@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /trips/{tripId} {
+      allow read, update, delete: if isOwner(resource.data.ownerUid);
+      allow create: if isOwner(request.resource.data.ownerUid);
+
+      // Subcollection-dokumenter har selv et denormaliseret ownerUid-felt,
+      // så reglen kan matche direkte uden get() på parent — get() i en regel
+      // der også skal understøtte list/query-kald på subcollectionen fejler
+      // i praksis for query-requests. Se CLAUDE.md.
+      match /days/{dayId} {
+        allow read, update, delete: if isOwner(resource.data.ownerUid);
+        allow create: if isOwner(request.resource.data.ownerUid);
+
+        match /segments/{segmentId} {
+          allow read, update, delete: if isOwner(resource.data.ownerUid);
+          allow create: if isOwner(request.resource.data.ownerUid);
+        }
+      }
+
+      match /photos/{photoId} {
+        allow read, update, delete: if isOwner(resource.data.ownerUid);
+        allow create: if isOwner(request.resource.data.ownerUid);
+      }
+
+      match /track/{pointId} {
+        allow read, update, delete: if isOwner(resource.data.ownerUid);
+        allow create: if isOwner(request.resource.data.ownerUid);
+      }
+    }
+  }
+}

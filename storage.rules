@@ -1,0 +1,10 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Billeder ligger under trips/{tripId}/{uid}/... — uid i stien er ejeren.
+    match /trips/{tripId}/{uid}/{allPaths=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
