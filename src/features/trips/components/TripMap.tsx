@@ -7,12 +7,18 @@ import styles from './TripMap.module.css'
 
 const ROUTE_SOURCE_ID = 'trip-route'
 
+export type PhotoMarker = { id: string; lat: number; lng: number }
+
 export function TripMap({
   destinations,
   onSelectDestination,
+  photoMarkers = [],
+  onSelectPhotoMarker,
 }: {
   destinations: Place[]
   onSelectDestination?: (place: Place) => void
+  photoMarkers?: PhotoMarker[]
+  onSelectPhotoMarker?: (photoId: string) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
@@ -50,6 +56,17 @@ export function TripMap({
         markers.push(marker)
       })
 
+      photoMarkers.forEach((photo) => {
+        const marker = new Marker({ color: '#f59e0b' }).setLngLat([photo.lng, photo.lat]).addTo(map)
+        marker.getElement().addEventListener('click', () => onSelectPhotoMarker?.(photo.id))
+        markers.push(marker)
+      })
+
+      const allPoints = [
+        ...destinations.map((d) => ({ lat: d.lat, lng: d.lng })),
+        ...photoMarkers.map((p) => ({ lat: p.lat, lng: p.lng })),
+      ]
+
       const existingSource = map.getSource(ROUTE_SOURCE_ID) as GeoJSONSource | undefined
 
       if (destinations.length > 1) {
@@ -72,21 +89,20 @@ export function TripMap({
             paint: { 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [2, 2] },
           })
         }
+      } else if (existingSource) {
+        map.removeLayer(ROUTE_SOURCE_ID)
+        map.removeSource(ROUTE_SOURCE_ID)
+      }
 
-        const [first, ...rest] = destinations
+      if (allPoints.length > 1) {
+        const [first, ...rest] = allPoints
         const bounds = rest.reduce(
-          (b, place) => b.extend([place.lng, place.lat]),
+          (b, point) => b.extend([point.lng, point.lat]),
           new LngLatBounds([first.lng, first.lat], [first.lng, first.lat]),
         )
         map.fitBounds(bounds, { padding: 60, maxZoom: 8 })
-      } else {
-        if (existingSource) {
-          map.removeLayer(ROUTE_SOURCE_ID)
-          map.removeSource(ROUTE_SOURCE_ID)
-        }
-        if (destinations.length === 1) {
-          map.flyTo({ center: [destinations[0].lng, destinations[0].lat], zoom: 5 })
-        }
+      } else if (allPoints.length === 1) {
+        map.flyTo({ center: [allPoints[0].lng, allPoints[0].lat], zoom: 5 })
       }
     }
 
@@ -99,9 +115,9 @@ export function TripMap({
     return () => {
       markers.forEach((marker) => marker.remove())
     }
-  }, [destinations, onSelectDestination])
+  }, [destinations, onSelectDestination, photoMarkers, onSelectPhotoMarker])
 
-  if (destinations.length === 0) {
+  if (destinations.length === 0 && photoMarkers.length === 0) {
     return <p className={styles.empty}>Tilføj destinationer for at se dem på kortet.</p>
   }
 

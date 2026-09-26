@@ -53,9 +53,15 @@ service cloud.firestore {
         }
       }
 
+      // Billeder har deres eget adgangsfelt (photoViewerUids) i stedet for
+      // memberUids — det styres af trippens sharedCategories.photos og
+      // indeholder altid mindst ejeren og den der uploadede billedet. Se
+      // computePhotoViewerUids i features/photos og CLAUDE.md.
       match /photos/{photoId} {
-        allow read, update, delete: if isMember(resource.data.memberUids);
-        allow create: if isMember(request.resource.data.memberUids);
+        allow read: if isMember(resource.data.photoViewerUids);
+        allow create: if isMember(request.resource.data.photoViewerUids)
+          && request.resource.data.ownerUid == request.auth.uid;
+        allow update, delete: if isOwner(resource.data.ownerUid);
       }
 
       match /track/{pointId} {

@@ -80,3 +80,9 @@
   font-size: 0.8rem;
   flex-shrink: 0;
 }
+
+.sectionLabel {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}

@@ -2,9 +2,23 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Billeder ligger under trips/{tripId}/{uid}/... — uid i stien er ejeren.
-    match /trips/{tripId}/{uid}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    // Billeder ligger under trips/{tripId}/{uid}/{photoId} — {uid} er den der
+    // uploadede. {photoId} matcher Firestore-dokumentets id i
+    // trips/{tripId}/photos/{photoId}.
+    //
+    // Forsøgte oprindeligt at bruge firestore.get() her til at tjekke
+    // trip-medlemskab på tværs af tjenester, men det gav
+    // storage/unauthorized i praksis i dette miljø (muligvis fordi
+    // Firestore ligger i eur3 og Storage i eur4 — uklart, ikke undersøgt
+    // færdigt) — droppet igen efter aftale med brugeren. Den reelle
+    // adgangskontrol sker i Firestore (photoViewerUids på hvert billede, se
+    // firestore.rules); et storagePath er ikke gættbart uden først at have
+    // fået det legitimt fra et tilladt Firestore-opslag, så denne regel er
+    // bevidst en simplere "logget ind"-model, ikke en fuld spejling af
+    // Firestores medlemskabstjek.
+    match /trips/{tripId}/{uid}/{photoId} {
+      allow write: if request.auth != null && request.auth.uid == uid;
+      allow read: if request.auth != null;
     }
   }
 }

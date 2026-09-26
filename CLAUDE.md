@@ -87,7 +87,8 @@ trips/{tripId}/days/{dayId}/segments/{segId}
   ownerUid (kun informativ), memberUids: string[]
 
 trips/{tripId}/photos/{photoId}
-  storagePath, takenAt?, location?: LatLng, dayId?, ownerUid, memberUids: string[]
+  storagePath, takenAt?, location?: LatLng, dayId?, ownerUid (= uploader),
+  photoViewerUids: string[] (se "Deling af billeder" nedenfor), uploadedAt
 
 trips/{tripId}/track/{pointId}
   lat, lng, timestamp, source (gps|foto|manuel), ownerUid, memberUids: string[]
@@ -95,7 +96,13 @@ trips/{tripId}/track/{pointId}
 
 `Place = { name, lat, lng, placeId }`. Alle bruger-indtastede tidspunkter gemmes som ISO-strenge (ikke Firestore `Timestamp`), så parsing/EXIF/afstandslogik kan testes som rene funktioner. Kun `createdAt` er en Firestore `Timestamp`. `memberUids` er denormaliseret på alle subcollection-dokumenter — se afsnittet om deling ovenfor.
 
-Kun medlemmer (`auth.uid in memberUids`) kan læse/skrive en rejse og alt indhold under den. Kun ejeren kan ændre `memberUids`/`sharedCategories` eller slette rejsen (håndhævet via `diff().affectedKeys()` i reglen, ikke separate rules pr. felt). Samme medlems-baserede regel gælder Storage (`trips/{tripId}/{uid}/...`-mønster, se `storage.rules`) — indtil videre dog stadig kun ejeren, opdateres når billeder (trin 6) bygges til at understøtte delte billeder.
+Kun medlemmer (`auth.uid in memberUids`) kan læse/skrive en rejse og alt indhold under den. Kun ejeren kan ændre `memberUids`/`sharedCategories` eller slette rejsen (håndhævet via `diff().affectedKeys()` i reglen, ikke separate rules pr. felt).
+
+### Deling af billeder (photoViewerUids) og Storage-begrænsning
+
+Billeder har deres eget adgangsfelt, `photoViewerUids`, i stedet for det almindelige `memberUids` — beregnet ud fra trippens `sharedCategories.photos`: hvis sat, er det alle `memberUids`; ellers kun `[ownerUid, uploaderUid]` (ejeren og den der uploadede kan altid se deres eget). Se `computePhotoViewerUids` i `features/photos/logic`. Når `sharedCategories.photos` ændres, cascade-opdateres `photoViewerUids` på alle eksisterende billeder (`cascadePhotoSharing` i `features/photos/repository.ts`, kaldt fra `useUpdateSharedCategories` i trips-featuren).
+
+**Storage håndhæver IKKE dette samme medlemskabstjek.** Det blev forsøgt med et tværgående `firestore.get(/databases/(default)/documents/trips/$(tripId))`-opslag i `storage.rules`, men det fejlede i praksis med `storage/unauthorized` i dette miljø (Firestore ligger i `eur3`, Storage i `eur4` — muligvis relateret, ikke undersøgt til bunds; kan også kræve en Cloud Function eller anden opsætning). Efter aftale med brugeren er Storage-reglen i stedet forenklet til "man skal være logget ind, og kun skrive i sin egen uid-mappe" — den reelle adgangskontrol ligger i Firestores `photoViewerUids`, og et `storagePath` er ikke gættbart uden først at have fået det legitimt derfra. Hvis dette skal strammes op senere, er næste skridt formentlig en Cloud Function der validerer uploads, ikke endnu et forsøg på samme rules-tilgang.
 
 ## Byggetrin (status)
 

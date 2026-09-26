@@ -1,3 +1,4 @@
+import type { Photo } from '../../photos/types'
 import type { Day } from '../types'
 import { DayRow } from './DayRow'
 import styles from './DaysList.module.css'
@@ -6,12 +7,14 @@ export function DaysList({
   tripId,
   memberUids,
   days,
+  photos,
   loading,
   highlightedDayId,
 }: {
   tripId: string
   memberUids: string[]
   days: Day[]
+  photos: Photo[]
   loading: boolean
   highlightedDayId: string | null
 }) {
@@ -31,6 +34,7 @@ export function DaysList({
           tripId={tripId}
           memberUids={memberUids}
           day={day}
+          photos={photos.filter((photo) => photo.dayId === day.id)}
           highlighted={day.id === highlightedDayId}
         />
       ))}

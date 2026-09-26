@@ -81,6 +81,13 @@ export async function updateTripStatus(tripId: string, status: TripStatus): Prom
   await updateDoc(doc(db, 'trips', tripId), { status })
 }
 
+export async function updateTripSharedCategories(
+  tripId: string,
+  sharedCategories: SharedCategories,
+): Promise<void> {
+  await updateDoc(doc(db, 'trips', tripId), { sharedCategories })
+}
+
 /**
  * Opdaterer hvem der er medlem af rejsen. Cascader det nye memberUids ned på
  * alle eksisterende days/segments (denormaliseret adgangsfelt, se CLAUDE.md),

@@ -3,25 +3,32 @@ import { Button } from '../../../shared/ui/Button'
 import { TextField } from '../../../shared/ui/TextField'
 import { useAddFriendByEmail } from '../../friends/hooks/useAddFriendByEmail'
 import { useFriends } from '../../friends/hooks/useFriends'
+import { useUpdateSharedCategories } from '../hooks/useUpdateSharedCategories'
 import { useUpdateTripMembers } from '../hooks/useUpdateTripMembers'
+import type { SharedCategories } from '../types'
 import styles from './ShareTripDialog.module.css'
 
 export function ShareTripDialog({
   tripId,
   ownerUid,
   memberUids,
+  sharedCategories,
   onClose,
 }: {
   tripId: string
   ownerUid: string
   memberUids: string[]
+  sharedCategories: SharedCategories
   onClose: () => void
 }) {
   const { friends } = useFriends(ownerUid)
   const { addByEmail, pending: addingFriend, error: addError } = useAddFriendByEmail(ownerUid)
-  const { saveMembers, pending: saving } = useUpdateTripMembers()
+  const { saveMembers, pending: savingMembers } = useUpdateTripMembers()
+  const { saveSharedCategories, pending: savingCategories } = useUpdateSharedCategories()
   const [selected, setSelected] = useState<Set<string>>(new Set(memberUids))
+  const [sharePhotos, setSharePhotos] = useState(sharedCategories.photos)
   const [email, setEmail] = useState('')
+  const saving = savingMembers || savingCategories
 
   function toggle(uid: string) {
     setSelected((prev) => {
@@ -43,7 +50,14 @@ export function ShareTripDialog({
   }
 
   async function handleSave() {
-    await saveMembers(tripId, ownerUid, Array.from(selected))
+    const nextMemberUids = Array.from(selected)
+    await saveMembers(tripId, ownerUid, nextMemberUids)
+    if (sharePhotos !== sharedCategories.photos) {
+      await saveSharedCategories(tripId, ownerUid, nextMemberUids, {
+        ...sharedCategories,
+        photos: sharePhotos,
+      })
+    }
     onClose()
   }
 
@@ -69,6 +83,15 @@ export function ShareTripDialog({
           ))}
         </ul>
       )}
+
+      <label className={styles.friendRow}>
+        <input
+          type="checkbox"
+          checked={sharePhotos}
+          onChange={(e) => setSharePhotos(e.target.checked)}
+        />
+        Del billeder med rejsefæller
+      </label>
 
       <div className={styles.addFriend}>
         <TextField
