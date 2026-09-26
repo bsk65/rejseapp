@@ -6,6 +6,8 @@
   padding: 14px 16px;
   background: var(--color-surface);
   border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
 }
 
 .title {

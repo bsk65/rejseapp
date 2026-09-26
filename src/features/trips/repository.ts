@@ -38,6 +38,17 @@ export function subscribeToTrips(ownerUid: string, onChange: (trips: Trip[]) => 
   })
 }
 
+export function subscribeToTrip(
+  tripId: string,
+  onChange: (trip: Trip | null) => void,
+): Unsubscribe {
+  return onSnapshot(
+    doc(db, 'trips', tripId),
+    (snap) => onChange(snap.exists() ? toTrip(snap) : null),
+    () => onChange(null),
+  )
+}
+
 export async function createTrip(ownerUid: string, input: NewTripInput): Promise<string> {
   const docRef = await addDoc(tripsCollection, {
     title: input.title,

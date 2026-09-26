@@ -40,4 +40,9 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.test.ts'],
   },
+  // MapLibre opretter sin egen web worker via en relativ import.meta.url — det
+  // brydes af Vites dependency-prebundling, så den udelukkes herfra.
+  optimizeDeps: {
+    exclude: ['maplibre-gl'],
+  },
 })

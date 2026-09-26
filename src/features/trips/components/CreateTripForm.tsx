@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { Button } from '../../../shared/ui/Button'
+import { PlaceSearchInput } from '../../../shared/ui/PlaceSearchInput'
 import { TextField } from '../../../shared/ui/TextField'
+import type { Place } from '../../../shared/types/place'
 import { useCreateTrip } from '../hooks/useCreateTrip'
-import { parseDestinationNames, toPlaceholderPlace } from '../logic/destinations'
 import styles from './CreateTripForm.module.css'
 
 export function CreateTripForm({
@@ -15,18 +16,27 @@ export function CreateTripForm({
   const [title, setTitle] = useState('')
   const [startDate, setStartDate] = useState('')
   const [days, setDays] = useState(1)
-  const [destinationsRaw, setDestinationsRaw] = useState('')
+  const [destinations, setDestinations] = useState<Place[]>([])
   const { create, pending, error } = useCreateTrip(ownerUid)
+
+  function addDestination(place: Place) {
+    setDestinations((prev) =>
+      prev.some((d) => d.placeId === place.placeId) ? prev : [...prev, place],
+    )
+  }
+
+  function removeDestination(placeId: string) {
+    setDestinations((prev) => prev.filter((d) => d.placeId !== placeId))
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const destinations = parseDestinationNames(destinationsRaw).map(toPlaceholderPlace)
     const ok = await create({ title, startDate, days, destinations })
     if (ok) {
       setTitle('')
       setStartDate('')
       setDays(1)
-      setDestinationsRaw('')
+      setDestinations([])
       onCreated()
     }
   }
@@ -49,12 +59,25 @@ export function CreateTripForm({
         onChange={(e) => setDays(Number(e.target.value))}
         required
       />
-      <TextField
-        label="Destinationer (kommasepareret)"
-        placeholder="Rom, Firenze, Venedig"
-        value={destinationsRaw}
-        onChange={(e) => setDestinationsRaw(e.target.value)}
-      />
+
+      <PlaceSearchInput label="Tilføj destination" onSelect={addDestination} />
+      {destinations.length > 0 && (
+        <ul className={styles.destinations}>
+          {destinations.map((place) => (
+            <li key={place.placeId} className={styles.destinationChip}>
+              <span>{place.name}</span>
+              <button
+                type="button"
+                onClick={() => removeDestination(place.placeId)}
+                aria-label={`Fjern ${place.name}`}
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {error && <p className={styles.error}>{error}</p>}
       <Button type="submit" disabled={pending}>
         Opret rejse
