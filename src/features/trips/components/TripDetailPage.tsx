@@ -22,7 +22,7 @@ export function TripDetailPage() {
   const { trip, loading } = useTrip(tripId)
   const { days, loading: daysLoading } = useDays(tripId, user?.uid)
   const { photos } = usePhotos(tripId, user?.uid)
-  const { points: trackPoints } = useTrack(tripId, user?.uid)
+  const { points: trackPoints, error: trackError } = useTrack(tripId, user?.uid)
   const trackLines = useMemo(
     () => groupTrackLines(trackPoints.filter((p) => p.source === 'gps')),
     [trackPoints],
@@ -142,6 +142,7 @@ export function TripDetailPage() {
           shareTrack: trip.sharedCategories.track,
         }}
         points={trackPoints}
+        loadError={trackError}
       />
 
       <PhotoUploadButton

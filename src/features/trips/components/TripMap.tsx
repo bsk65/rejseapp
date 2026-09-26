@@ -1,16 +1,21 @@
-import { LngLatBounds, Map as MapLibreMap, Marker } from 'maplibre-gl'
+import { Map as MapLibreMap, Marker } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { fitToPoints } from '../../../shared/map/fitToPoints'
 import { osmRasterStyle } from '../../../shared/map/osmRasterStyle'
+import { setCircleLayer } from '../../../shared/map/setCircleLayer'
 import { setLineLayer } from '../../../shared/map/setLineLayer'
 import type { LatLng, Place } from '../../../shared/types/place'
 import styles from './TripMap.module.css'
 
 const ROUTE_SOURCE_ID = 'trip-route'
 const TRACK_SOURCE_ID = 'trip-track'
+const TRACK_POINTS_SOURCE_ID = 'trip-track-points'
 const TRACK_COLOR = '#22c55e'
 
 export type PhotoMarker = { id: string; lat: number; lng: number }
+
+type Focus = 'all' | 'track'
 
 export function TripMap({
   destinations,
@@ -30,12 +35,14 @@ export function TripMap({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
+  const [focus, setFocus] = useState<Focus>('all')
+  // Hvad kortet sidst blev zoomet til — så en genrendering med samme indhold
+  // ikke nulstiller brugerens egen zoom/panorering.
+  const lastFitKeyRef = useRef('')
 
-  const hasContent =
-    destinations.length > 0 ||
-    photoMarkers.length > 0 ||
-    trackLines.length > 0 ||
-    checkInMarkers.length > 0
+  const trackPoints = [...trackLines.flat(), ...checkInMarkers]
+  const hasTrack = trackPoints.length > 0
+  const hasContent = destinations.length > 0 || photoMarkers.length > 0 || hasTrack
 
   // Kortet oprettes først når der er noget at vise (før det findes der ingen
   // container) — derfor afhænger effekten af hasContent og ikke bare [].
@@ -49,6 +56,7 @@ export function TripMap({
     })
     map.on('load', () => map.setProjection({ type: 'globe' }))
     mapRef.current = map
+    lastFitKeyRef.current = ''
 
     return () => {
       map.remove()
@@ -95,23 +103,24 @@ export function TripMap({
         'line-color': TRACK_COLOR,
         'line-width': 3,
       })
+      setCircleLayer(map, TRACK_POINTS_SOURCE_ID, trackLines.flat(), {
+        'circle-color': TRACK_COLOR,
+        'circle-radius': 5,
+        'circle-stroke-color': '#0f172a',
+        'circle-stroke-width': 1.5,
+      })
 
-      const allPoints = [
-        ...destinations.map((d) => ({ lat: d.lat, lng: d.lng })),
-        ...photoMarkers.map((p) => ({ lat: p.lat, lng: p.lng })),
-        ...trackLines.flat(),
-        ...checkInMarkers,
-      ]
-
-      if (allPoints.length > 1) {
-        const [first, ...rest] = allPoints
-        const bounds = rest.reduce(
-          (b, point) => b.extend([point.lng, point.lat]),
-          new LngLatBounds([first.lng, first.lat], [first.lng, first.lat]),
-        )
-        map.fitBounds(bounds, { padding: 60, maxZoom: 13 })
-      } else if (allPoints.length === 1) {
-        map.flyTo({ center: [allPoints[0].lng, allPoints[0].lat], zoom: 5 })
+      const fitPoints =
+        focus === 'track' && trackPoints.length > 0
+          ? trackPoints
+          : [...destinations, ...photoMarkers, ...trackPoints]
+      const fitKey = `${focus}:${JSON.stringify(fitPoints.map((p) => [p.lat, p.lng]))}`
+      if (fitKey !== lastFitKeyRef.current) {
+        lastFitKeyRef.current = fitKey
+        fitToPoints(map, fitPoints, {
+          maxZoom: focus === 'track' ? 16 : 13,
+          singleZoom: focus === 'track' ? 15 : 5,
+        })
       }
     }
 
@@ -124,18 +133,24 @@ export function TripMap({
     return () => {
       markers.forEach((marker) => marker.remove())
     }
-  }, [
-    destinations,
-    onSelectDestination,
-    photoMarkers,
-    onSelectPhotoMarker,
-    trackLines,
-    checkInMarkers,
-  ])
+  })
 
   if (!hasContent) {
     return <p className={styles.empty}>Tilføj destinationer for at se dem på kortet.</p>
   }
 
-  return <div ref={containerRef} className={styles.map} />
+  return (
+    <div className={styles.wrapper}>
+      <div ref={containerRef} className={styles.map} />
+      {hasTrack && (
+        <button
+          type="button"
+          className={styles.focusButton}
+          onClick={() => setFocus((f) => (f === 'track' ? 'all' : 'track'))}
+        >
+          {focus === 'track' ? 'Vis hele rejsen' : 'Vis sporet'}
+        </button>
+      )}
+    </div>
+  )
 }

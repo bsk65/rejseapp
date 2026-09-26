@@ -42,6 +42,7 @@ export function subscribeToTrack(
   tripId: string,
   viewerUid: string,
   onChange: (points: TrackPoint[]) => void,
+  onError: (error: Error) => void,
 ): Unsubscribe {
   // where('trackViewerUids', ...) skal med, ellers afviser Firestore hele
   // list-queryet. Se CLAUDE.md.
@@ -50,7 +51,7 @@ export function subscribeToTrack(
     where('trackViewerUids', 'array-contains', viewerUid),
     orderBy('timestamp', 'asc'),
   )
-  return onSnapshot(q, (snapshot) => onChange(snapshot.docs.map(toTrackPoint)))
+  return onSnapshot(q, (snapshot) => onChange(snapshot.docs.map(toTrackPoint)), onError)
 }
 
 export async function addTrackPoint(tripId: string, point: NewTrackPoint): Promise<void> {

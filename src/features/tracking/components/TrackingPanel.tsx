@@ -12,9 +12,11 @@ import styles from './TrackingPanel.module.css'
 export function TrackingPanel({
   context,
   points,
+  loadError,
 }: {
   context: TrackingContext
   points: TrackPoint[]
+  loadError: string | null
 }) {
   const { record, error: recordError } = useRecordTrackPoint(context)
   const recordGps = useCallback((fix: GpsFix) => record(fix, 'gps'), [record])
@@ -24,7 +26,7 @@ export function TrackingPanel({
 
   const gpsPointCount = points.filter((p) => p.source === 'gps').length
   const checkIns = points.filter((p) => p.source === 'manuel')
-  const error = gps.error ?? checkIn.error ?? recordError
+  const error = loadError ?? gps.error ?? checkIn.error ?? recordError
 
   return (
     <section className={styles.panel}>
@@ -40,7 +42,8 @@ export function TrackingPanel({
             Sporer din rute… {gps.recordedCount} punkter gemt
           </p>
           <p className={styles.hint}>
-            Hold appen åben — sporingen stopper, hvis du lukker den eller skifter til en anden app.
+            Lad appen være åben. Slukker skærmen, eller skifter du app, kan telefonen sætte
+            sporingen på pause — den fortsætter, når du åbner appen igen.
           </p>
           <Button type="button" variant="danger" onClick={gps.stop}>
             Stop sporing
