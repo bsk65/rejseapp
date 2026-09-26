@@ -8,6 +8,7 @@ function makeSegment(overrides: Partial<Segment>): Segment {
     mode: 'fly',
     status: 'planlagt',
     ownerUid: 'uid',
+    memberUids: ['uid'],
     ...overrides,
   }
 }

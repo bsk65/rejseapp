@@ -3,36 +3,64 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(ownerUid) {
+      return isSignedIn() && request.auth.uid == ownerUid;
+    }
+
+    function isMember(memberUids) {
+      return isSignedIn() && request.auth.uid in memberUids;
+    }
+
+    // Brugerprofiler (uid + email) — bruges til at slå en e-mail op til et
+    // uid, når man tilføjer en ven. Alle loggede ind brugere må læse (kun
+    // uid+email, ikke følsomt), men man må kun skrive sit eget dokument.
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(uid);
+
+      match /friends/{friendUid} {
+        allow read, write: if isOwner(uid);
+      }
     }
 
     match /trips/{tripId} {
-      allow read, update, delete: if isOwner(resource.data.ownerUid);
-      allow create: if isOwner(request.resource.data.ownerUid);
+      allow read: if isMember(resource.data.memberUids);
+      allow create: if isOwner(request.resource.data.ownerUid)
+        && request.resource.data.memberUids == [request.auth.uid];
+      // Alle medlemmer må redigere rejsens indhold, men kun ejeren må ændre
+      // hvem der er medlem, delings-kategorier, eller slette rejsen.
+      allow update: if isMember(resource.data.memberUids)
+        && (isOwner(resource.data.ownerUid)
+          || !request.resource.data.diff(resource.data).affectedKeys()
+              .hasAny(['ownerUid', 'memberUids', 'sharedCategories']));
+      allow delete: if isOwner(resource.data.ownerUid);
 
-      // Subcollection-dokumenter har selv et denormaliseret ownerUid-felt,
+      // Subcollection-dokumenter har selv et denormaliseret memberUids-felt,
       // så reglen kan matche direkte uden get() på parent — get() i en regel
       // der også skal understøtte list/query-kald på subcollectionen fejler
       // i praksis for query-requests. Se CLAUDE.md.
       match /days/{dayId} {
-        allow read, update, delete: if isOwner(resource.data.ownerUid);
-        allow create: if isOwner(request.resource.data.ownerUid);
+        allow read, update, delete: if isMember(resource.data.memberUids);
+        allow create: if isMember(request.resource.data.memberUids);
 
         match /segments/{segmentId} {
-          allow read, update, delete: if isOwner(resource.data.ownerUid);
-          allow create: if isOwner(request.resource.data.ownerUid);
+          allow read, update, delete: if isMember(resource.data.memberUids);
+          allow create: if isMember(request.resource.data.memberUids);
         }
       }
 
       match /photos/{photoId} {
-        allow read, update, delete: if isOwner(resource.data.ownerUid);
-        allow create: if isOwner(request.resource.data.ownerUid);
+        allow read, update, delete: if isMember(resource.data.memberUids);
+        allow create: if isMember(request.resource.data.memberUids);
       }
 
       match /track/{pointId} {
-        allow read, update, delete: if isOwner(resource.data.ownerUid);
-        allow create: if isOwner(request.resource.data.ownerUid);
+        allow read, update, delete: if isMember(resource.data.memberUids);
+        allow create: if isMember(request.resource.data.memberUids);
       }
     }
   }

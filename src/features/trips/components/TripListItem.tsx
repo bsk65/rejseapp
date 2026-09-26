@@ -14,7 +14,10 @@ export function TripListItem({ trip }: { trip: Trip }) {
     <li>
       <Link to={`/rejser/${trip.id}`} className={styles.item}>
         <div>
-          <p className={styles.title}>{trip.title}</p>
+          <p className={styles.title}>
+            {trip.title}
+            {trip.memberUids.length > 1 && <span className={styles.shared}>Delt</span>}
+          </p>
           <p className={styles.meta}>{formatDateRange(trip.startDate, trip.days)}</p>
           {trip.destinations.length > 0 && (
             <p className={styles.meta}>{trip.destinations.map((d) => d.name).join(' → ')}</p>

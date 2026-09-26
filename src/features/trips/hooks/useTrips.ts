@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react'
 import { subscribeToTrips } from '../repository'
 import type { Trip } from '../types'
 
-export function useTrips(ownerUid: string | null) {
+export function useTrips(memberUid: string | null) {
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!ownerUid) return
-    return subscribeToTrips(ownerUid, (nextTrips) => {
+    if (!memberUid) return
+    return subscribeToTrips(memberUid, (nextTrips) => {
       setTrips(nextTrips)
       setLoading(false)
     })
-  }, [ownerUid])
+  }, [memberUid])
 
-  if (!ownerUid) {
+  if (!memberUid) {
     return { trips: [], loading: false }
   }
 

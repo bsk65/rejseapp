@@ -4,13 +4,13 @@ import styles from './DaysList.module.css'
 
 export function DaysList({
   tripId,
-  ownerUid,
+  memberUids,
   days,
   loading,
   highlightedDayId,
 }: {
   tripId: string
-  ownerUid: string
+  memberUids: string[]
   days: Day[]
   loading: boolean
   highlightedDayId: string | null
@@ -29,7 +29,7 @@ export function DaysList({
         <DayRow
           key={day.id}
           tripId={tripId}
-          ownerUid={ownerUid}
+          memberUids={memberUids}
           day={day}
           highlighted={day.id === highlightedDayId}
         />

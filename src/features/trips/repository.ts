@@ -2,18 +2,20 @@ import {
   addDoc,
   collection,
   doc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
   type DocumentData,
   type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore'
 import { db } from '../../firebase/config'
-import type { NewTripInput, Trip, TripStatus } from './types'
+import type { NewTripInput, SharedCategories, Trip, TripStatus } from './types'
 
 const tripsCollection = collection(db, 'trips')
 
@@ -26,13 +28,24 @@ function toTrip(docSnap: QueryDocumentSnapshot<DocumentData>): Trip {
     days: data.days,
     destinations: data.destinations ?? [],
     ownerUid: data.ownerUid,
+    memberUids: data.memberUids ?? [data.ownerUid],
+    sharedCategories: data.sharedCategories ?? { photos: false, track: false },
     status: data.status,
     createdAt: data.createdAt ?? null,
   }
 }
 
-export function subscribeToTrips(ownerUid: string, onChange: (trips: Trip[]) => void): Unsubscribe {
-  const q = query(tripsCollection, where('ownerUid', '==', ownerUid), orderBy('startDate', 'desc'))
+export function subscribeToTrips(
+  memberUid: string,
+  onChange: (trips: Trip[]) => void,
+): Unsubscribe {
+  // where('memberUids', 'array-contains', ...) skal med, ellers afviser
+  // Firestore hele list-queryet. Se CLAUDE.md.
+  const q = query(
+    tripsCollection,
+    where('memberUids', 'array-contains', memberUid),
+    orderBy('startDate', 'desc'),
+  )
   return onSnapshot(q, (snapshot) => {
     onChange(snapshot.docs.map(toTrip))
   })
@@ -56,6 +69,8 @@ export async function createTrip(ownerUid: string, input: NewTripInput): Promise
     days: input.days,
     destinations: input.destinations,
     ownerUid,
+    memberUids: [ownerUid],
+    sharedCategories: { photos: false, track: false } satisfies SharedCategories,
     status: 'planlagt' satisfies TripStatus,
     createdAt: serverTimestamp(),
   })
@@ -64,4 +79,38 @@ export async function createTrip(ownerUid: string, input: NewTripInput): Promise
 
 export async function updateTripStatus(tripId: string, status: TripStatus): Promise<void> {
   await updateDoc(doc(db, 'trips', tripId), { status })
+}
+
+/**
+ * Opdaterer hvem der er medlem af rejsen. Cascader det nye memberUids ned på
+ * alle eksisterende days/segments (denormaliseret adgangsfelt, se CLAUDE.md),
+ * ellers ville nuværende indhold blive utilgængeligt for de tilføjede/fjernede
+ * medlemmer. Client-side batch — antager rejsens samlede days+segments holder
+ * sig et godt stykke under Firestores grænse på 500 skrivninger pr. batch.
+ */
+export async function updateTripMembers(
+  tripId: string,
+  ownerUid: string,
+  memberUids: string[],
+): Promise<void> {
+  const daysSnapshot = await getDocs(
+    query(collection(db, 'trips', tripId, 'days'), where('memberUids', 'array-contains', ownerUid)),
+  )
+
+  const segmentsSnapshots = await Promise.all(
+    daysSnapshot.docs.map((dayDoc) =>
+      getDocs(
+        query(collection(dayDoc.ref, 'segments'), where('memberUids', 'array-contains', ownerUid)),
+      ),
+    ),
+  )
+
+  const batch = writeBatch(db)
+  batch.update(doc(db, 'trips', tripId), { memberUids })
+  daysSnapshot.docs.forEach((dayDoc) => batch.update(dayDoc.ref, { memberUids }))
+  segmentsSnapshots.forEach((snapshot) =>
+    snapshot.docs.forEach((segDoc) => batch.update(segDoc.ref, { memberUids })),
+  )
+
+  await batch.commit()
 }

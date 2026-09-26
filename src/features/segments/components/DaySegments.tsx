@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { useCreateSegment } from '../hooks/useCreateSegment'
 import { useSegments } from '../hooks/useSegments'
 import type { Segment } from '../types'
@@ -11,16 +12,19 @@ import styles from './DaySegments.module.css'
 export function DaySegments({
   tripId,
   dayId,
-  ownerUid,
+  memberUids,
 }: {
   tripId: string
   dayId: string
-  ownerUid: string
+  memberUids: string[]
 }) {
-  const { segments } = useSegments(tripId, dayId, ownerUid)
+  const { user } = useAuthUser()
+  const { segments } = useSegments(tripId, dayId, user?.uid ?? '')
   const { addSegment, pending } = useCreateSegment()
   const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
   const [showPaste, setShowPaste] = useState(false)
+
+  if (!user) return null
 
   return (
     <div className={styles.wrapper}>
@@ -37,7 +41,7 @@ export function DaySegments({
 
       <SegmentModeButtons
         disabled={pending}
-        onAdd={(mode) => void addSegment(tripId, dayId, ownerUid, mode)}
+        onAdd={(mode) => void addSegment(tripId, dayId, user.uid, memberUids, mode)}
       />
 
       <button
@@ -52,7 +56,8 @@ export function DaySegments({
         <PasteItinerary
           tripId={tripId}
           dayId={dayId}
-          ownerUid={ownerUid}
+          creatorUid={user.uid}
+          memberUids={memberUids}
           onDone={() => setShowPaste(false)}
         />
       )}

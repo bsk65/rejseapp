@@ -17,11 +17,14 @@ export type Segment = {
   seat?: string
   bookingRef?: string
   freeText?: string
+  /** Hvem der oprettede segmentet — kun informativ, ikke sikkerhedsrelevant. */
   ownerUid: string
+  /** Denormaliseret fra rejsens memberUids — se CLAUDE.md. */
+  memberUids: string[]
 }
 
-/** Felter en bruger kan redigere via detalje-formularen — ikke id/ownerUid. */
-export type SegmentDetails = Omit<Segment, 'id' | 'mode' | 'ownerUid'>
+/** Felter en bruger kan redigere via detalje-formularen — ikke id/mode/ownerUid/memberUids. */
+export type SegmentDetails = Omit<Segment, 'id' | 'mode' | 'ownerUid' | 'memberUids'>
 
 export const transportModeLabel: Record<TransportMode, string> = {
   fly: 'Fly',

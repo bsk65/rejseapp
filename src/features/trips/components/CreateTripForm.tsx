@@ -35,7 +35,7 @@ export function CreateTripForm({
     event.preventDefault()
     const tripId = await create({ title, startDate, days, destinations })
     if (tripId) {
-      await createDays(tripId, ownerUid, days, startDate)
+      await createDays(tripId, ownerUid, [ownerUid], days, startDate)
       setTitle('')
       setStartDate('')
       setDays(1)

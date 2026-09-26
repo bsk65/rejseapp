@@ -8,13 +8,14 @@ export function useCreateSegment() {
   async function addSegment(
     tripId: string,
     dayId: string,
-    ownerUid: string,
+    creatorUid: string,
+    memberUids: string[],
     mode: TransportMode,
     details?: Partial<SegmentDetails>,
   ): Promise<void> {
     setPending(true)
     try {
-      await createSegment(tripId, dayId, ownerUid, mode, details)
+      await createSegment(tripId, dayId, creatorUid, memberUids, mode, details)
     } finally {
       setPending(false)
     }

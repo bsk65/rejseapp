@@ -6,12 +6,12 @@ import styles from './DayRow.module.css'
 
 export function DayRow({
   tripId,
-  ownerUid,
+  memberUids,
   day,
   highlighted,
 }: {
   tripId: string
-  ownerUid: string
+  memberUids: string[]
   day: Day
   highlighted: boolean
 }) {
@@ -37,7 +37,7 @@ export function DayRow({
         />
       </div>
 
-      <DaySegments tripId={tripId} dayId={day.id} ownerUid={ownerUid} />
+      <DaySegments tripId={tripId} dayId={day.id} memberUids={memberUids} />
     </li>
   )
 }

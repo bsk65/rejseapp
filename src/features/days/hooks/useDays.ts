@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react'
 import { subscribeToDays } from '../repository'
 import type { Day } from '../types'
 
-export function useDays(tripId: string | undefined, ownerUid: string | undefined) {
+export function useDays(tripId: string | undefined, memberUid: string | undefined) {
   const [days, setDays] = useState<Day[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!tripId || !ownerUid) return
-    return subscribeToDays(tripId, ownerUid, (nextDays) => {
+    if (!tripId || !memberUid) return
+    return subscribeToDays(tripId, memberUid, (nextDays) => {
       setDays(nextDays)
       setLoading(false)
     })
-  }, [tripId, ownerUid])
+  }, [tripId, memberUid])
 
-  if (!tripId || !ownerUid) {
+  if (!tripId || !memberUid) {
     return { days: [], loading: false }
   }
 

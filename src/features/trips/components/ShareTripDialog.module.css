@@ -1,0 +1,56 @@
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-surface);
+  border-radius: 12px;
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.friendRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 0.9rem;
+}
+
+.addFriend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}

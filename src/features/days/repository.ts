@@ -30,19 +30,20 @@ function toDay(docSnap: QueryDocumentSnapshot<DocumentData>): Day {
     toPlace: data.toPlace ?? undefined,
     note: data.note ?? undefined,
     ownerUid: data.ownerUid,
+    memberUids: data.memberUids ?? [data.ownerUid],
   }
 }
 
 export function subscribeToDays(
   tripId: string,
-  ownerUid: string,
+  memberUid: string,
   onChange: (days: Day[]) => void,
 ): Unsubscribe {
-  // where('ownerUid', ...) skal med, ellers afviser Firestore hele
-  // list-queryet — reglen kan ikke matches per dokument uden det. Se CLAUDE.md.
+  // where('memberUids', 'array-contains', ...) skal med, ellers afviser
+  // Firestore hele list-queryet. Se CLAUDE.md.
   const q = query(
     daysCollection(tripId),
-    where('ownerUid', '==', ownerUid),
+    where('memberUids', 'array-contains', memberUid),
     orderBy('dayNumber', 'asc'),
   )
   return onSnapshot(q, (snapshot) => onChange(snapshot.docs.map(toDay)))
@@ -50,7 +51,8 @@ export function subscribeToDays(
 
 export async function createDaysForTrip(
   tripId: string,
-  ownerUid: string,
+  creatorUid: string,
+  memberUids: string[],
   numDays: number,
   startDate: string,
 ): Promise<void> {
@@ -59,7 +61,8 @@ export async function createDaysForTrip(
     batch.set(doc(daysCollection(tripId)), {
       dayNumber,
       date: addDaysToIsoDate(startDate, dayNumber - 1),
-      ownerUid,
+      ownerUid: creatorUid,
+      memberUids,
     })
   }
   await batch.commit()

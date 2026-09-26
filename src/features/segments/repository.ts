@@ -36,6 +36,7 @@ function toSegment(docSnap: QueryDocumentSnapshot<DocumentData>): Segment {
     bookingRef: data.bookingRef ?? undefined,
     freeText: data.freeText ?? undefined,
     ownerUid: data.ownerUid,
+    memberUids: data.memberUids ?? [data.ownerUid],
   }
 }
 
@@ -53,14 +54,14 @@ function stripUndefined<T extends Record<string, unknown>>(obj: T): Partial<T> {
 export function subscribeToSegments(
   tripId: string,
   dayId: string,
-  ownerUid: string,
+  memberUid: string,
   onChange: (segments: Segment[]) => void,
 ): Unsubscribe {
-  // where('ownerUid', ...) skal med, ellers afviser Firestore hele
-  // list-queryet — reglen kan ikke matches per dokument uden det. Se CLAUDE.md.
+  // where('memberUids', 'array-contains', ...) skal med, ellers afviser
+  // Firestore hele list-queryet. Se CLAUDE.md.
   const q = query(
     segmentsCollection(tripId, dayId),
-    where('ownerUid', '==', ownerUid),
+    where('memberUids', 'array-contains', memberUid),
     orderBy('createdAt', 'asc'),
   )
   return onSnapshot(q, (snapshot) => onChange(snapshot.docs.map(toSegment)))
@@ -69,14 +70,16 @@ export function subscribeToSegments(
 export async function createSegment(
   tripId: string,
   dayId: string,
-  ownerUid: string,
+  creatorUid: string,
+  memberUids: string[],
   mode: TransportMode,
   details?: Partial<SegmentDetails>,
 ): Promise<void> {
   await addDoc(segmentsCollection(tripId, dayId), {
     mode,
     status: 'planlagt' satisfies SegmentStatus,
-    ownerUid,
+    ownerUid: creatorUid,
+    memberUids,
     createdAt: serverTimestamp(),
     ...stripUndefined(details ?? {}),
   })

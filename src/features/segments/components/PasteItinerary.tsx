@@ -8,12 +8,14 @@ import styles from './PasteItinerary.module.css'
 export function PasteItinerary({
   tripId,
   dayId,
-  ownerUid,
+  creatorUid,
+  memberUids,
   onDone,
 }: {
   tripId: string
   dayId: string
-  ownerUid: string
+  creatorUid: string
+  memberUids: string[]
   onDone: () => void
 }) {
   const [text, setText] = useState('')
@@ -36,7 +38,7 @@ export function PasteItinerary({
         ? `Rute: ${draft.departureAirport} → ${draft.arrivalAirport}`
         : undefined
 
-    await addSegment(tripId, dayId, ownerUid, 'fly', {
+    await addSegment(tripId, dayId, creatorUid, memberUids, 'fly', {
       carrier: draft.carrier,
       number: draft.number,
       departureTime: draft.departureTime,

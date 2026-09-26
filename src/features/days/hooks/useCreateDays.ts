@@ -6,13 +6,14 @@ export function useCreateDays() {
 
   async function createDays(
     tripId: string,
-    ownerUid: string,
+    creatorUid: string,
+    memberUids: string[],
     numDays: number,
     startDate: string,
   ): Promise<void> {
     setPending(true)
     try {
-      await createDaysForTrip(tripId, ownerUid, numDays, startDate)
+      await createDaysForTrip(tripId, creatorUid, memberUids, numDays, startDate)
     } finally {
       setPending(false)
     }
