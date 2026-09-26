@@ -27,6 +27,7 @@ export function ShareTripDialog({
   const { saveSharedCategories, pending: savingCategories } = useUpdateSharedCategories()
   const [selected, setSelected] = useState<Set<string>>(new Set(memberUids))
   const [sharePhotos, setSharePhotos] = useState(sharedCategories.photos)
+  const [shareTrack, setShareTrack] = useState(sharedCategories.track)
   const [email, setEmail] = useState('')
   const saving = savingMembers || savingCategories
 
@@ -52,12 +53,13 @@ export function ShareTripDialog({
   async function handleSave() {
     const nextMemberUids = Array.from(selected)
     await saveMembers(tripId, ownerUid, nextMemberUids)
-    if (sharePhotos !== sharedCategories.photos) {
-      await saveSharedCategories(tripId, ownerUid, nextMemberUids, {
-        ...sharedCategories,
-        photos: sharePhotos,
-      })
-    }
+    // Køres altid (ikke kun ved ændret toggle): billeder og sporingspunkter
+    // har deres eget adgangsfelt, som også skal genberegnes når medlemslisten
+    // ændres — ellers ser nye medlemmer ikke det allerede delte indhold.
+    await saveSharedCategories(tripId, ownerUid, nextMemberUids, {
+      photos: sharePhotos,
+      track: shareTrack,
+    })
     onClose()
   }
 
@@ -91,6 +93,15 @@ export function ShareTripDialog({
           onChange={(e) => setSharePhotos(e.target.checked)}
         />
         Del billeder med rejsefæller
+      </label>
+
+      <label className={styles.friendRow}>
+        <input
+          type="checkbox"
+          checked={shareTrack}
+          onChange={(e) => setShareTrack(e.target.checked)}
+        />
+        Del sporing og check-ins med rejsefæller
       </label>
 
       <div className={styles.addFriend}>

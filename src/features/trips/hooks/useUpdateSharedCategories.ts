@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { cascadePhotoSharing } from '../../photos/repository'
+import { cascadeTrackSharing } from '../../tracking/repository'
 import { updateTripSharedCategories } from '../repository'
 import type { SharedCategories } from '../types'
 
@@ -15,7 +16,10 @@ export function useUpdateSharedCategories() {
     setPending(true)
     try {
       await updateTripSharedCategories(tripId, sharedCategories)
-      await cascadePhotoSharing(tripId, sharedCategories.photos, memberUids, ownerUid)
+      await Promise.all([
+        cascadePhotoSharing(tripId, sharedCategories.photos, memberUids, ownerUid),
+        cascadeTrackSharing(tripId, sharedCategories.track, memberUids, ownerUid),
+      ])
     } finally {
       setPending(false)
     }

@@ -1,11 +1,14 @@
-import { GeoJSONSource, LngLatBounds, Map as MapLibreMap, Marker } from 'maplibre-gl'
+import { LngLatBounds, Map as MapLibreMap, Marker } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useEffect, useRef } from 'react'
 import { osmRasterStyle } from '../../../shared/map/osmRasterStyle'
-import type { Place } from '../../../shared/types/place'
+import { setLineLayer } from '../../../shared/map/setLineLayer'
+import type { LatLng, Place } from '../../../shared/types/place'
 import styles from './TripMap.module.css'
 
 const ROUTE_SOURCE_ID = 'trip-route'
+const TRACK_SOURCE_ID = 'trip-track'
+const TRACK_COLOR = '#22c55e'
 
 export type PhotoMarker = { id: string; lat: number; lng: number }
 
@@ -14,17 +17,30 @@ export function TripMap({
   onSelectDestination,
   photoMarkers = [],
   onSelectPhotoMarker,
+  trackLines = [],
+  checkInMarkers = [],
 }: {
   destinations: Place[]
   onSelectDestination?: (place: Place) => void
   photoMarkers?: PhotoMarker[]
   onSelectPhotoMarker?: (photoId: string) => void
+  /** Én linje pr. person, der er blevet GPS-sporet. */
+  trackLines?: LatLng[][]
+  checkInMarkers?: LatLng[]
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
 
+  const hasContent =
+    destinations.length > 0 ||
+    photoMarkers.length > 0 ||
+    trackLines.length > 0 ||
+    checkInMarkers.length > 0
+
+  // Kortet oprettes først når der er noget at vise (før det findes der ingen
+  // container) — derfor afhænger effekten af hasContent og ikke bare [].
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!hasContent || !containerRef.current) return
     const map = new MapLibreMap({
       container: containerRef.current,
       style: osmRasterStyle,
@@ -38,7 +54,7 @@ export function TripMap({
       map.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [hasContent])
 
   useEffect(() => {
     const map = mapRef.current
@@ -62,37 +78,30 @@ export function TripMap({
         markers.push(marker)
       })
 
+      checkInMarkers.forEach((point) => {
+        markers.push(
+          new Marker({ color: TRACK_COLOR, scale: 0.7 })
+            .setLngLat([point.lng, point.lat])
+            .addTo(map),
+        )
+      })
+
+      setLineLayer(map, ROUTE_SOURCE_ID, [destinations], {
+        'line-color': '#38bdf8',
+        'line-width': 2,
+        'line-dasharray': [2, 2],
+      })
+      setLineLayer(map, TRACK_SOURCE_ID, trackLines, {
+        'line-color': TRACK_COLOR,
+        'line-width': 3,
+      })
+
       const allPoints = [
         ...destinations.map((d) => ({ lat: d.lat, lng: d.lng })),
         ...photoMarkers.map((p) => ({ lat: p.lat, lng: p.lng })),
+        ...trackLines.flat(),
+        ...checkInMarkers,
       ]
-
-      const existingSource = map.getSource(ROUTE_SOURCE_ID) as GeoJSONSource | undefined
-
-      if (destinations.length > 1) {
-        const geojson: GeoJSON.Feature<GeoJSON.LineString> = {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates: destinations.map((place) => [place.lng, place.lat]),
-          },
-        }
-        if (existingSource) {
-          existingSource.setData(geojson)
-        } else {
-          map.addSource(ROUTE_SOURCE_ID, { type: 'geojson', data: geojson })
-          map.addLayer({
-            id: ROUTE_SOURCE_ID,
-            type: 'line',
-            source: ROUTE_SOURCE_ID,
-            paint: { 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [2, 2] },
-          })
-        }
-      } else if (existingSource) {
-        map.removeLayer(ROUTE_SOURCE_ID)
-        map.removeSource(ROUTE_SOURCE_ID)
-      }
 
       if (allPoints.length > 1) {
         const [first, ...rest] = allPoints
@@ -100,7 +109,7 @@ export function TripMap({
           (b, point) => b.extend([point.lng, point.lat]),
           new LngLatBounds([first.lng, first.lat], [first.lng, first.lat]),
         )
-        map.fitBounds(bounds, { padding: 60, maxZoom: 8 })
+        map.fitBounds(bounds, { padding: 60, maxZoom: 13 })
       } else if (allPoints.length === 1) {
         map.flyTo({ center: [allPoints[0].lng, allPoints[0].lat], zoom: 5 })
       }
@@ -115,9 +124,16 @@ export function TripMap({
     return () => {
       markers.forEach((marker) => marker.remove())
     }
-  }, [destinations, onSelectDestination, photoMarkers, onSelectPhotoMarker])
+  }, [
+    destinations,
+    onSelectDestination,
+    photoMarkers,
+    onSelectPhotoMarker,
+    trackLines,
+    checkInMarkers,
+  ])
 
-  if (destinations.length === 0 && photoMarkers.length === 0) {
+  if (!hasContent) {
     return <p className={styles.empty}>Tilføj destinationer for at se dem på kortet.</p>
   }
 

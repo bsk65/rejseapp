@@ -16,7 +16,7 @@ import {
 } from 'firebase/firestore'
 import { deleteObject, ref, uploadBytes } from 'firebase/storage'
 import { db, storage } from '../../firebase/config'
-import { computePhotoViewerUids } from './logic/computePhotoViewerUids'
+import { computeViewerUids } from '../../shared/utils/computeViewerUids'
 import type { Photo } from './types'
 
 function photosCollection(tripId: string) {
@@ -95,14 +95,19 @@ export async function cascadePhotoSharing(
   memberUids: string[],
   tripOwnerUid: string,
 ): Promise<void> {
-  const snapshot = await getDocs(photosCollection(tripId))
+  // Trippens ejer er altid med i photoViewerUids (se computeViewerUids), så
+  // dette filter rammer alle billeder — og det skal med, ellers afviser
+  // Firestore list-queryet. Se CLAUDE.md.
+  const snapshot = await getDocs(
+    query(photosCollection(tripId), where('photoViewerUids', 'array-contains', tripOwnerUid)),
+  )
   if (snapshot.empty) return
 
   const batch = writeBatch(db)
   snapshot.docs.forEach((photoDoc) => {
     const ownerUid = (photoDoc.data() as { ownerUid: string }).ownerUid
     batch.update(photoDoc.ref, {
-      photoViewerUids: computePhotoViewerUids(sharePhotos, memberUids, tripOwnerUid, ownerUid),
+      photoViewerUids: computeViewerUids(sharePhotos, memberUids, tripOwnerUid, ownerUid),
     })
   })
   await batch.commit()

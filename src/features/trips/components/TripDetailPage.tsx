@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { DaysList } from '../../days/components/DaysList'
@@ -6,6 +6,9 @@ import { useDays } from '../../days/hooks/useDays'
 import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import { PhotoUploadButton } from '../../photos/components/PhotoUploadButton'
 import { usePhotos } from '../../photos/hooks/usePhotos'
+import { TrackingPanel } from '../../tracking/components/TrackingPanel'
+import { useTrack } from '../../tracking/hooks/useTrack'
+import { groupTrackLines } from '../../tracking/logic/groupTrackLines'
 import { formatDateRange } from '../logic/tripDates'
 import { useTrip } from '../hooks/useTrip'
 import { ShareTripDialog } from './ShareTripDialog'
@@ -19,6 +22,15 @@ export function TripDetailPage() {
   const { trip, loading } = useTrip(tripId)
   const { days, loading: daysLoading } = useDays(tripId, user?.uid)
   const { photos } = usePhotos(tripId, user?.uid)
+  const { points: trackPoints } = useTrack(tripId, user?.uid)
+  const trackLines = useMemo(
+    () => groupTrackLines(trackPoints.filter((p) => p.source === 'gps')),
+    [trackPoints],
+  )
+  const checkInMarkers = useMemo(
+    () => trackPoints.filter((p) => p.source === 'manuel'),
+    [trackPoints],
+  )
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const [highlightedDayId, setHighlightedDayId] = useState<string | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
@@ -102,6 +114,8 @@ export function TripDetailPage() {
         onSelectDestination={handleSelectDestination}
         photoMarkers={photoMarkers}
         onSelectPhotoMarker={handleSelectPhotoMarker}
+        trackLines={trackLines}
+        checkInMarkers={checkInMarkers}
       />
 
       {trip.destinations.length > 0 && (
@@ -118,6 +132,17 @@ export function TripDetailPage() {
           ))}
         </ul>
       )}
+
+      <TrackingPanel
+        context={{
+          tripId: trip.id,
+          userUid: user.uid,
+          tripOwnerUid: trip.ownerUid,
+          memberUids: trip.memberUids,
+          shareTrack: trip.sharedCategories.track,
+        }}
+        points={trackPoints}
+      />
 
       <PhotoUploadButton
         tripId={trip.id}

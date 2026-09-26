@@ -15,6 +15,25 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid in memberUids;
     }
 
+    // get() på parent-trippen bruges KUN i create/update-regler (enkelt-
+    // dokument-skrivninger) — aldrig i read-regler, da det får list-queries
+    // til at fejle. Se CLAUDE.md.
+    function tripData(tripId) {
+      return get(/databases/$(database)/documents/trips/$(tripId)).data;
+    }
+
+    function isTripMember(tripId) {
+      return isSignedIn() && request.auth.uid in tripData(tripId).memberUids;
+    }
+
+    function isTripOwner(tripId) {
+      return isSignedIn() && request.auth.uid == tripData(tripId).ownerUid;
+    }
+
+    function onlyChanges(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
     // Brugerprofiler (uid + email) — bruges til at slå en e-mail op til et
     // uid, når man tilføjer en ven. Alle loggede ind brugere må læse (kun
     // uid+email, ikke følsomt), men man må kun skrive sit eget dokument.
@@ -53,20 +72,30 @@ service cloud.firestore {
         }
       }
 
-      // Billeder har deres eget adgangsfelt (photoViewerUids) i stedet for
-      // memberUids — det styres af trippens sharedCategories.photos og
-      // indeholder altid mindst ejeren og den der uploadede billedet. Se
-      // computePhotoViewerUids i features/photos og CLAUDE.md.
+      // Billeder og sporingspunkter har hver deres eget adgangsfelt
+      // (photoViewerUids / trackViewerUids) i stedet for memberUids — styret
+      // af trippens sharedCategories og indeholder altid mindst trippens ejer
+      // og den der oprettede dokumentet. Se computeViewerUids i
+      // src/shared/utils og CLAUDE.md. Trippens ejer må opdatere selve
+      // adgangsfeltet på andres dokumenter (cascade ved ændret deling).
       match /photos/{photoId} {
         allow read: if isMember(resource.data.photoViewerUids);
         allow create: if isMember(request.resource.data.photoViewerUids)
-          && request.resource.data.ownerUid == request.auth.uid;
-        allow update, delete: if isOwner(resource.data.ownerUid);
+          && request.resource.data.ownerUid == request.auth.uid
+          && isTripMember(tripId);
+        allow update: if isOwner(resource.data.ownerUid)
+          || (isTripOwner(tripId) && onlyChanges(['photoViewerUids']));
+        allow delete: if isOwner(resource.data.ownerUid);
       }
 
       match /track/{pointId} {
-        allow read, update, delete: if isMember(resource.data.memberUids);
-        allow create: if isMember(request.resource.data.memberUids);
+        allow read: if isMember(resource.data.trackViewerUids);
+        allow create: if isMember(request.resource.data.trackViewerUids)
+          && request.resource.data.ownerUid == request.auth.uid
+          && isTripMember(tripId);
+        allow update: if isOwner(resource.data.ownerUid)
+          || (isTripOwner(tripId) && onlyChanges(['trackViewerUids']));
+        allow delete: if isOwner(resource.data.ownerUid);
       }
     }
   }

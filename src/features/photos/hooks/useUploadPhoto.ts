@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Day } from '../../days/types'
-import { computePhotoViewerUids } from '../logic/computePhotoViewerUids'
+import { computeViewerUids } from '../../../shared/utils/computeViewerUids'
 import { matchPhotoToDay } from '../logic/matchPhotoToDay'
 import { readPhotoMetadata } from '../logic/readPhotoMetadata'
 import { uploadPhoto } from '../repository'
@@ -23,12 +23,7 @@ export function useUploadPhoto() {
     try {
       const metadata = await readPhotoMetadata(file)
       const dayId = matchPhotoToDay(metadata.takenAt, days)
-      const photoViewerUids = computePhotoViewerUids(
-        sharePhotos,
-        memberUids,
-        tripOwnerUid,
-        uploaderUid,
-      )
+      const photoViewerUids = computeViewerUids(sharePhotos, memberUids, tripOwnerUid, uploaderUid)
       await uploadPhoto(tripId, uploaderUid, photoViewerUids, file, {
         takenAt: metadata.takenAt,
         location: metadata.location,
