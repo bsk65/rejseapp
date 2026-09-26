@@ -6,16 +6,15 @@ export function useCreateTrip(ownerUid: string | null) {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function create(input: NewTripInput): Promise<boolean> {
-    if (!ownerUid) return false
+  async function create(input: NewTripInput): Promise<string | null> {
+    if (!ownerUid) return null
     setPending(true)
     setError(null)
     try {
-      await createTrip(ownerUid, input)
-      return true
+      return await createTrip(ownerUid, input)
     } catch {
       setError('Kunne ikke oprette rejsen. Prøv igen.')
-      return false
+      return null
     } finally {
       setPending(false)
     }

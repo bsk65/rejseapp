@@ -3,6 +3,7 @@ import { Button } from '../../../shared/ui/Button'
 import { PlaceSearchInput } from '../../../shared/ui/PlaceSearchInput'
 import { TextField } from '../../../shared/ui/TextField'
 import type { Place } from '../../../shared/types/place'
+import { useCreateDays } from '../../days/hooks/useCreateDays'
 import { useCreateTrip } from '../hooks/useCreateTrip'
 import styles from './CreateTripForm.module.css'
 
@@ -18,6 +19,7 @@ export function CreateTripForm({
   const [days, setDays] = useState(1)
   const [destinations, setDestinations] = useState<Place[]>([])
   const { create, pending, error } = useCreateTrip(ownerUid)
+  const { createDays } = useCreateDays()
 
   function addDestination(place: Place) {
     setDestinations((prev) =>
@@ -31,8 +33,9 @@ export function CreateTripForm({
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    const ok = await create({ title, startDate, days, destinations })
-    if (ok) {
+    const tripId = await create({ title, startDate, days, destinations })
+    if (tripId) {
+      await createDays(tripId, ownerUid, days, startDate)
       setTitle('')
       setStartDate('')
       setDays(1)

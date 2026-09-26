@@ -27,6 +27,8 @@ Hver feature med Firestore-data har en `repository.ts` med rene, testbare funkti
 
 **Vigtigt om Firestore security rules og subcollections:** brug IKKE `get()` på et parent-dokument i en regel, der også skal understøtte `list`/query-kald på en subcollection — det fejler i praksis, ikke kun for ufiltrerede queries (lærdom fra søsterprojektet "3D bueskydning"). Denormaliser i stedet `ownerUid` direkte på hvert subcollection-dokument (days, segments, photos, track), og skriv reglen som et direkte match mod `resource.data.ownerUid` / `request.resource.data.ownerUid`.
 
+**Vigtigt om `list`-queries generelt:** selv med et direkte `resource.data.ownerUid`-match (ingen `get()`) afviser Firestore hele queryet med `permission-denied`, hvis selve queryet ikke også har et `where('ownerUid', '==', ...)`-filter, der matcher reglen — Firestore kan ikke bevise sikkerheden for et list-kald ud fra reglen alene, den skal kunne se det i selve queryets `where`-klausuler. Enhver `subscribeToX`/`getX`-liste-funktion i et repository skal derfor altid inkludere `where('ownerUid', '==', ownerUid)`, og der skal være et tilsvarende composite index i `firestore.indexes.json` for `(ownerUid, <sorteringsfelt>)`.
+
 ## Kommandoer
 
 ```bash
@@ -73,7 +75,7 @@ trips/{tripId}/track/{pointId}
 
 `Place = { name, lat, lng, placeId }`. Alle bruger-indtastede tidspunkter gemmes som ISO-strenge (ikke Firestore `Timestamp`), så parsing/EXIF/afstandslogik kan testes som rene funktioner. Kun `createdAt` er en Firestore `Timestamp`. `ownerUid` er denormaliseret på alle subcollection-dokumenter — se afsnittet om security rules ovenfor.
 
-Kun ejeren (`ownerUid === auth.uid`) kan læse/skrive sine trips og alt indhold under dem. Samme regel gælder Storage (`courses/{uid}/...`-mønster, se `storage.rules`).
+Kun ejeren (`ownerUid === auth.uid`) kan læse/skrive sine trips og alt indhold under dem. Samme regel gælder Storage (`trips/{tripId}/{uid}/...`-mønster, se `storage.rules`).
 
 ## Byggetrin (status)
 

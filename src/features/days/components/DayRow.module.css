@@ -1,0 +1,48 @@
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  scroll-margin-top: 16px;
+  transition: outline-color 0.2s ease;
+  outline: 2px solid transparent;
+}
+
+.row[data-highlighted='true'] {
+  outline-color: var(--color-accent);
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.dayNumber {
+  font-weight: 600;
+}
+
+.date {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.places {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.placeChip {
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
