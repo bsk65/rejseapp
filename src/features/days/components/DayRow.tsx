@@ -1,40 +1,8 @@
-import { useState } from 'react'
+import { PlaceField } from '../../../shared/ui/PlaceField'
 import { DaySegments } from '../../segments/components/DaySegments'
-import { PlaceSearchInput } from '../../../shared/ui/PlaceSearchInput'
-import type { Place } from '../../../shared/types/place'
 import { useDayPlace } from '../hooks/useDayPlace'
 import type { Day } from '../types'
 import styles from './DayRow.module.css'
-
-function PlaceField({
-  label,
-  place,
-  onSelect,
-}: {
-  label: string
-  place: Place | undefined
-  onSelect: (place: Place) => void
-}) {
-  const [editing, setEditing] = useState(false)
-
-  if (place && !editing) {
-    return (
-      <button type="button" className={styles.placeChip} onClick={() => setEditing(true)}>
-        {label}: {place.name}
-      </button>
-    )
-  }
-
-  return (
-    <PlaceSearchInput
-      label={label}
-      onSelect={(selected) => {
-        onSelect(selected)
-        setEditing(false)
-      }}
-    />
-  )
-}
 
 export function DayRow({
   tripId,

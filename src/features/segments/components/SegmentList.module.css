@@ -11,6 +11,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   font-size: 0.85rem;
   color: var(--color-text-muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:active {
+  background: var(--color-surface);
 }
