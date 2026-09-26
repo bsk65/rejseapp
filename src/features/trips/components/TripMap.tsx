@@ -36,6 +36,7 @@ export function TripMap({
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const [focus, setFocus] = useState<Focus>('all')
+  const [mapReady, setMapReady] = useState(false)
   // Hvad kortet sidst blev zoomet til — så en genrendering med samme indhold
   // ikke nulstiller brugerens egen zoom/panorering.
   const lastFitKeyRef = useRef('')
@@ -54,19 +55,27 @@ export function TripMap({
       center: [10, 50],
       zoom: 2,
     })
-    map.on('load', () => map.setProjection({ type: 'globe' }))
+    map.on('load', () => {
+      map.setProjection({ type: 'globe' })
+      setMapReady(true)
+    })
     mapRef.current = map
     lastFitKeyRef.current = ''
 
     return () => {
       map.remove()
       mapRef.current = null
+      setMapReady(false)
     }
   }, [hasContent])
 
+  // Tegner først når kortets 'load' er sket én gang (mapReady). Brug IKKE
+  // map.isStyleLoaded() her: den er false mens kortfliser hentes (f.eks.
+  // under en zoom), og en efterfølgende once('load') fyrer aldrig igen — så
+  // nye punkter blev aldrig tegnet.
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || !mapReady) return
 
     const markers: Marker[] = []
 
@@ -124,11 +133,7 @@ export function TripMap({
       }
     }
 
-    if (map.isStyleLoaded()) {
-      render(map)
-    } else {
-      map.once('load', () => render(map))
-    }
+    render(map)
 
     return () => {
       markers.forEach((marker) => marker.remove())
