@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 import { RequireAuth } from './features/auth/components/RequireAuth'
 import { TripsPage } from './features/trips/components/TripsPage'
+import { RouteErrorPage } from './shared/ui/RouteErrorPage'
 
 // MapLibre (via TripMap) er tung, så rejsedetalje-siden lazy-loades for at
 // holde login/liste-bundlet lille på langsomme forbindelser.
@@ -15,6 +16,7 @@ const TripDetailPage = lazy(() =>
 export const router = createBrowserRouter([
   {
     path: '/',
+    errorElement: <RouteErrorPage />,
     element: (
       <RequireAuth>
         <TripsPage />
@@ -23,6 +25,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/rejser/:tripId',
+    errorElement: <RouteErrorPage />,
     element: (
       <RequireAuth>
         <Suspense fallback={null}>
