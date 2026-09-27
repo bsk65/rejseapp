@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDaysToIsoDate } from './date'
+import { addDaysToIsoDate, formatDayDate } from './date'
 
 describe('addDaysToIsoDate', () => {
   it('adds a positive offset', () => {
@@ -12,5 +12,11 @@ describe('addDaysToIsoDate', () => {
 
   it('rolls over into the next month', () => {
     expect(addDaysToIsoDate('2026-10-30', 3)).toBe('2026-11-02')
+  })
+})
+
+describe('formatDayDate', () => {
+  it('formats with weekday, day and month in Danish', () => {
+    expect(formatDayDate('2026-10-03')).toBe('lør. 3. okt.')
   })
 })

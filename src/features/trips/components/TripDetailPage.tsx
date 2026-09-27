@@ -1,20 +1,30 @@
-import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { DaysList } from '../../days/components/DaysList'
 import { useDays } from '../../days/hooks/useDays'
 import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import { PhotoUploadButton } from '../../photos/components/PhotoUploadButton'
 import { usePhotos } from '../../photos/hooks/usePhotos'
-import { TrackingPanel } from '../../tracking/components/TrackingPanel'
-import { useTrack } from '../../tracking/hooks/useTrack'
-import { groupTrackLines } from '../../tracking/logic/groupTrackLines'
+import { TicketsView } from '../../segments/components/TicketsView'
 import { formatDateRange } from '../logic/tripDates'
 import { useTrip } from '../hooks/useTrip'
 import { ShareTripDialog } from './ShareTripDialog'
-import { TripMap } from './TripMap'
+import { TripMapTab } from './TripMapTab'
 import styles from './TripDetailPage.module.css'
-import type { LatLng, Place } from '../../../shared/types/place'
+
+type TripTab = 'dage' | 'billetter' | 'kort'
+
+const TABS: TabOption<TripTab>[] = [
+  { id: 'dage', label: 'Dage' },
+  { id: 'billetter', label: 'Billetter & tider' },
+  { id: 'kort', label: 'Kort & spor' },
+]
+
+function isTripTab(value: string | null): value is TripTab {
+  return TABS.some((tab) => tab.id === value)
+}
 
 export function TripDetailPage() {
   const { tripId } = useParams<{ tripId: string }>()
@@ -22,41 +32,25 @@ export function TripDetailPage() {
   const { trip, loading } = useTrip(tripId)
   const { days, loading: daysLoading } = useDays(tripId, user?.uid)
   const { photos } = usePhotos(tripId, user?.uid)
-  const { points: trackPoints, error: trackError } = useTrack(tripId, user?.uid)
-  const trackLines = useMemo(
-    () => groupTrackLines(trackPoints.filter((p) => p.source === 'gps')),
-    [trackPoints],
-  )
-  const checkInMarkers = useMemo(
-    () => trackPoints.filter((p) => p.source === 'manuel'),
-    [trackPoints],
-  )
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
+  const [searchParams, setSearchParams] = useSearchParams()
   const [highlightedDayId, setHighlightedDayId] = useState<string | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
 
-  function scrollToDay(dayId: string) {
+  // Valgt fane ligger i URL'en (?fane=...), så den overlever en genindlæsning.
+  const tabParam = searchParams.get('fane')
+  const activeTab: TripTab = isTripTab(tabParam) ? tabParam : 'dage'
+
+  function selectTab(tab: TripTab) {
+    setSearchParams(tab === 'dage' ? {} : { fane: tab }, { replace: true })
+  }
+
+  function showDay(dayId: string) {
+    selectTab('dage')
     setHighlightedDayId(dayId)
-    document.getElementById(`dag-${dayId}`)?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  function handleSelectDestination(place: Place) {
-    const matchingDay = days.find(
-      (day) => day.fromPlace?.placeId === place.placeId || day.toPlace?.placeId === place.placeId,
+    // Vent til fanen er vist, før der scrolles.
+    requestAnimationFrame(() =>
+      document.getElementById(`dag-${dayId}`)?.scrollIntoView({ behavior: 'smooth' }),
     )
-
-    if (matchingDay) {
-      scrollToDay(matchingDay.id)
-    } else {
-      // Ingen dag har fået tildelt denne destination endnu — fremhæv den i
-      // stedet i destinationslisten herunder.
-      setSelectedPlaceId(place.placeId)
-    }
-  }
-
-  function handleSelectPhotoMarker(photoId: string) {
-    const dayId = photos.find((p) => p.id === photoId)?.dayId
-    if (dayId) scrollToDay(dayId)
   }
 
   if (loading) {
@@ -74,9 +68,6 @@ export function TripDetailPage() {
 
   const isOwner = user.uid === trip.ownerUid
   const unsortedPhotos = photos.filter((p) => !p.dayId)
-  const photoMarkers = photos
-    .filter((p): p is typeof p & { location: LatLng } => Boolean(p.location))
-    .map((p) => ({ id: p.id, lat: p.location.lat, lng: p.location.lng }))
 
   return (
     <div className={styles.page}>
@@ -109,65 +100,48 @@ export function TripDetailPage() {
         />
       )}
 
-      <TripMap
-        destinations={trip.destinations}
-        onSelectDestination={handleSelectDestination}
-        photoMarkers={photoMarkers}
-        onSelectPhotoMarker={handleSelectPhotoMarker}
-        trackLines={trackLines}
-        checkInMarkers={checkInMarkers}
-      />
+      <Tabs tabs={TABS} active={activeTab} onChange={selectTab} />
 
-      {trip.destinations.length > 0 && (
-        <ul className={styles.destinations}>
-          {trip.destinations.map((place, index) => (
-            <li
-              key={place.placeId}
-              className={styles.destinationItem}
-              data-selected={place.placeId === selectedPlaceId}
-            >
-              <span className={styles.destinationIndex}>{index + 1}</span>
-              <span>{place.name}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Alle faner forbliver monteret (kun skjult), så f.eks. en igangværende
+          GPS-sporing på "Kort & spor" ikke stopper, når man skifter fane. */}
+      <div className={styles.tabPanel} hidden={activeTab !== 'dage'}>
+        <PhotoUploadButton
+          tripId={trip.id}
+          uploaderUid={user.uid}
+          tripOwnerUid={trip.ownerUid}
+          memberUids={trip.memberUids}
+          sharePhotos={trip.sharedCategories.photos}
+          days={days}
+        />
+        {unsortedPhotos.length > 0 && (
+          <div>
+            <p className={styles.sectionLabel}>Billeder uden dag</p>
+            <PhotoGallery tripId={trip.id} photos={unsortedPhotos} />
+          </div>
+        )}
+        <DaysList
+          tripId={trip.id}
+          memberUids={trip.memberUids}
+          days={days}
+          photos={photos}
+          loading={daysLoading}
+          highlightedDayId={highlightedDayId}
+        />
+      </div>
 
-      <TrackingPanel
-        context={{
-          tripId: trip.id,
-          userUid: user.uid,
-          tripOwnerUid: trip.ownerUid,
-          memberUids: trip.memberUids,
-          shareTrack: trip.sharedCategories.track,
-        }}
-        points={trackPoints}
-        loadError={trackError}
-      />
+      <div className={styles.tabPanel} hidden={activeTab !== 'billetter'}>
+        <TicketsView tripId={trip.id} days={days} userUid={user.uid} />
+      </div>
 
-      <PhotoUploadButton
-        tripId={trip.id}
-        uploaderUid={user.uid}
-        tripOwnerUid={trip.ownerUid}
-        memberUids={trip.memberUids}
-        sharePhotos={trip.sharedCategories.photos}
-        days={days}
-      />
-      {unsortedPhotos.length > 0 && (
-        <div>
-          <p className={styles.sectionLabel}>Billeder uden dag</p>
-          <PhotoGallery tripId={trip.id} photos={unsortedPhotos} />
-        </div>
-      )}
-
-      <DaysList
-        tripId={trip.id}
-        memberUids={trip.memberUids}
-        days={days}
-        photos={photos}
-        loading={daysLoading}
-        highlightedDayId={highlightedDayId}
-      />
+      <div className={styles.tabPanel} hidden={activeTab !== 'kort'}>
+        <TripMapTab
+          trip={trip}
+          userUid={user.uid}
+          days={days}
+          photos={photos}
+          onShowDay={showDay}
+        />
+      </div>
     </div>
   )
 }

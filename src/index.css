@@ -9,12 +9,53 @@
   --color-accent-contrast: #0f172a;
   --color-danger: #ef4444;
 
+  /* Dag-farver (se shared/utils/dayColors.ts) — skal kunne skelnes fra
+     destinationernes blå og sporets grøn på kortet. */
+  --day-color-0: #f472b6;
+  --day-color-1: #a78bfa;
+  --day-color-2: #fbbf24;
+  --day-color-3: #60a5fa;
+  --day-color-4: #fb923c;
+  --day-color-5: #2dd4bf;
+  --day-color-6: #f87171;
+  --day-color-7: #a3e635;
+
   color-scheme: dark;
   font-family:
     system-ui,
     -apple-system,
     'Segoe UI',
     sans-serif;
+}
+
+/* Sæt data-day-color="0-7" på et element for at give det --day-color
+   (dagens farve) uden inline style. Se shared/utils/dayColors.ts. */
+[data-day-color] {
+  --day-color: var(--color-accent);
+}
+[data-day-color='0'] {
+  --day-color: var(--day-color-0);
+}
+[data-day-color='1'] {
+  --day-color: var(--day-color-1);
+}
+[data-day-color='2'] {
+  --day-color: var(--day-color-2);
+}
+[data-day-color='3'] {
+  --day-color: var(--day-color-3);
+}
+[data-day-color='4'] {
+  --day-color: var(--day-color-4);
+}
+[data-day-color='5'] {
+  --day-color: var(--day-color-5);
+}
+[data-day-color='6'] {
+  --day-color: var(--day-color-6);
+}
+[data-day-color='7'] {
+  --day-color: var(--day-color-7);
 }
 
 * {

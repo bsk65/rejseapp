@@ -109,6 +109,12 @@ Billeder har deres eget adgangsfelt, `photoViewerUids`, i stedet for det alminde
 
 `features/tracking`: løbende GPS-sporing (`watchPosition` i `useGpsTracking`) + manuelt check-in (aktuel position eller søgt sted). Ikke hver GPS-måling gemmes — `shouldRecordPoint` gemmer ved ≥100 m bevægelse eller ≥15 min stilstand og kasserer målinger med usikkerhed >50 m. Efter start gemmes intet før GPS'en er "varmet op" (`isGpsStable`: mindst 20 s, og 3 målinger i træk uden urealistiske spring >70 m/s) — telefoner giver ofte en grov mast-baseret første position, der kan ligge mange km forkert (set i praksis: ~25 km i Frøbjerg). `maximumAge: 0`, så en gammel cachet position aldrig bruges. "Check ind her" afviser positioner med usikkerhed >100 m. Sporingen kører kun mens appen er åben i forgrunden (browsere giver ikke PWA'er baggrunds-GPS); Wake Lock holder skærmen tændt imens. Kortet tegner én grøn linje pr. person (`groupTrackLines`) og check-ins som grønne nåle. `source: 'foto'` er reserveret til opsummeringen (trin 8) og skrives ikke endnu.
 
+### Rejsesidens faner, dag-farver og billetoversigt
+
+- Rejsesiden har tre faner ( i URL'en): **Dage**, **Billetter & tider**, **Kort & spor**. Alle faner forbliver monteret og skjules kun med — ellers ville en igangværende GPS-sporing stoppe ved faneskift. bruger en ResizeObserver til at tilpasse sig (og udføre en ventende zoom), når dens fane vises igen.
+- **Dag-farver:** paletten ligger som i . Sæt på et element for at få (ingen inline style). Kortmarkører kan ikke bruge CSS-variabler, så de bruger .
+- **Billetter & tider** (): samler fly/tog/bus/færge fra alle dage i tidsorden (), med filter pr. transportform og fremhævet næste afgang med nedtælling. departureTime kan være fuld dato+tid, kun dato, kun klokkeslæt eller mangle — normaliserer. Tidspunkter tolkes i telefonens lokale tidszone.
+
 ## Byggetrin (status)
 
 1. Projekt + Firebase + auth + opret/vis rejse

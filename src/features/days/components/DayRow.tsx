@@ -1,4 +1,6 @@
 import { PlaceField } from '../../../shared/ui/PlaceField'
+import { formatDayDate } from '../../../shared/utils/date'
+import { dayColorIndex } from '../../../shared/utils/dayColors'
 import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import type { Photo } from '../../photos/types'
 import { DaySegments } from '../../segments/components/DaySegments'
@@ -22,10 +24,15 @@ export function DayRow({
   const { setDayPlace } = useDayPlace()
 
   return (
-    <li id={`dag-${day.id}`} className={styles.row} data-highlighted={highlighted}>
+    <li
+      id={`dag-${day.id}`}
+      className={styles.row}
+      data-highlighted={highlighted}
+      data-day-color={dayColorIndex(day.dayNumber)}
+    >
       <div className={styles.header}>
         <span className={styles.dayNumber}>Dag {day.dayNumber}</span>
-        <span className={styles.date}>{day.date}</span>
+        <span className={styles.date}>{formatDayDate(day.date)}</span>
       </div>
 
       <div className={styles.places}>

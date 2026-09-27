@@ -12,8 +12,25 @@ const ROUTE_SOURCE_ID = 'trip-route'
 const TRACK_SOURCE_ID = 'trip-track'
 const TRACK_POINTS_SOURCE_ID = 'trip-track-points'
 const TRACK_COLOR = '#22c55e'
+const PHOTO_COLOR = '#f59e0b'
 
-export type PhotoMarker = { id: string; lat: number; lng: number }
+/** color: dagens farve, hvis billedet hører til en dag (ellers standard-orange). */
+export type PhotoMarker = { id: string; lat: number; lng: number; color?: string }
+
+type FitRequest = { key: string; points: LatLng[]; maxZoom: number; singleZoom: number }
+
+/** Udfører den ventende zoom, hvis den er ny og kortet har en synlig størrelse. */
+function applyPendingFit(
+  map: MapLibreMap,
+  container: HTMLElement | null,
+  request: FitRequest | null,
+  lastFitKey: { current: string },
+): void {
+  if (!request || request.key === lastFitKey.current) return
+  if (!container || container.clientWidth === 0) return
+  lastFitKey.current = request.key
+  fitToPoints(map, request.points, request)
+}
 
 type Focus = 'all' | 'track'
 
@@ -40,6 +57,9 @@ export function TripMap({
   // Hvad kortet sidst blev zoomet til — så en genrendering med samme indhold
   // ikke nulstiller brugerens egen zoom/panorering.
   const lastFitKeyRef = useRef('')
+  // Den seneste ønskede zoom — udføres først, når kortet har en synlig
+  // størrelse (det ligger på en fane, der kan være skjult).
+  const pendingFitRef = useRef<FitRequest | null>(null)
 
   const trackPoints = [...trackLines.flat(), ...checkInMarkers]
   const hasTrack = trackPoints.length > 0
@@ -62,7 +82,18 @@ export function TripMap({
     mapRef.current = map
     lastFitKeyRef.current = ''
 
+    // Når fanen vises igen, har containeren fået en størrelse: tilpas kortet
+    // og udfør en zoom, der ikke kunne laves, mens det var skjult.
+    const container = containerRef.current
+    const observer = new ResizeObserver(() => {
+      if (container.clientWidth === 0) return
+      map.resize()
+      applyPendingFit(map, containerRef.current, pendingFitRef.current, lastFitKeyRef)
+    })
+    observer.observe(container)
+
     return () => {
+      observer.disconnect()
       map.remove()
       mapRef.current = null
       setMapReady(false)
@@ -90,7 +121,9 @@ export function TripMap({
       })
 
       photoMarkers.forEach((photo) => {
-        const marker = new Marker({ color: '#f59e0b' }).setLngLat([photo.lng, photo.lat]).addTo(map)
+        const marker = new Marker({ color: photo.color || PHOTO_COLOR })
+          .setLngLat([photo.lng, photo.lat])
+          .addTo(map)
         marker.getElement().addEventListener('click', () => onSelectPhotoMarker?.(photo.id))
         markers.push(marker)
       })
@@ -124,13 +157,13 @@ export function TripMap({
           ? trackPoints
           : [...destinations, ...photoMarkers, ...trackPoints]
       const fitKey = `${focus}:${JSON.stringify(fitPoints.map((p) => [p.lat, p.lng]))}`
-      if (fitKey !== lastFitKeyRef.current) {
-        lastFitKeyRef.current = fitKey
-        fitToPoints(map, fitPoints, {
-          maxZoom: focus === 'track' ? 16 : 13,
-          singleZoom: focus === 'track' ? 15 : 5,
-        })
+      pendingFitRef.current = {
+        key: fitKey,
+        points: fitPoints,
+        maxZoom: focus === 'track' ? 16 : 13,
+        singleZoom: focus === 'track' ? 15 : 5,
       }
+      applyPendingFit(map, containerRef.current, pendingFitRef.current, lastFitKeyRef)
     }
 
     render(map)

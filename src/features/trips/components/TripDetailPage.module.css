@@ -86,3 +86,14 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
 }
+
+.tabPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* display: flex ovenfor ville ellers overtrumfe hidden-attributten. */
+.tabPanel[hidden] {
+  display: none;
+}
