@@ -25,3 +25,22 @@
   gap: 10px;
   justify-content: flex-end;
 }
+
+/* "Slet" står til venstre, væk fra "Gem", så man ikke rammer den ved et uheld. */
+.deleteButton {
+  margin-right: auto;
+}
+
+.confirmDelete {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--color-danger);
+  border-radius: 10px;
+}
+
+.confirmText {
+  margin: 0;
+  font-size: 0.9rem;
+}

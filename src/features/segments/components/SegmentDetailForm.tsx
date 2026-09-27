@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { TextField } from '../../../shared/ui/TextField'
+import { useDeleteSegment } from '../hooks/useDeleteSegment'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
 import { transportModeLabel, type Segment, type SegmentDetails, type SegmentStatus } from '../types'
 import styles from './SegmentDetailForm.module.css'
@@ -41,6 +42,13 @@ export function SegmentDetailForm({
     freeText: segment.freeText,
   })
   const { saveSegment, pending } = useUpdateSegment()
+  const { removeSegment, pending: deleting } = useDeleteSegment()
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+
+  async function handleDelete() {
+    await removeSegment(tripId, dayId, segment.id)
+    onClose()
+  }
 
   const showsCarrier = segment.mode !== 'bil' && segment.mode !== 'gang'
   const showsTerminal = segment.mode === 'fly'
@@ -137,14 +145,43 @@ export function SegmentDetailForm({
         Bekræftet booking
       </label>
 
-      <div className={styles.actions}>
-        <Button type="button" variant="secondary" onClick={onClose}>
-          Annuller
-        </Button>
-        <Button type="button" disabled={pending} onClick={() => void handleSave()}>
-          Gem
-        </Button>
-      </div>
+      {confirmingDelete ? (
+        <div className={styles.confirmDelete}>
+          <p className={styles.confirmText}>
+            Slet denne {transportModeLabel[segment.mode].toLowerCase()}-booking helt?
+          </p>
+          <div className={styles.actions}>
+            <Button type="button" variant="secondary" onClick={() => setConfirmingDelete(false)}>
+              Fortryd
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              disabled={deleting}
+              onClick={() => void handleDelete()}
+            >
+              Ja, slet
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.actions}>
+          <Button
+            type="button"
+            variant="danger"
+            className={styles.deleteButton}
+            onClick={() => setConfirmingDelete(true)}
+          >
+            Slet
+          </Button>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Annuller
+          </Button>
+          <Button type="button" disabled={pending} onClick={() => void handleSave()}>
+            Gem
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

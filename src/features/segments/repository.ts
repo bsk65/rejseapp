@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   onSnapshot,
   orderBy,
@@ -83,6 +84,14 @@ export async function createSegment(
     createdAt: serverTimestamp(),
     ...stripUndefined(details ?? {}),
   })
+}
+
+export async function deleteSegment(
+  tripId: string,
+  dayId: string,
+  segmentId: string,
+): Promise<void> {
+  await deleteDoc(doc(segmentsCollection(tripId, dayId), segmentId))
 }
 
 export async function updateSegment(
