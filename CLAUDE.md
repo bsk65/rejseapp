@@ -111,9 +111,9 @@ Billeder har deres eget adgangsfelt, `photoViewerUids`, i stedet for det alminde
 
 ### Rejsesidens faner, dag-farver og billetoversigt
 
-- Rejsesiden har tre faner ( i URL'en): **Dage**, **Billetter & tider**, **Kort & spor**. Alle faner forbliver monteret og skjules kun med — ellers ville en igangværende GPS-sporing stoppe ved faneskift. bruger en ResizeObserver til at tilpasse sig (og udføre en ventende zoom), når dens fane vises igen.
-- **Dag-farver:** paletten ligger som i . Sæt på et element for at få (ingen inline style). Kortmarkører kan ikke bruge CSS-variabler, så de bruger .
-- **Billetter & tider** (): samler fly/tog/bus/færge fra alle dage i tidsorden (), med filter pr. transportform og fremhævet næste afgang med nedtælling. departureTime kan være fuld dato+tid, kun dato, kun klokkeslæt eller mangle — normaliserer. Tidspunkter tolkes i telefonens lokale tidszone.
+- Rejsesiden har tre faner (`?fane=` i URL'en): **Dage**, **Billetter & tider**, **Kort & spor**. Alle faner forbliver monteret og skjules kun med `hidden` — ellers ville en igangværende GPS-sporing stoppe ved faneskift. `TripMap` bruger en ResizeObserver til at tilpasse sig (og udføre en ventende zoom), når dens fane vises igen.
+- **Dag-farver:** paletten ligger som `--day-color-0..7` i `index.css`. Sæt `data-day-color={dayColorIndex(dayNumber)}` på et element for at få `--day-color` (ingen inline style). Kortmarkører kan ikke bruge CSS-variabler, så de bruger `resolveDayColor()`.
+- **Billetter & tider** (`segments/components/TicketsView`): samler fly/tog/bus/færge fra alle dage i tidsorden (`buildTickets`), med filter pr. transportform og fremhævet næste afgang med nedtælling. `departureTime` kan være fuld dato+tid, kun dato, kun klokkeslæt eller mangle — `buildTickets` normaliserer. Tidspunkter tolkes i telefonens lokale tidszone.
 
 ## Byggetrin (status)
 
