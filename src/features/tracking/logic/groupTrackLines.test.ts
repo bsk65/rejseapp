@@ -34,3 +34,16 @@ describe('groupTrackLines', () => {
     ])
   })
 })
+
+describe('groupTrackLines with imports', () => {
+  it('keeps each imported track as its own line', () => {
+    const imported = { ...point('a', 5, '2026-09-26T09:00:00Z'), importId: 'x' }
+    const imported2 = { ...point('a', 6, '2026-09-26T09:05:00Z'), importId: 'x' }
+    const lines = groupTrackLines([point('a', 1, '2026-09-26T10:00:00Z'), imported, imported2])
+    expect(lines).toHaveLength(2)
+    expect(lines[1]).toEqual([
+      { lat: 5, lng: 0 },
+      { lat: 6, lng: 0 },
+    ])
+  })
+})

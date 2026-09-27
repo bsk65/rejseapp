@@ -6,6 +6,7 @@ import type { Photo } from '../../photos/types'
 import { TrackingPanel } from '../../tracking/components/TrackingPanel'
 import { useTrack } from '../../tracking/hooks/useTrack'
 import { groupTrackLines } from '../../tracking/logic/groupTrackLines'
+import { isRouteSource } from '../../tracking/types'
 import type { Trip } from '../types'
 import { TripMap } from './TripMap'
 import styles from './TripDetailPage.module.css'
@@ -27,7 +28,7 @@ export function TripMapTab({
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const { points: trackPoints, error: trackError } = useTrack(trip.id, userUid)
   const trackLines = useMemo(
-    () => groupTrackLines(trackPoints.filter((p) => p.source === 'gps')),
+    () => groupTrackLines(trackPoints.filter((p) => isRouteSource(p.source))),
     [trackPoints],
   )
   const checkInMarkers = useMemo(

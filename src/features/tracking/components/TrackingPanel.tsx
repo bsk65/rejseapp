@@ -5,8 +5,9 @@ import { useCheckIn } from '../hooks/useCheckIn'
 import { useGpsTracking } from '../hooks/useGpsTracking'
 import { useRecordTrackPoint } from '../hooks/useRecordTrackPoint'
 import type { GpsFix } from '../logic/shouldRecordPoint'
-import type { TrackPoint, TrackingContext } from '../types'
+import { isRouteSource, type TrackPoint, type TrackingContext } from '../types'
 import { CheckInList } from './CheckInList'
+import { GpxImport } from './GpxImport'
 import styles from './TrackingPanel.module.css'
 
 export function TrackingPanel({
@@ -24,7 +25,7 @@ export function TrackingPanel({
   const checkIn = useCheckIn(record)
   const [searching, setSearching] = useState(false)
 
-  const gpsPointCount = points.filter((p) => p.source === 'gps').length
+  const routePointCount = points.filter((p) => isRouteSource(p.source)).length
   const checkIns = points.filter((p) => p.source === 'manuel')
   const error = loadError ?? gps.error ?? checkIn.error ?? recordError
 
@@ -32,7 +33,7 @@ export function TrackingPanel({
     <section className={styles.panel}>
       <div className={styles.header}>
         <p className={styles.title}>Sporing</p>
-        <p className={styles.meta}>{gpsPointCount} GPS-punkter</p>
+        <p className={styles.meta}>{routePointCount} GPS-punkter</p>
       </div>
 
       {gps.active ? (
@@ -84,6 +85,8 @@ export function TrackingPanel({
       {error && <p className={styles.error}>{error}</p>}
 
       <CheckInList tripId={context.tripId} userUid={context.userUid} checkIns={checkIns} />
+
+      <GpxImport context={context} points={points} />
     </section>
   )
 }

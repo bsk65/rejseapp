@@ -1,15 +1,26 @@
 import type { LatLng } from '../../shared/types/place'
 
-/** Hvor et sporingspunkt kommer fra. 'foto' er reserveret til opsummeringen (trin 8). */
-export type TrackSource = 'gps' | 'foto' | 'manuel'
+/**
+ * Hvor et sporingspunkt kommer fra: 'gps' = telefonens egen sporing,
+ * 'import' = GPX-fil (ur/Strava), 'manuel' = check-in. 'foto' er reserveret
+ * til opsummeringen (trin 8).
+ */
+export type TrackSource = 'gps' | 'import' | 'foto' | 'manuel'
+
+/** Kilder der danner en rute (linje) på kortet — modsat enkeltstående check-ins. */
+export function isRouteSource(source: TrackSource): boolean {
+  return source === 'gps' || source === 'import'
+}
 
 export type TrackPoint = LatLng & {
   id: string
   /** ISO-tidspunkt for hvornår man var på stedet. */
   timestamp: string
   source: TrackSource
-  /** Stednavn ved manuelt check-in via stedsøgning. */
+  /** Stednavn ved check-in, eller sporets navn/filnavn ved import. */
   label?: string
+  /** Fælles id for alle punkter fra samme GPX-import — så sporet kan slettes samlet. */
+  importId?: string
   /** Hvem der blev sporet / checkede ind. */
   ownerUid: string
   /** Hvem der må se punktet lige nu — styres af trippens sharedCategories.track. Se CLAUDE.md. */

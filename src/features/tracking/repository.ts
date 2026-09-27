@@ -33,6 +33,7 @@ function toTrackPoint(docSnap: QueryDocumentSnapshot<DocumentData>): TrackPoint 
     timestamp: data.timestamp,
     source: data.source,
     label: data.label ?? undefined,
+    importId: data.importId ?? undefined,
     ownerUid: data.ownerUid,
     trackViewerUids: data.trackViewerUids ?? [data.ownerUid],
   }
@@ -61,6 +62,43 @@ export async function addTrackPoint(tripId: string, point: NewTrackPoint): Promi
 
 export async function deleteTrackPoint(tripId: string, pointId: string): Promise<void> {
   await deleteDoc(doc(trackCollection(tripId), pointId))
+}
+
+/**
+ * Skriv-reglen for track-punkter slår trippen op med get() (medlemstjek), og
+ * Firestore tillader kun 20 get()-kald pr. batch — derfor små batches ved import.
+ */
+const IMPORT_BATCH_SIZE = 20
+
+/** Gemmer et helt importeret spor. `onProgress` får antal gemte punkter indtil nu. */
+export async function addTrackPoints(
+  tripId: string,
+  points: NewTrackPoint[],
+  onProgress?: (saved: number) => void,
+): Promise<void> {
+  for (let start = 0; start < points.length; start += IMPORT_BATCH_SIZE) {
+    const batch = writeBatch(db)
+    points.slice(start, start + IMPORT_BATCH_SIZE).forEach(({ label, importId, ...rest }) => {
+      batch.set(doc(trackCollection(tripId)), {
+        ...rest,
+        ...(label ? { label } : {}),
+        ...(importId ? { importId } : {}),
+      })
+    })
+    await batch.commit()
+    onProgress?.(Math.min(start + IMPORT_BATCH_SIZE, points.length))
+  }
+}
+
+/** Sletter flere punkter (f.eks. et helt importeret spor). Slette-reglen bruger ikke get(). */
+export async function deleteTrackPoints(tripId: string, pointIds: string[]): Promise<void> {
+  for (let start = 0; start < pointIds.length; start += BATCH_SIZE) {
+    const batch = writeBatch(db)
+    pointIds
+      .slice(start, start + BATCH_SIZE)
+      .forEach((id) => batch.delete(doc(trackCollection(tripId), id)))
+    await batch.commit()
+  }
 }
 
 /**
