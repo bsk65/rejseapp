@@ -7,6 +7,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registreres selv i src/shared/pwa/registerServiceWorker.ts (som også
+      // genindlæser ved ny version) — intet automatisk indsat registerSW.js.
+      injectRegister: false,
       // Ingen fetch-handler ud over precache af app-shell — Firestores egen
       // offline-persistens (IndexedDB) håndterer data. Ingen stale-data-cache.
       workbox: {

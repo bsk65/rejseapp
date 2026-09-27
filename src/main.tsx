@@ -2,7 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { App } from './App'
+import { registerServiceWorker } from './shared/pwa/registerServiceWorker'
 import { reloadOnceForStaleChunk } from './shared/utils/staleChunk'
+
+registerServiceWorker()
 
 // Vite udsender denne hændelse, når en lazy-loadet fil ikke kan hentes —
 // typisk fordi en ny version er deployet, mens den gamle stadig var åben.
