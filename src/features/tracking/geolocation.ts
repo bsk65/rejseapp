@@ -20,7 +20,10 @@ export function describeGeolocationError(error: GeolocationPositionError): strin
   return 'Kunne ikke finde din position lige nu.'
 }
 
-/** Engangs-position til "Check ind her". */
+/** Check-ins tåler lidt mere usikkerhed end løbende sporing (indendørs er GPS ofte 20-100 m). */
+const MAX_CHECK_IN_ACCURACY_METERS = 100
+
+/** Engangs-position til "Check ind her". Afviser en for upræcis position. */
 export function getCurrentFix(): Promise<GpsFix> {
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) {
@@ -28,9 +31,20 @@ export function getCurrentFix(): Promise<GpsFix> {
       return
     }
     navigator.geolocation.getCurrentPosition(
-      (position) => resolve(toGpsFix(position)),
+      (position) => {
+        const fix = toGpsFix(position)
+        if (fix.accuracy !== undefined && fix.accuracy > MAX_CHECK_IN_ACCURACY_METERS) {
+          reject(
+            new Error(
+              `Positionen er for upræcis lige nu (±${Math.round(fix.accuracy)} m). Vent lidt og prøv igen, eller check ind via søgning.`,
+            ),
+          )
+          return
+        }
+        resolve(fix)
+      },
       (err) => reject(new Error(describeGeolocationError(err))),
-      { enableHighAccuracy: true, timeout: 20_000, maximumAge: 30_000 },
+      { enableHighAccuracy: true, timeout: 30_000, maximumAge: 0 },
     )
   })
 }

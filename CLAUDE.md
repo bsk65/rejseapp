@@ -107,7 +107,7 @@ Billeder har deres eget adgangsfelt, `photoViewerUids`, i stedet for det alminde
 
 ### Sporing (trin 7)
 
-`features/tracking`: løbende GPS-sporing (`watchPosition` i `useGpsTracking`) + manuelt check-in (aktuel position eller søgt sted). Ikke hver GPS-måling gemmes — `shouldRecordPoint` gemmer ved ≥100 m bevægelse eller ≥15 min stilstand og kasserer målinger med usikkerhed >200 m. Sporingen kører kun mens appen er åben i forgrunden (browsere giver ikke PWA'er baggrunds-GPS); Wake Lock holder skærmen tændt imens. Kortet tegner én grøn linje pr. person (`groupTrackLines`) og check-ins som grønne nåle. `source: 'foto'` er reserveret til opsummeringen (trin 8) og skrives ikke endnu.
+`features/tracking`: løbende GPS-sporing (`watchPosition` i `useGpsTracking`) + manuelt check-in (aktuel position eller søgt sted). Ikke hver GPS-måling gemmes — `shouldRecordPoint` gemmer ved ≥100 m bevægelse eller ≥15 min stilstand og kasserer målinger med usikkerhed >50 m. Efter start gemmes intet før GPS'en er "varmet op" (`isGpsStable`: mindst 20 s, og 3 målinger i træk uden urealistiske spring >70 m/s) — telefoner giver ofte en grov mast-baseret første position, der kan ligge mange km forkert (set i praksis: ~25 km i Frøbjerg). `maximumAge: 0`, så en gammel cachet position aldrig bruges. "Check ind her" afviser positioner med usikkerhed >100 m. Sporingen kører kun mens appen er åben i forgrunden (browsere giver ikke PWA'er baggrunds-GPS); Wake Lock holder skærmen tændt imens. Kortet tegner én grøn linje pr. person (`groupTrackLines`) og check-ins som grønne nåle. `source: 'foto'` er reserveret til opsummeringen (trin 8) og skrives ikke endnu.
 
 ## Byggetrin (status)
 

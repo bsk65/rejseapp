@@ -39,7 +39,9 @@ export function TrackingPanel({
         <>
           <p className={styles.status}>
             <span className={styles.liveDot} />
-            Sporer din rute… {gps.recordedCount} punkter gemt
+            {gps.warmingUp
+              ? 'Venter på et stabilt GPS-signal…'
+              : 'Sporer din rute… ' + gps.recordedCount + ' punkter gemt'}
           </p>
           <p className={styles.hint}>
             Lad appen være åben. Slukker skærmen, eller skifter du app, kan telefonen sætte

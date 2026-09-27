@@ -20,7 +20,7 @@ export type RecordingRules = {
 export const DEFAULT_RECORDING_RULES: RecordingRules = {
   minDistanceMeters: 100,
   maxIntervalMinutes: 15,
-  maxAccuracyMeters: 200,
+  maxAccuracyMeters: 50,
 }
 
 /**
