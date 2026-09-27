@@ -14,6 +14,12 @@ export default defineConfig({
       // offline-persistens (IndexedDB) håndterer data. Ingen stale-data-cache.
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // En ny version skal tage over med det samme. Uden disse venter den nye
+        // service worker, til ALLE faner med appen er lukket (et almindeligt
+        // genindlæs er ikke nok), og autoUpdate-genindlæsningen i
+        // registerServiceWorker.ts sker aldrig.
+        skipWaiting: true,
+        clientsClaim: true,
       },
       manifest: {
         name: 'Rejseappen',
