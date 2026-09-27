@@ -57,7 +57,7 @@ export function DayRow({
 
       <PhotoGallery tripId={tripId} photos={photos} />
 
-      <DaySegments tripId={tripId} dayId={day.id} memberUids={memberUids} />
+      <DaySegments tripId={tripId} dayId={day.id} dayDate={day.date} memberUids={memberUids} />
     </li>
   )
 }

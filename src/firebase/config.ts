@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
+import { getFunctions } from 'firebase/functions'
 import { getStorage } from 'firebase/storage'
 
 function requireEnv(name: string, value: string | undefined): string {
@@ -29,3 +30,5 @@ export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
+/** Cloud Functions ligger i europe-west1 (se functions/src/index.ts). */
+export const functions = getFunctions(app, 'europe-west1')

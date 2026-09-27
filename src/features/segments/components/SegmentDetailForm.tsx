@@ -3,6 +3,7 @@ import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { TextField } from '../../../shared/ui/TextField'
 import { useDeleteSegment } from '../hooks/useDeleteSegment'
+import { FlightLookupButton } from './FlightLookupButton'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
 import { transportModeLabel, type Segment, type SegmentDetails, type SegmentStatus } from '../types'
 import styles from './SegmentDetailForm.module.css'
@@ -20,11 +21,14 @@ const numberLabel: Partial<Record<Segment['mode'], string>> = {
 export function SegmentDetailForm({
   tripId,
   dayId,
+  dayDate,
   segment,
   onClose,
 }: {
   tripId: string
   dayId: string
+  /** Dagens dato (YYYY-MM-DD) — bruges til flyopslag, hvis afgangsdato mangler. */
+  dayDate: string
   segment: Segment
   onClose: () => void
 }) {
@@ -52,7 +56,9 @@ export function SegmentDetailForm({
 
   const showsCarrier = segment.mode !== 'bil' && segment.mode !== 'gang'
   const showsTerminal = segment.mode === 'fly'
-  const showsSeat = segment.mode === 'tog'
+  const showsSeat = segment.mode === 'tog' || segment.mode === 'fly'
+  // Dato til flyopslag: afgangsdatoen, hvis den er udfyldt, ellers dagens dato.
+  const lookupDate = details.departureTime?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? dayDate
 
   function set<K extends keyof SegmentDetails>(field: K, value: SegmentDetails[K]) {
     setDetails((prev) => ({ ...prev, [field]: value }))
@@ -79,6 +85,13 @@ export function SegmentDetailForm({
           label={numberLabel[segment.mode] ?? 'Nummer'}
           value={details.number ?? ''}
           onChange={(e) => set('number', e.target.value || undefined)}
+        />
+      )}
+      {segment.mode === 'fly' && (
+        <FlightLookupButton
+          flightNumber={details.number}
+          date={lookupDate}
+          onFound={(found) => setDetails((prev) => ({ ...prev, ...found }))}
         />
       )}
 
@@ -114,7 +127,7 @@ export function SegmentDetailForm({
       />
       {showsSeat && (
         <TextField
-          label="Vogn/plads"
+          label={segment.mode === 'fly' ? 'Sæde' : 'Vogn/plads'}
           value={details.seat ?? ''}
           onChange={(e) => set('seat', e.target.value || undefined)}
         />

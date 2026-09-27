@@ -12,10 +12,12 @@ import styles from './DaySegments.module.css'
 export function DaySegments({
   tripId,
   dayId,
+  dayDate,
   memberUids,
 }: {
   tripId: string
   dayId: string
+  dayDate: string
   memberUids: string[]
 }) {
   const { user } = useAuthUser()
@@ -34,6 +36,7 @@ export function DaySegments({
         <SegmentDetailForm
           tripId={tripId}
           dayId={dayId}
+          dayDate={dayDate}
           segment={selectedSegment}
           onClose={() => setSelectedSegment(null)}
         />

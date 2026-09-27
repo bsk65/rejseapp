@@ -10,6 +10,7 @@ import {
   type Ticket,
 } from '../logic/tickets'
 import { transportModeLabel, type TransportMode } from '../types'
+import { BoardingPassScan } from './BoardingPassScan'
 import { SegmentDetailForm } from './SegmentDetailForm'
 import { TicketCard } from './TicketCard'
 import { TransportModeIcon } from './TransportModeIcon'
@@ -19,10 +20,12 @@ export function TicketsView({
   tripId,
   days,
   userUid,
+  memberUids,
 }: {
   tripId: string
   days: Day[]
   userUid: string
+  memberUids: string[]
 }) {
   const { entries } = useTripSegments(tripId, days, userUid)
   const now = useNow()
@@ -36,17 +39,31 @@ export function TicketsView({
     allTickets.some((t) => t.segment.mode === mode),
   )
 
+  const scan = (
+    <BoardingPassScan
+      tripId={tripId}
+      days={days}
+      entries={entries}
+      userUid={userUid}
+      memberUids={memberUids}
+    />
+  )
+
   if (allTickets.length === 0) {
     return (
-      <p className={styles.empty}>
-        Ingen fly, tog, busser eller færger endnu. Tilføj dem under de enkelte dage på fanen “Dage”
-        — så samles de her i tidsorden.
-      </p>
+      <div className={styles.view}>
+        {scan}
+        <p className={styles.empty}>
+          Ingen fly, tog, busser eller færger endnu. Tilføj dem under de enkelte dage på fanen
+          “Dage” — så samles de her i tidsorden.
+        </p>
+      </div>
     )
   }
 
   return (
     <div className={styles.view}>
+      {scan}
       {presentModes.length > 1 && (
         <div className={styles.filters}>
           <button
@@ -76,6 +93,7 @@ export function TicketsView({
         <SegmentDetailForm
           tripId={tripId}
           dayId={editing.dayId}
+          dayDate={editing.dayDate}
           segment={editing.segment}
           onClose={() => setEditing(null)}
         />

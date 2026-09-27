@@ -130,7 +130,7 @@ export function TripDetailPage() {
       </div>
 
       <div className={styles.tabPanel} hidden={activeTab !== 'billetter'}>
-        <TicketsView tripId={trip.id} days={days} userUid={user.uid} />
+        <TicketsView tripId={trip.id} days={days} userUid={user.uid} memberUids={trip.memberUids} />
       </div>
 
       <div className={styles.tabPanel} hidden={activeTab !== 'kort'}>
