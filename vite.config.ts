@@ -45,4 +45,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['maplibre-gl'],
   },
+  // MapLibres worker bundles via "?worker&url" (se shared/map/configureMapLibre.ts)
+  // og startes som module-worker, så den bygges som ES-modul.
+  worker: {
+    format: 'es',
+  },
 })
