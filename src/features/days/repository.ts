@@ -76,3 +76,16 @@ export async function updateDayPlace(
 ): Promise<void> {
   await updateDoc(doc(daysCollection(tripId), dayId), { [field]: place })
 }
+
+/** Sætter "Til" på én dag og "Fra" på næste dag i samme skrivning. */
+export async function updateToPlaceAndNextFrom(
+  tripId: string,
+  dayId: string,
+  nextDayId: string,
+  place: Place,
+): Promise<void> {
+  const batch = writeBatch(db)
+  batch.update(doc(daysCollection(tripId), dayId), { toPlace: place })
+  batch.update(doc(daysCollection(tripId), nextDayId), { fromPlace: place })
+  await batch.commit()
+}

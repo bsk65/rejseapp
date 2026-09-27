@@ -28,12 +28,14 @@ export function DaysList({
 
   return (
     <ul className={styles.list}>
-      {days.map((day) => (
+      {days.map((day, index) => (
         <DayRow
           key={day.id}
           tripId={tripId}
           memberUids={memberUids}
           day={day}
+          previousDay={days[index - 1]}
+          nextDay={days[index + 1]}
           photos={photos.filter((photo) => photo.dayId === day.id)}
           highlighted={day.id === highlightedDayId}
         />

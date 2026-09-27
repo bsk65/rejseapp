@@ -52,7 +52,7 @@ export function PlaceSearchInput({
     <div className={styles.wrapper}>
       <TextField
         label={label}
-        placeholder="Rom, Italien"
+        placeholder="Skriv en by eller et sted"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />

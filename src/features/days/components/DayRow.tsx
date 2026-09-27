@@ -5,6 +5,7 @@ import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import type { Photo } from '../../photos/types'
 import { DaySegments } from '../../segments/components/DaySegments'
 import { useDayPlace } from '../hooks/useDayPlace'
+import { effectiveFromPlace } from '../logic/followPreviousDay'
 import type { Day } from '../types'
 import styles from './DayRow.module.css'
 
@@ -12,16 +13,22 @@ export function DayRow({
   tripId,
   memberUids,
   day,
+  previousDay,
+  nextDay,
   photos,
   highlighted,
 }: {
   tripId: string
   memberUids: string[]
   day: Day
+  /** Bruges til at foreslå "Fra" = dagen før's "Til". */
+  previousDay: Day | undefined
+  /** Får automatisk dagens "Til" som sit "Fra". */
+  nextDay: Day | undefined
   photos: Photo[]
   highlighted: boolean
 }) {
-  const { setDayPlace } = useDayPlace()
+  const { setFromPlace, setToPlace } = useDayPlace()
 
   return (
     <li
@@ -38,13 +45,13 @@ export function DayRow({
       <div className={styles.places}>
         <PlaceField
           label="Fra"
-          place={day.fromPlace}
-          onSelect={(place) => void setDayPlace(tripId, day.id, 'fromPlace', place)}
+          place={effectiveFromPlace(day, previousDay)}
+          onSelect={(place) => void setFromPlace(tripId, day, place)}
         />
         <PlaceField
           label="Til"
           place={day.toPlace}
-          onSelect={(place) => void setDayPlace(tripId, day.id, 'toPlace', place)}
+          onSelect={(place) => void setToPlace(tripId, day, nextDay, place)}
         />
       </div>
 
