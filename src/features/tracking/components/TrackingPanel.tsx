@@ -14,10 +14,14 @@ export function TrackingPanel({
   context,
   points,
   loadError,
+  selectedImportId,
+  onSelectImport,
 }: {
   context: TrackingContext
   points: TrackPoint[]
   loadError: string | null
+  selectedImportId: string | null
+  onSelectImport: (importId: string) => void
 }) {
   const { record, error: recordError } = useRecordTrackPoint(context)
   const recordGps = useCallback((fix: GpsFix) => record(fix, 'gps'), [record])
@@ -86,7 +90,12 @@ export function TrackingPanel({
 
       <CheckInList tripId={context.tripId} userUid={context.userUid} checkIns={checkIns} />
 
-      <GpxImport context={context} points={points} />
+      <GpxImport
+        context={context}
+        points={points}
+        selectedImportId={selectedImportId}
+        onSelectImport={onSelectImport}
+      />
     </section>
   )
 }

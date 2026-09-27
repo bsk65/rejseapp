@@ -11,6 +11,8 @@ import styles from './TripMap.module.css'
 const ROUTE_SOURCE_ID = 'trip-route'
 const TRACK_SOURCE_ID = 'trip-track'
 const TRACK_POINTS_SOURCE_ID = 'trip-track-points'
+const HIGHLIGHT_SOURCE_ID = 'trip-track-highlight'
+const HIGHLIGHT_COLOR = '#facc15'
 const TRACK_COLOR = '#22c55e'
 const PHOTO_COLOR = '#f59e0b'
 
@@ -32,7 +34,15 @@ function applyPendingFit(
   fitToPoints(map, request.points, request)
 }
 
-type Focus = 'all' | 'track'
+/**
+ * Hvad kortet er zoomet ind på: hele rejsen, alle spor, eller ét valgt spor
+ * (fremhævet med gult). Styres af forælderen, så f.eks. listen over
+ * importerede spor kan vælge et spor.
+ */
+export type MapFocus =
+  | { kind: 'all' }
+  | { kind: 'tracks' }
+  | { kind: 'selected'; key: string; label: string; points: LatLng[] }
 
 export function TripMap({
   destinations,
@@ -41,6 +51,8 @@ export function TripMap({
   onSelectPhotoMarker,
   trackLines = [],
   checkInMarkers = [],
+  focus,
+  onFocusChange,
 }: {
   destinations: Place[]
   onSelectDestination?: (place: Place) => void
@@ -49,10 +61,11 @@ export function TripMap({
   /** Én linje pr. person, der er blevet GPS-sporet. */
   trackLines?: LatLng[][]
   checkInMarkers?: LatLng[]
+  focus: MapFocus
+  onFocusChange: (focus: MapFocus) => void
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
-  const [focus, setFocus] = useState<Focus>('all')
   const [mapReady, setMapReady] = useState(false)
   // Hvad kortet sidst blev zoomet til — så en genrendering med samme indhold
   // ikke nulstiller brugerens egen zoom/panorering.
@@ -151,17 +164,25 @@ export function TripMap({
         'circle-stroke-color': '#0f172a',
         'circle-stroke-width': 1.5,
       })
+      setLineLayer(map, HIGHLIGHT_SOURCE_ID, focus.kind === 'selected' ? [focus.points] : [], {
+        'line-color': HIGHLIGHT_COLOR,
+        'line-width': 5,
+      })
 
+      const zoomedIn = focus.kind !== 'all'
       const fitPoints =
-        focus === 'track' && trackPoints.length > 0
-          ? trackPoints
-          : [...destinations, ...photoMarkers, ...trackPoints]
-      const fitKey = `${focus}:${JSON.stringify(fitPoints.map((p) => [p.lat, p.lng]))}`
+        focus.kind === 'selected'
+          ? focus.points
+          : focus.kind === 'tracks' && trackPoints.length > 0
+            ? trackPoints
+            : [...destinations, ...photoMarkers, ...trackPoints]
+      const focusKey = focus.kind === 'selected' ? focus.key : focus.kind
+      const fitKey = `${focusKey}:${JSON.stringify(fitPoints.map((p) => [p.lat, p.lng]))}`
       pendingFitRef.current = {
         key: fitKey,
         points: fitPoints,
-        maxZoom: focus === 'track' ? 16 : 13,
-        singleZoom: focus === 'track' ? 15 : 5,
+        maxZoom: zoomedIn ? 16 : 13,
+        singleZoom: zoomedIn ? 15 : 5,
       }
       applyPendingFit(map, containerRef.current, pendingFitRef.current, lastFitKeyRef)
     }
@@ -181,13 +202,18 @@ export function TripMap({
     <div className={styles.wrapper}>
       <div ref={containerRef} className={styles.map} />
       {hasTrack && (
-        <button
-          type="button"
-          className={styles.focusButton}
-          onClick={() => setFocus((f) => (f === 'track' ? 'all' : 'track'))}
-        >
-          {focus === 'track' ? 'Vis hele rejsen' : 'Vis sporet'}
-        </button>
+        <div className={styles.overlay}>
+          <button
+            type="button"
+            className={styles.focusButton}
+            onClick={() =>
+              onFocusChange(focus.kind === 'all' ? { kind: 'tracks' } : { kind: 'all' })
+            }
+          >
+            {focus.kind === 'all' ? 'Vis alle spor' : 'Vis hele rejsen'}
+          </button>
+          {focus.kind === 'selected' && <span className={styles.focusLabel}>{focus.label}</span>}
+        </div>
       )}
     </div>
   )

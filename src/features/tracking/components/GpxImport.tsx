@@ -8,7 +8,17 @@ import type { TrackPoint, TrackingContext } from '../types'
 import styles from './GpxImport.module.css'
 
 /** Import af GPS-spor fra ur/Strava (GPX-fil) + liste over importerede spor. */
-export function GpxImport({ context, points }: { context: TrackingContext; points: TrackPoint[] }) {
+export function GpxImport({
+  context,
+  points,
+  selectedImportId,
+  onSelectImport,
+}: {
+  context: TrackingContext
+  points: TrackPoint[]
+  selectedImportId: string | null
+  onSelectImport: (importId: string) => void
+}) {
   const inputRef = useRef<HTMLInputElement>(null)
   const { importFile, pending, progress, error, result } = useGpxImport(context)
   const { remove, pendingIds } = useDeleteTrackPoints()
@@ -57,13 +67,22 @@ export function GpxImport({ context, points }: { context: TrackingContext; point
       {imports.length > 0 && (
         <ul className={styles.list}>
           {imports.map((imp) => (
-            <li key={imp.importId} className={styles.item}>
-              <div className={styles.text}>
+            <li
+              key={imp.importId}
+              className={styles.item}
+              data-selected={imp.importId === selectedImportId}
+            >
+              <button
+                type="button"
+                className={styles.selectButton}
+                onClick={() => onSelectImport(imp.importId)}
+              >
                 <span>{imp.label}</span>
                 <span className={styles.meta}>
                   {formatDayDate(imp.startedAt.slice(0, 10))} · {imp.pointCount} punkter
+                  {imp.importId === selectedImportId ? ' · vist på kortet' : ' · tryk for at vise'}
                 </span>
-              </div>
+              </button>
               {imp.ownerUid === context.userUid && (
                 <button
                   type="button"

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { LatLng, Place } from '../../../shared/types/place'
 import { resolveDayColor } from '../../../shared/utils/dayColors'
 import type { Day } from '../../days/types'
@@ -8,7 +8,7 @@ import { useTrack } from '../../tracking/hooks/useTrack'
 import { groupTrackLines } from '../../tracking/logic/groupTrackLines'
 import { isRouteSource } from '../../tracking/types'
 import type { Trip } from '../types'
-import { TripMap } from './TripMap'
+import { TripMap, type MapFocus } from './TripMap'
 import styles from './TripDetailPage.module.css'
 
 /** Fanen "Kort & spor": kort, destinationsliste og sporing. */
@@ -35,6 +35,24 @@ export function TripMapTab({
     () => trackPoints.filter((p) => p.source === 'manuel'),
     [trackPoints],
   )
+  const [focus, setFocus] = useState<MapFocus>({ kind: 'all' })
+  const mapAnchorRef = useRef<HTMLDivElement>(null)
+  const selectedImportId = focus.kind === 'selected' ? focus.key : null
+
+  /** Viser ét importeret spor på kortet (fremhævet) og scroller op til kortet. */
+  function showImport(importId: string) {
+    const points = trackPoints
+      .filter((p) => p.importId === importId)
+      .sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1))
+    if (points.length === 0) return
+    setFocus({
+      kind: 'selected',
+      key: importId,
+      label: points[0].label ?? 'Importeret spor',
+      points: points.map(({ lat, lng }) => ({ lat, lng })),
+    })
+    mapAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   // Billeder farves som den dag, de hører til — samme farve som dagen i listen.
   const photoMarkers = photos
@@ -69,14 +87,18 @@ export function TripMapTab({
 
   return (
     <>
-      <TripMap
-        destinations={trip.destinations}
-        onSelectDestination={handleSelectDestination}
-        photoMarkers={photoMarkers}
-        onSelectPhotoMarker={handleSelectPhotoMarker}
-        trackLines={trackLines}
-        checkInMarkers={checkInMarkers}
-      />
+      <div ref={mapAnchorRef} className={styles.mapAnchor}>
+        <TripMap
+          destinations={trip.destinations}
+          onSelectDestination={handleSelectDestination}
+          photoMarkers={photoMarkers}
+          onSelectPhotoMarker={handleSelectPhotoMarker}
+          trackLines={trackLines}
+          checkInMarkers={checkInMarkers}
+          focus={focus}
+          onFocusChange={setFocus}
+        />
+      </div>
 
       {trip.destinations.length > 0 && (
         <ul className={styles.destinations}>
@@ -103,6 +125,8 @@ export function TripMapTab({
         }}
         points={trackPoints}
         loadError={trackError}
+        selectedImportId={selectedImportId}
+        onSelectImport={showImport}
       />
     </>
   )

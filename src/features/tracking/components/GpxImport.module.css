@@ -52,10 +52,24 @@
   min-height: 44px;
 }
 
-.text {
+.selectButton {
   display: flex;
+  flex: 1;
   flex-direction: column;
+  align-items: flex-start;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
   font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item[data-selected='true'] .selectButton {
+  border-color: #facc15;
 }
 
 .deleteButton {
