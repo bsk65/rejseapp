@@ -15,3 +15,11 @@ export function formatDayDate(isoDate: string): string {
     timeZone: 'UTC',
   })
 }
+
+/** Lokal kalenderdato (YYYY-MM-DD) for et tidspunkt — rejsens dage er lokale datoer. */
+export function localIsoDate(time: number): string {
+  const d = new Date(time)
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${month}-${day}`
+}

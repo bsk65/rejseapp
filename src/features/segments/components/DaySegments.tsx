@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { useCreateSegment } from '../hooks/useCreateSegment'
-import { useSegments } from '../hooks/useSegments'
 import type { Segment } from '../types'
 import { PasteItinerary } from './PasteItinerary'
 import { SegmentDetailForm } from './SegmentDetailForm'
@@ -14,14 +13,16 @@ export function DaySegments({
   dayId,
   dayDate,
   memberUids,
+  segments,
 }: {
   tripId: string
   dayId: string
   dayDate: string
   memberUids: string[]
+  /** Dagens segmenter — hentes af dagen selv (DayRow), som også viser dem i resuméet. */
+  segments: Segment[]
 }) {
   const { user } = useAuthUser()
-  const { segments } = useSegments(tripId, dayId, user?.uid ?? '')
   const { addSegment, pending } = useCreateSegment()
   const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
   const [showPaste, setShowPaste] = useState(false)

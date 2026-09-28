@@ -4,13 +4,21 @@ import { dayColorIndex } from '../../../shared/utils/dayColors'
 import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import type { Photo } from '../../photos/types'
 import { DaySegments } from '../../segments/components/DaySegments'
+import { useSegments } from '../../segments/hooks/useSegments'
 import { DayStays } from '../../stays/components/DayStays'
+import { stayEventsForDate } from '../../stays/logic/stayDates'
 import type { Stay } from '../../stays/types'
 import { useDayPlace } from '../hooks/useDayPlace'
 import { effectiveFromPlace } from '../logic/followPreviousDay'
 import type { Day } from '../types'
+import { DaySummary } from './DaySummary'
 import styles from './DayRow.module.css'
 
+/**
+ * Én dag i listen. Foldet sammen vises kun et kort resumé; et tryk på
+ * overskriften folder den ud til alt indholdet (steder, billeder,
+ * overnatning, transport).
+ */
 export function DayRow({
   tripId,
   memberUids,
@@ -21,6 +29,9 @@ export function DayRow({
   nextDay,
   photos,
   highlighted,
+  expanded,
+  isToday,
+  onToggle,
 }: {
   tripId: string
   memberUids: string[]
@@ -34,46 +45,84 @@ export function DayRow({
   nextDay: Day | undefined
   photos: Photo[]
   highlighted: boolean
+  expanded: boolean
+  isToday: boolean
+  onToggle: () => void
 }) {
   const { setFromPlace, setToPlace } = useDayPlace()
+  const { segments } = useSegments(tripId, day.id, userUid)
+  const fromPlace = effectiveFromPlace(day, previousDay)
+  const bodyId = `dag-${day.id}-indhold`
 
   return (
     <li
       id={`dag-${day.id}`}
       className={styles.row}
       data-highlighted={highlighted}
+      data-expanded={expanded}
       data-day-color={dayColorIndex(day.dayNumber)}
     >
-      <div className={styles.header}>
-        <span className={styles.dayNumber}>Dag {day.dayNumber}</span>
-        <span className={styles.date}>{formatDayDate(day.date)}</span>
-      </div>
+      <button
+        type="button"
+        className={styles.header}
+        onClick={onToggle}
+        aria-expanded={expanded}
+        aria-controls={bodyId}
+      >
+        <span className={styles.titleLine}>
+          <span className={styles.dayNumber}>Dag {day.dayNumber}</span>
+          <span className={styles.date}>{formatDayDate(day.date)}</span>
+          {isToday && <span className={styles.today}>I dag</span>}
+          <span className={styles.chevron} aria-hidden="true">
+            ›
+          </span>
+        </span>
+        {!expanded && (
+          <DaySummary
+            from={fromPlace}
+            to={day.toPlace}
+            segments={segments}
+            stayEvents={stayEventsForDate(stays, day.date)}
+            photoCount={photos.length}
+          />
+        )}
+      </button>
 
-      <div className={styles.places}>
-        <PlaceField
-          label="Fra"
-          place={effectiveFromPlace(day, previousDay)}
-          onSelect={(place) => void setFromPlace(tripId, day, place)}
-        />
-        <PlaceField
-          label="Til"
-          place={day.toPlace}
-          onSelect={(place) => void setToPlace(tripId, day, nextDay, place)}
-        />
-      </div>
+      {expanded && (
+        <div id={bodyId} className={styles.body}>
+          <div className={styles.places}>
+            <PlaceField
+              label="Fra"
+              place={fromPlace}
+              onSelect={(place) => void setFromPlace(tripId, day, place)}
+            />
+            <PlaceField
+              label="Til"
+              place={day.toPlace}
+              onSelect={(place) => void setToPlace(tripId, day, nextDay, place)}
+            />
+          </div>
 
-      <PhotoGallery tripId={tripId} photos={photos} />
+          <PhotoGallery tripId={tripId} photos={photos} />
 
-      <DayStays
-        tripId={tripId}
-        userUid={userUid}
-        memberUids={memberUids}
-        date={day.date}
-        stays={stays}
-        setAsDayTo={(place) => setToPlace(tripId, day, nextDay, place)}
-      />
+          <DayStays
+            tripId={tripId}
+            userUid={userUid}
+            memberUids={memberUids}
+            date={day.date}
+            stays={stays}
+            setAsDayTo={(place) => setToPlace(tripId, day, nextDay, place)}
+          />
 
-      <DaySegments tripId={tripId} dayId={day.id} dayDate={day.date} memberUids={memberUids} />
+          <DaySegments
+            tripId={tripId}
+            dayId={day.id}
+            dayDate={day.date}
+            memberUids={memberUids}
+            segments={segments}
+          />
+        </div>
+      )}
     </li>
   )
 }

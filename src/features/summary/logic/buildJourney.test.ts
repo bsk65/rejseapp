@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import type { TrackPoint, TrackSource } from '../../tracking/types'
-import { buildJourney, localIsoDate, pickOneTrackerPerDay } from './buildJourney'
+import { buildJourney, pickOneTrackerPerDay } from './buildJourney'
 
 const odense = { name: 'Odense', lat: 55.4, lng: 10.39, placeId: 'odense' }
 const rome = { name: 'Rom', lat: 41.9, lng: 12.5, placeId: 'rome' }
@@ -36,12 +36,6 @@ function photo(id: string, extra: Partial<Photo>): Photo {
     ...extra,
   }
 }
-
-describe('localIsoDate', () => {
-  it('formats the local calendar date', () => {
-    expect(localIsoDate(new Date(2026, 9, 4, 23, 30).getTime())).toBe('2026-10-04')
-  })
-})
 
 describe('pickOneTrackerPerDay', () => {
   it('keeps only the person with most points each day', () => {

@@ -1,15 +1,8 @@
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import { isRouteSource, type TrackPoint } from '../../tracking/types'
+import { localIsoDate } from '../../../shared/utils/date'
 import type { JourneyStop } from '../types'
-
-/** Lokal kalenderdato (YYYY-MM-DD) for et tidspunkt — dage er lokale datoer. */
-export function localIsoDate(time: number): string {
-  const d = new Date(time)
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${d.getFullYear()}-${month}-${day}`
-}
 
 /** Et lokalt klokkeslæt på en dags dato, som tidspunkt i ms. */
 function timeOnDate(isoDate: string, clock: string): number {
