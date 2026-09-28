@@ -2,7 +2,16 @@ import type { Place } from '../types/place'
 
 type NominatimAddress = Partial<
   Record<
-    'city' | 'town' | 'village' | 'municipality' | 'hamlet' | 'county' | 'state' | 'country',
+    | 'road'
+    | 'house_number'
+    | 'city'
+    | 'town'
+    | 'village'
+    | 'municipality'
+    | 'hamlet'
+    | 'county'
+    | 'state'
+    | 'country',
     string
   >
 >
@@ -10,6 +19,8 @@ type NominatimAddress = Partial<
 type NominatimResult = {
   place_id: number
   display_name: string
+  /** Stedets eget navn (hotel, by …) — tomt for en ren gadeadresse. */
+  name?: string
   lat: string
   lon: string
   address?: NominatimAddress
@@ -22,6 +33,18 @@ type NominatimResult = {
  */
 function shortenDisplayName(displayName: string): string {
   return displayName.split(',')[0]?.trim() || displayName
+}
+
+/**
+ * Navnet der vises: stedets eget navn, hvis det har et. En ren gadeadresse
+ * har intet navn, og display_names første led er da kun husnummeret ("6"),
+ * så navnet bygges af vej + husnummer ("Boulevard Garibaldi 6").
+ */
+function placeName(result: NominatimResult): string {
+  if (result.name) return result.name
+  const road = result.address?.road
+  if (road) return [road, result.address?.house_number].filter(Boolean).join(' ')
+  return shortenDisplayName(result.display_name)
 }
 
 /**
@@ -46,7 +69,7 @@ function describeArea(name: string, address: NominatimAddress | undefined): stri
 
 export function mapNominatimResults(results: NominatimResult[]): Place[] {
   return results.map((result) => {
-    const name = shortenDisplayName(result.display_name)
+    const name = placeName(result)
     const area = describeArea(name, result.address)
     return {
       name,

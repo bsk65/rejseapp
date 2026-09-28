@@ -62,6 +62,40 @@ describe('mapNominatimResults', () => {
     expect(bare).not.toHaveProperty('area')
   })
 
+  it('names a street address by road and house number, not just the number', () => {
+    const [place] = mapNominatimResults([
+      {
+        place_id: 5,
+        name: '',
+        display_name: '6, Boulevard Garibaldi, Les Arches, Issy-les-Moulineaux, Frankrig',
+        lat: '48.83',
+        lon: '2.26',
+        address: {
+          house_number: '6',
+          road: 'Boulevard Garibaldi',
+          town: 'Issy-les-Moulineaux',
+          country: 'Frankrig',
+        },
+      },
+    ])
+    expect(place.name).toBe('Boulevard Garibaldi 6')
+    expect(place.area).toBe('Issy-les-Moulineaux, Frankrig')
+  })
+
+  it("prefers the place's own name, e.g. a hotel on a street", () => {
+    const [place] = mapNominatimResults([
+      {
+        place_id: 6,
+        name: 'Hjem',
+        display_name: 'Hjem, 12, Calle Alderete, Málaga, Spanien',
+        lat: '36.72',
+        lon: '-4.42',
+        address: { house_number: '12', road: 'Calle Alderete', city: 'Málaga', country: 'Spanien' },
+      },
+    ])
+    expect(place.name).toBe('Hjem')
+  })
+
   it('returns an empty list for no results', () => {
     expect(mapNominatimResults([])).toEqual([])
   })
