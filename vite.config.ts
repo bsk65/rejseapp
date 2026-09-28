@@ -41,6 +41,14 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
           },
+          // Samme fil: motivet ligger inden for Androids "safe zone" (se
+          // icons/icon.svg), så det tåler at blive beskåret til cirkel o.l.
+          {
+            src: 'icons/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
     }),
