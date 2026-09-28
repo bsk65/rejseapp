@@ -1,3 +1,4 @@
+import { formatDayDate } from '../../../shared/utils/date'
 import { useState } from 'react'
 import { lookupFlight } from '../api/flightLookup'
 import { flightToSegmentDetails, pickFlight } from '../logic/flightToDetails'
@@ -18,7 +19,9 @@ export function useFlightLookup() {
     try {
       const flight = pickFlight(await lookupFlight(flightNumber, date), fromAirport)
       if (!flight) {
-        setError(`Fandt ikke ${flightNumber} den ${date}. Tjek flynummer og dato.`)
+        setError(
+          `Fandt ikke ${flightNumber} ${formatDayDate(date)}. Flyver det en anden dag, eller er flynummeret forkert?`,
+        )
         return undefined
       }
       return flightToSegmentDetails(flight)

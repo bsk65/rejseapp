@@ -1,3 +1,4 @@
+import { formatDayDate } from '../../../shared/utils/date'
 import { Button } from '../../../shared/ui/Button'
 import { useFlightLookup } from '../hooks/useFlightLookup'
 import type { SegmentDetails } from '../types'
@@ -38,7 +39,7 @@ export function FlightLookupButton({
       </Button>
       <p className={styles.hint}>
         {canLookup
-          ? `Udfylder lufthavne, tider og terminal for ${flightNumber} den ${date}.`
+          ? `Udfylder lufthavne, tider og terminal for ${flightNumber} ${formatDayDate(date)}.`
           : 'Skriv flynummeret (f.eks. SK1415), så kan resten hentes automatisk.'}
       </p>
       {error && <p className={styles.error}>{error}</p>}

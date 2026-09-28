@@ -5,6 +5,7 @@ import { TextField } from '../../../shared/ui/TextField'
 import { useDeleteSegment } from '../hooks/useDeleteSegment'
 import { FlightLookupButton } from './FlightLookupButton'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
+import { withAirlineCode } from '../logic/airlineCodes'
 import { transportModeLabel, type Segment, type SegmentDetails, type SegmentStatus } from '../types'
 import styles from './SegmentDetailForm.module.css'
 
@@ -65,7 +66,10 @@ export function SegmentDetailForm({
   }
 
   async function handleSave() {
-    await saveSegment(tripId, dayId, segment.id, details)
+    // Et fly-nummer uden selskabskode ("1762") gemmes med koden foran ("AF1762").
+    const number =
+      segment.mode === 'fly' ? withAirlineCode(details.number, details.carrier) : details.number
+    await saveSegment(tripId, dayId, segment.id, { ...details, number })
     onClose()
   }
 
@@ -89,7 +93,7 @@ export function SegmentDetailForm({
       )}
       {segment.mode === 'fly' && (
         <FlightLookupButton
-          flightNumber={details.number}
+          flightNumber={withAirlineCode(details.number, details.carrier)}
           date={lookupDate}
           onFound={(found) => setDetails((prev) => ({ ...prev, ...found }))}
         />
