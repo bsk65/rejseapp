@@ -1,4 +1,5 @@
 import type { Photo } from '../../photos/types'
+import type { Stay } from '../../stays/types'
 import type { Day } from '../types'
 import { DayRow } from './DayRow'
 import styles from './DaysList.module.css'
@@ -6,6 +7,8 @@ import styles from './DaysList.module.css'
 export function DaysList({
   tripId,
   memberUids,
+  userUid,
+  stays,
   days,
   photos,
   loading,
@@ -13,6 +16,8 @@ export function DaysList({
 }: {
   tripId: string
   memberUids: string[]
+  userUid: string
+  stays: Stay[]
   days: Day[]
   photos: Photo[]
   loading: boolean
@@ -33,6 +38,8 @@ export function DaysList({
           key={day.id}
           tripId={tripId}
           memberUids={memberUids}
+          userUid={userUid}
+          stays={stays}
           day={day}
           previousDay={days[index - 1]}
           nextDay={days[index + 1]}

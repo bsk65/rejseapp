@@ -43,6 +43,20 @@
       ]
     },
     {
+      "collectionGroup": "stays",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "memberUids",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "checkInDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "photos",
       "queryScope": "COLLECTION",
       "fields": [

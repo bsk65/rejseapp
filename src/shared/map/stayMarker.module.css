@@ -1,0 +1,16 @@
+/* Rundt mærke med en seng — lilla, så det skiller sig ud fra destinationernes
+   blå nåle, sporets grønne og billedernes orange. */
+.marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #0f172a;
+  border-radius: 50%;
+  background: #a78bfa;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}

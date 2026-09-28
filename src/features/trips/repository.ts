@@ -90,9 +90,9 @@ export async function updateTripSharedCategories(
 
 /**
  * Opdaterer hvem der er medlem af rejsen. Cascader det nye memberUids ned på
- * alle eksisterende days/segments (denormaliseret adgangsfelt, se CLAUDE.md),
+ * alle eksisterende days/segments/stays (denormaliseret adgangsfelt, se CLAUDE.md),
  * ellers ville nuværende indhold blive utilgængeligt for de tilføjede/fjernede
- * medlemmer. Client-side batch — antager rejsens samlede days+segments holder
+ * medlemmer. Client-side batch — antager rejsens samlede days+segments+stays holder
  * sig et godt stykke under Firestores grænse på 500 skrivninger pr. batch.
  */
 export async function updateTripMembers(
@@ -102,6 +102,13 @@ export async function updateTripMembers(
 ): Promise<void> {
   const daysSnapshot = await getDocs(
     query(collection(db, 'trips', tripId, 'days'), where('memberUids', 'array-contains', ownerUid)),
+  )
+
+  const staysSnapshot = await getDocs(
+    query(
+      collection(db, 'trips', tripId, 'stays'),
+      where('memberUids', 'array-contains', ownerUid),
+    ),
   )
 
   const segmentsSnapshots = await Promise.all(
@@ -115,6 +122,7 @@ export async function updateTripMembers(
   const batch = writeBatch(db)
   batch.update(doc(db, 'trips', tripId), { memberUids })
   daysSnapshot.docs.forEach((dayDoc) => batch.update(dayDoc.ref, { memberUids }))
+  staysSnapshot.docs.forEach((stayDoc) => batch.update(stayDoc.ref, { memberUids }))
   segmentsSnapshots.forEach((snapshot) =>
     snapshot.docs.forEach((segDoc) => batch.update(segDoc.ref, { memberUids })),
   )

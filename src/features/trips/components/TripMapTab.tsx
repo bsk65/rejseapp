@@ -4,6 +4,7 @@ import { resolveDayColor } from '../../../shared/utils/dayColors'
 import { placeLabel } from '../../../shared/utils/placeLabel'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
+import type { Stay } from '../../stays/types'
 import { TrackingPanel } from '../../tracking/components/TrackingPanel'
 import { useTrack } from '../../tracking/hooks/useTrack'
 import { groupTrackLines } from '../../tracking/logic/groupTrackLines'
@@ -18,12 +19,14 @@ export function TripMapTab({
   userUid,
   days,
   photos,
+  stays,
   onShowDay,
 }: {
   trip: Trip
   userUid: string
   days: Day[]
   photos: Photo[]
+  stays: Stay[]
   onShowDay: (dayId: string) => void
 }) {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
@@ -68,6 +71,17 @@ export function TripMapTab({
       }
     })
 
+  const stayMarkers = stays
+    .filter((stay): stay is Stay & { place: Place } => Boolean(stay.place))
+    .map((stay) => ({ id: stay.id, name: stay.name, lat: stay.place.lat, lng: stay.place.lng }))
+
+  /** Seng-mærket viser indtjekningsdagen på fanen "Dage". */
+  function handleSelectStay(stayId: string) {
+    const checkInDate = stays.find((stay) => stay.id === stayId)?.checkInDate
+    const day = days.find((d) => d.date === checkInDate)
+    if (day) onShowDay(day.id)
+  }
+
   function handleSelectDestination(place: Place) {
     const matchingDay = days.find(
       (day) => day.fromPlace?.placeId === place.placeId || day.toPlace?.placeId === place.placeId,
@@ -94,6 +108,8 @@ export function TripMapTab({
           onSelectDestination={handleSelectDestination}
           photoMarkers={photoMarkers}
           onSelectPhotoMarker={handleSelectPhotoMarker}
+          stayMarkers={stayMarkers}
+          onSelectStay={handleSelectStay}
           trackLines={trackLines}
           checkInMarkers={checkInMarkers}
           focus={focus}

@@ -6,10 +6,12 @@ import { fitToPoints } from '../../../shared/map/fitToPoints'
 import { osmRasterStyle } from '../../../shared/map/osmRasterStyle'
 import { setCircleLayer } from '../../../shared/map/setCircleLayer'
 import { setLineLayer } from '../../../shared/map/setLineLayer'
+import { createStayMarker } from '../../../shared/map/stayMarker'
 import { dayColorIndex } from '../../../shared/utils/dayColors'
 import type { JourneyPath } from '../logic/journeyPath'
 import { traveledPoints } from '../logic/journeyPath'
 import { zoomForLegKm, type PlaybackState } from '../logic/timeline'
+import type { Stay } from '../../stays/types'
 import type { JourneyStop } from '../types'
 import styles from './JourneyMap.module.css'
 
@@ -30,11 +32,13 @@ export function JourneyMap({
   path,
   state,
   follow,
+  stays,
 }: {
   stops: JourneyStop[]
   path: JourneyPath
   state: PlaybackState
   follow: boolean
+  stays: Stay[]
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
@@ -93,6 +97,16 @@ export function JourneyMap({
       },
     )
   }, [mapReady, path, stops])
+
+  // Seng-mærker for overnatninger med adresse.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
+    const markers = stays.flatMap((stay) =>
+      stay.place ? [createStayMarker(stay.place, stay.name).addTo(map)] : [],
+    )
+    return () => markers.forEach((marker) => marker.remove())
+  }, [mapReady, stays])
 
   // Oversigt: zoom ud til hele rejsen, når afspilningen ikke kører.
   useEffect(() => {

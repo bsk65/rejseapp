@@ -8,6 +8,7 @@ import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import { PhotoUploadButton } from '../../photos/components/PhotoUploadButton'
 import { usePhotos } from '../../photos/hooks/usePhotos'
 import { TicketsView } from '../../segments/components/TicketsView'
+import { useStays } from '../../stays/hooks/useStays'
 import { SummaryView } from '../../summary/components/SummaryView'
 import { formatDateRange } from '../logic/tripDates'
 import { useTrip } from '../hooks/useTrip'
@@ -34,6 +35,7 @@ export function TripDetailPage() {
   const { trip, loading } = useTrip(tripId)
   const { days, loading: daysLoading } = useDays(tripId, user?.uid)
   const { photos } = usePhotos(tripId, user?.uid)
+  const { stays, error: staysError } = useStays(tripId, user?.uid)
   const [searchParams, setSearchParams] = useSearchParams()
   const [highlightedDayId, setHighlightedDayId] = useState<string | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
@@ -121,9 +123,12 @@ export function TripDetailPage() {
             <PhotoGallery tripId={trip.id} photos={unsortedPhotos} />
           </div>
         )}
+        {staysError && <p className={styles.error}>{staysError}</p>}
         <DaysList
           tripId={trip.id}
           memberUids={trip.memberUids}
+          userUid={user.uid}
+          stays={stays}
           days={days}
           photos={photos}
           loading={daysLoading}
@@ -132,7 +137,13 @@ export function TripDetailPage() {
       </div>
 
       <div className={styles.tabPanel} hidden={activeTab !== 'billetter'}>
-        <TicketsView tripId={trip.id} days={days} userUid={user.uid} memberUids={trip.memberUids} />
+        <TicketsView
+          tripId={trip.id}
+          days={days}
+          stays={stays}
+          userUid={user.uid}
+          memberUids={trip.memberUids}
+        />
       </div>
 
       <div className={styles.tabPanel} hidden={activeTab !== 'kort'}>
@@ -141,6 +152,7 @@ export function TripDetailPage() {
           userUid={user.uid}
           days={days}
           photos={photos}
+          stays={stays}
           onShowDay={showDay}
         />
       </div>
@@ -154,6 +166,7 @@ export function TripDetailPage() {
           dayCount={trip.days}
           days={days}
           photos={photos}
+          stays={stays}
         />
       )}
     </div>

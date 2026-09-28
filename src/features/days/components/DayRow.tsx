@@ -4,6 +4,8 @@ import { dayColorIndex } from '../../../shared/utils/dayColors'
 import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import type { Photo } from '../../photos/types'
 import { DaySegments } from '../../segments/components/DaySegments'
+import { DayStays } from '../../stays/components/DayStays'
+import type { Stay } from '../../stays/types'
 import { useDayPlace } from '../hooks/useDayPlace'
 import { effectiveFromPlace } from '../logic/followPreviousDay'
 import type { Day } from '../types'
@@ -12,6 +14,8 @@ import styles from './DayRow.module.css'
 export function DayRow({
   tripId,
   memberUids,
+  userUid,
+  stays,
   day,
   previousDay,
   nextDay,
@@ -20,6 +24,9 @@ export function DayRow({
 }: {
   tripId: string
   memberUids: string[]
+  userUid: string
+  /** Alle rejsens overnatninger — dagen viser selv dem, der berører den. */
+  stays: Stay[]
   day: Day
   /** Bruges til at foreslå "Fra" = dagen før's "Til". */
   previousDay: Day | undefined
@@ -56,6 +63,15 @@ export function DayRow({
       </div>
 
       <PhotoGallery tripId={tripId} photos={photos} />
+
+      <DayStays
+        tripId={tripId}
+        userUid={userUid}
+        memberUids={memberUids}
+        date={day.date}
+        stays={stays}
+        setAsDayTo={(place) => setToPlace(tripId, day, nextDay, place)}
+      />
 
       <DaySegments tripId={tripId} dayId={day.id} dayDate={day.date} memberUids={memberUids} />
     </li>

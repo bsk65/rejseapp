@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
+import type { Stay } from '../../stays/types'
 import { useTrack } from '../../tracking/hooks/useTrack'
 import { buildJourney } from '../logic/buildJourney'
 import { buildTimeline } from '../logic/timeline'
@@ -15,12 +16,14 @@ export function SummaryView({
   dayCount,
   days,
   photos,
+  stays,
 }: {
   tripId: string
   userUid: string
   dayCount: number
   days: Day[]
   photos: Photo[]
+  stays: Stay[]
 }) {
   const { points, error } = useTrack(tripId, userUid)
   const stops = useMemo(() => buildJourney(days, points, photos), [days, points, photos])
@@ -48,7 +51,7 @@ export function SummaryView({
           upload billeder med GPS-position — så kan hele rejsen afspilles her.
         </p>
       ) : (
-        <JourneyPlayer stops={stops} days={days} />
+        <JourneyPlayer stops={stops} days={days} stays={stays} />
       )}
     </div>
   )

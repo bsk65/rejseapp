@@ -40,13 +40,13 @@ function resolveDeparture(entry: TicketEntry): Pick<Ticket, 'departsAt' | 'time'
 }
 
 /** Sorteringsnøgle: uden klokkeslæt lægges først på dagen (dato) eller sidst (intet). */
-function sortKey(ticket: Ticket): string {
+export function ticketSortKey(ticket: Ticket): string {
   if (ticket.departsAt) return ticket.departsAt
   return ticket.segment.departureTime ? `${ticket.date}T` : `${ticket.date}T~`
 }
 
 /** Ren tegn-for-tegn-sammenligning — localeCompare ignorerer bl.a. '~' og sorterer derfor forkert. */
-function compareCodePoints(a: string, b: string): number {
+export function compareCodePoints(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
 }
 
@@ -56,7 +56,9 @@ export function buildTickets(entries: TicketEntry[], mode: TransportMode | 'alle
     .filter((entry) => TICKET_MODES.includes(entry.segment.mode))
     .filter((entry) => mode === 'alle' || entry.segment.mode === mode)
     .map((entry) => ({ ...entry, ...resolveDeparture(entry) }))
-    .sort((a, b) => compareCodePoints(sortKey(a), sortKey(b)) || a.dayNumber - b.dayNumber)
+    .sort(
+      (a, b) => compareCodePoints(ticketSortKey(a), ticketSortKey(b)) || a.dayNumber - b.dayNumber,
+    )
 }
 
 /** Første afgang med kendt tidspunkt, der ikke er passeret endnu. */

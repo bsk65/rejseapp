@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { formatDayDate } from '../../../shared/utils/date'
 import { dayColorIndex } from '../../../shared/utils/dayColors'
 import type { Day } from '../../days/types'
+import type { Stay } from '../../stays/types'
 import { usePlayback } from '../hooks/usePlayback'
 import { formatKm } from '../logic/formatKm'
 import { buildJourneyPath } from '../logic/journeyPath'
@@ -13,7 +14,15 @@ import { PlaybackControls } from './PlaybackControls'
 import styles from './JourneyPlayer.module.css'
 
 /** Afspilning af rejsen på kortet: kort med overlays + knapper. Kræver mindst to stop. */
-export function JourneyPlayer({ stops, days }: { stops: JourneyStop[]; days: Day[] }) {
+export function JourneyPlayer({
+  stops,
+  days,
+  stays,
+}: {
+  stops: JourneyStop[]
+  days: Day[]
+  stays: Stay[]
+}) {
   const timeline = useMemo(() => buildTimeline(stops), [stops])
   const path = useMemo(() => buildJourneyPath(stops), [stops])
   const playback = usePlayback(timeline.duration)
@@ -30,7 +39,7 @@ export function JourneyPlayer({ stops, days }: { stops: JourneyStop[]; days: Day
   return (
     <div className={styles.player}>
       <div className={styles.stage}>
-        <JourneyMap stops={stops} path={path} state={state} follow={follow} />
+        <JourneyMap stops={stops} path={path} state={state} follow={follow} stays={stays} />
 
         <div className={styles.topOverlay}>
           <span

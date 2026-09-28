@@ -6,6 +6,7 @@ import { fitToPoints } from '../../../shared/map/fitToPoints'
 import { osmRasterStyle } from '../../../shared/map/osmRasterStyle'
 import { setCircleLayer } from '../../../shared/map/setCircleLayer'
 import { setLineLayer } from '../../../shared/map/setLineLayer'
+import { createStayMarker } from '../../../shared/map/stayMarker'
 import type { LatLng, Place } from '../../../shared/types/place'
 import styles from './TripMap.module.css'
 
@@ -19,6 +20,9 @@ const PHOTO_COLOR = '#f59e0b'
 
 /** color: dagens farve, hvis billedet hører til en dag (ellers standard-orange). */
 export type PhotoMarker = { id: string; lat: number; lng: number; color?: string }
+
+/** En overnatning med adresse — vises som seng-mærke. */
+export type StayMarker = { id: string; lat: number; lng: number; name: string }
 
 type FitRequest = { key: string; points: LatLng[]; maxZoom: number; singleZoom: number }
 
@@ -50,6 +54,8 @@ export function TripMap({
   onSelectDestination,
   photoMarkers = [],
   onSelectPhotoMarker,
+  stayMarkers = [],
+  onSelectStay,
   trackLines = [],
   checkInMarkers = [],
   focus,
@@ -59,6 +65,8 @@ export function TripMap({
   onSelectDestination?: (place: Place) => void
   photoMarkers?: PhotoMarker[]
   onSelectPhotoMarker?: (photoId: string) => void
+  stayMarkers?: StayMarker[]
+  onSelectStay?: (stayId: string) => void
   /** Én linje pr. person, der er blevet GPS-sporet. */
   trackLines?: LatLng[][]
   checkInMarkers?: LatLng[]
@@ -77,7 +85,8 @@ export function TripMap({
 
   const trackPoints = [...trackLines.flat(), ...checkInMarkers]
   const hasTrack = trackPoints.length > 0
-  const hasContent = destinations.length > 0 || photoMarkers.length > 0 || hasTrack
+  const hasContent =
+    destinations.length > 0 || photoMarkers.length > 0 || stayMarkers.length > 0 || hasTrack
 
   // Kortet oprettes først når der er noget at vise (før det findes der ingen
   // container) — derfor afhænger effekten af hasContent og ikke bare [].
@@ -142,6 +151,12 @@ export function TripMap({
         markers.push(marker)
       })
 
+      stayMarkers.forEach((stay) => {
+        const marker = createStayMarker(stay, stay.name).addTo(map)
+        marker.getElement().addEventListener('click', () => onSelectStay?.(stay.id))
+        markers.push(marker)
+      })
+
       checkInMarkers.forEach((point) => {
         markers.push(
           new Marker({ color: TRACK_COLOR, scale: 0.7 })
@@ -176,7 +191,7 @@ export function TripMap({
           ? focus.points
           : focus.kind === 'tracks' && trackPoints.length > 0
             ? trackPoints
-            : [...destinations, ...photoMarkers, ...trackPoints]
+            : [...destinations, ...photoMarkers, ...stayMarkers, ...trackPoints]
       const focusKey = focus.kind === 'selected' ? focus.key : focus.kind
       const fitKey = `${focusKey}:${JSON.stringify(fitPoints.map((p) => [p.lat, p.lng]))}`
       pendingFitRef.current = {

@@ -72,6 +72,12 @@ service cloud.firestore {
         }
       }
 
+      // Overnatninger: samme model som dage — alle medlemmer må læse og rette.
+      match /stays/{stayId} {
+        allow read, update, delete: if isMember(resource.data.memberUids);
+        allow create: if isMember(request.resource.data.memberUids);
+      }
+
       // Billeder og sporingspunkter har hver deres eget adgangsfelt
       // (photoViewerUids / trackViewerUids) i stedet for memberUids — styret
       // af trippens sharedCategories og indeholder altid mindst trippens ejer

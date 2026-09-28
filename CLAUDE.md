@@ -10,7 +10,7 @@ Rejseappen er en dansksproget PWA til at planlægge og dokumentere rejser: opret
 
 Gælder hele projektet, ikke kun ved aflevering.
 
-- **Modulær opbygning pr. feature** under `src/features/`: `trips`, `days`, `segments`, `friends`, `photos`, `tracking`, `summary`, `auth`. Hver feature har sine egne `components/`, `hooks/`, `types.ts`, `repository.ts` og evt. `logic/`.
+- **Modulær opbygning pr. feature** under `src/features/`: `trips`, `days`, `segments`, `stays`, `friends`, `photos`, `tracking`, `summary`, `auth`. Hver feature har sine egne `components/`, `hooks/`, `types.ts`, `repository.ts` og evt. `logic/`.
 - **Firestore-kald isoleres i et datalag.** Kun `repository.ts`-filer i hver feature kalder Firestore direkte. UI-komponenter rører aldrig Firestore — de bruger kun hooks, som bruger repository-funktioner.
 - **Fælles kode** i `src/shared/`: `ui/` (generiske komponenter), `hooks/`, `utils/`, `types/`. Noget flyttes hertil, når det bruges af mere end én feature — ikke før.
 - **Filstørrelse:** ingen fil over ca. 200-300 linjer. Del op i stedet for at lade den vokse. Én komponent pr. fil, navngivet som filen.
@@ -93,6 +93,11 @@ trips/{tripId}/days/{dayId}/segments/{segId}
   arrivalPlace?, arrivalTime?, seat?, bookingRef?, freeText?,
   ownerUid (kun informativ), memberUids: string[]
 
+trips/{tripId}/stays/{stayId}
+  name, place?: Place, checkInDate, checkInTime? (HH:mm), checkOutDate, checkOutTime?,
+  bookingRef?, accessCode?, wifi?, hostPhone?, note?,
+  ownerUid (kun informativ), memberUids: string[]
+
 trips/{tripId}/photos/{photoId}
   storagePath, takenAt?, location?: LatLng, dayId?, ownerUid (= uploader),
   photoViewerUids: string[] (se "Deling af billeder" nedenfor), uploadedAt
@@ -136,6 +141,16 @@ Billeder har deres eget adgangsfelt, `photoViewerUids`, i stedet for det alminde
 - `buildTimeline` lægger stoppene ud som bevægelse + pauser (billede 2,5 s, check-in 1,5 s, planlagt sted 1 s). Et stræks tid vokser med `log(1+km)`, og den samlede bevægelsestid skaleres ind i 15-90 s, så både en weekendtur og en jordomrejse kan ses på rimelig tid. `stateAt` giver position/km/pause til et tidspunkt (rent, testet).
 - Lange stræk (fly) tegnes og køres som storcirkel-buer (`greatCircle.ts`), og længdegrader "foldes ud" over datolinjen. Kameraet følger positionen og glider mod en zoom, der passer til strækkets længde (`zoomForLegKm`). Før start og efter slut vises hele rejsen.
 - Billeder vises som et kort over kortet under pausen; det næste billede hentes skjult i forvejen. `usePhotoUrl` (photos-featuren) deles med `PhotoThumbnail`.
+
+### Overnatninger (`features/stays`)
+
+En overnatning (hotel, Airbnb …) ligger på rejsen — ikke på en dag — fordi den strækker sig over flere nætter: `trips/{tripId}/stays`, med `memberUids` denormaliseret og cascade-opdateret i `updateTripMembers` som dage/segmenter. Alle medlemmer må læse/rette (samme regel som `days`).
+
+- **Dage:** hver dag har "Tilføj overnatning" (indtjek = dagen, udtjek = næste dag), og `stayEventsForDate` viser dagens udtjek / nat / indtjek. Ved oprettelse tilbydes adressen som dagens "Til".
+- **Billetter & tider:** `stayMoments` giver ind- og udtjekning som tidspunkter; `buildTicketTimeline` fletter dem med afgangene (samme sortering), og "Næste" kan derfor også være en indtjekning. Eget filter "Overnatning".
+- **Kort:** lilla seng-mærke (`shared/map/stayMarker.ts`) på "Kort & spor" (tryk → indtjekningsdagen) og i "Afspil".
+- Opdateringer sletter tømte felter med `deleteField()` (i modsætning til segmenter, hvor et tømt felt blot ikke sendes med).
+- `place.area` (by, land) kommer fra stedsøgningen og vises via `placeLabel()` — så to steder med samme navn kan skelnes.
 
 ## Byggetrin (status)
 
