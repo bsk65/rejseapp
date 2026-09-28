@@ -149,6 +149,7 @@ En overnatning (hotel, Airbnb …) ligger på rejsen — ikke på en dag — for
 - **Dage:** hver dag har "Tilføj overnatning" (indtjek = dagen, udtjek = næste dag), og `stayEventsForDate` viser dagens udtjek / nat / indtjek. Ved oprettelse tilbydes adressen som dagens "Til".
 - **Billetter & tider:** `stayMoments` giver ind- og udtjekning som tidspunkter; `buildTicketTimeline` fletter dem med afgangene (samme sortering), og "Næste" kan derfor også være en indtjekning. Eget filter "Overnatning".
 - **Kort:** lilla seng-mærke (`shared/map/stayMarker.ts`) på "Kort & spor" (tryk → indtjekningsdagen) og i "Afspil".
+- **Indsæt bekræftelse** (`StayConfirmationPaste` → `parseStayConfirmation`): finder felterne ud fra deres overskrifter på dansk/engelsk (værdien på samme linje eller de næste), `parseLooseDate` forstår "29. sep.", "Sep 29, 2026", "29.09.2026" m.m. og gætter manglende år ud fra dagens dato. Udtjek tager det sidste klokkeslæt i et tidsrum. Adressen slås op med Nominatim (første resultat). Ren heuristik — nye mailformater tilføjes som testcase i `parseStayConfirmation.test.ts`.
 - Opdateringer sletter tømte felter med `deleteField()` (i modsætning til segmenter, hvor et tømt felt blot ikke sendes med).
 - `place.area` (by, land) kommer fra stedsøgningen og vises via `placeLabel()` — så to steder med samme navn kan skelnes.
 
