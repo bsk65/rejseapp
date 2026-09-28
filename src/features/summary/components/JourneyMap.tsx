@@ -16,7 +16,7 @@ import styles from './JourneyMap.module.css'
 const FULL_ROUTE_ID = 'journey-full'
 const TRAVELED_ID = 'journey-traveled'
 const PHOTOS_ID = 'journey-photos'
-const TRAVELED_COLOR = '#facc15'
+const TRAVELED_COLOR = '#e11d48'
 /** Hvor hurtigt kameraets zoom glider mod målet pr. billede (0-1). */
 const ZOOM_EASING = 0.06
 
@@ -76,8 +76,8 @@ export function JourneyMap({
     const map = mapRef.current
     if (!map || !mapReady) return
     setLineLayer(map, FULL_ROUTE_ID, [path.points], {
-      'line-color': '#f1f5f9',
-      'line-opacity': 0.35,
+      'line-color': '#0f172a',
+      'line-opacity': 0.55,
       'line-width': 2,
       'line-dasharray': [2, 2],
     })
