@@ -1,0 +1,55 @@
+.player {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stage {
+  position: relative;
+}
+
+.topOverlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.dayChip,
+.kmChip,
+.placeLabel {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dayChip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 4px solid var(--day-color, var(--color-accent));
+}
+
+.kmChip {
+  flex-shrink: 0;
+  color: #facc15;
+  font-variant-numeric: tabular-nums;
+}
+
+.placeLabel {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  max-width: calc(100% - 20px);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+  pointer-events: none;
+}

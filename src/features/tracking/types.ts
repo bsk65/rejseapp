@@ -2,8 +2,8 @@ import type { LatLng } from '../../shared/types/place'
 
 /**
  * Hvor et sporingspunkt kommer fra: 'gps' = telefonens egen sporing,
- * 'import' = GPX-fil (ur/Strava), 'manuel' = check-in. 'foto' er reserveret
- * til opsummeringen (trin 8).
+ * 'import' = GPX-fil (ur/Strava), 'manuel' = check-in. 'foto' bruges ikke —
+ * opsummeringen (trin 8) læser billeder direkte fra photos-samlingen.
  */
 export type TrackSource = 'gps' | 'import' | 'foto' | 'manuel'
 

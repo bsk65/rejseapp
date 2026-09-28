@@ -8,18 +8,20 @@ import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import { PhotoUploadButton } from '../../photos/components/PhotoUploadButton'
 import { usePhotos } from '../../photos/hooks/usePhotos'
 import { TicketsView } from '../../segments/components/TicketsView'
+import { SummaryView } from '../../summary/components/SummaryView'
 import { formatDateRange } from '../logic/tripDates'
 import { useTrip } from '../hooks/useTrip'
 import { ShareTripDialog } from './ShareTripDialog'
 import { TripMapTab } from './TripMapTab'
 import styles from './TripDetailPage.module.css'
 
-type TripTab = 'dage' | 'billetter' | 'kort'
+type TripTab = 'dage' | 'billetter' | 'kort' | 'opsummering'
 
 const TABS: TabOption<TripTab>[] = [
   { id: 'dage', label: 'Dage' },
   { id: 'billetter', label: 'Billetter & tider' },
   { id: 'kort', label: 'Kort & spor' },
+  { id: 'opsummering', label: 'Afspil' },
 ]
 
 function isTripTab(value: string | null): value is TripTab {
@@ -142,6 +144,18 @@ export function TripDetailPage() {
           onShowDay={showDay}
         />
       </div>
+
+      {/* Opsummeringen monteres kun, mens fanen er åben — der er intet at
+          bevare, og animationen skal ikke køre i baggrunden. */}
+      {activeTab === 'opsummering' && (
+        <SummaryView
+          tripId={trip.id}
+          userUid={user.uid}
+          dayCount={trip.days}
+          days={days}
+          photos={photos}
+        />
+      )}
     </div>
   )
 }

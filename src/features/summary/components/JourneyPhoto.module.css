@@ -1,0 +1,32 @@
+.card {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  width: min(70%, 280px);
+  padding: 4px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  transform: translateX(-50%) rotate(-2deg);
+  animation: pop-in 0.3s ease-out;
+  pointer-events: none;
+}
+
+.card[hidden] {
+  display: none;
+}
+
+.img {
+  display: block;
+  width: 100%;
+  max-height: 36vh;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-2deg) scale(0.8);
+  }
+}

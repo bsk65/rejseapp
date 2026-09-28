@@ -1,0 +1,36 @@
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.playButton,
+.smallButton {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.playButton {
+  width: 52px;
+  height: 52px;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font-size: 1.2rem;
+}
+
+.smallButton {
+  width: 44px;
+  height: 44px;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.scrubber {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--color-accent);
+}

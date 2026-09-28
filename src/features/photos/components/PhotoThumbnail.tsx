@@ -1,6 +1,4 @@
-import { getDownloadURL, ref } from 'firebase/storage'
-import { useEffect, useState } from 'react'
-import { storage } from '../../../firebase/config'
+import { usePhotoUrl } from '../hooks/usePhotoUrl'
 import styles from './PhotoThumbnail.module.css'
 
 export function PhotoThumbnail({
@@ -10,21 +8,7 @@ export function PhotoThumbnail({
   storagePath: string
   onDelete?: () => void
 }) {
-  const [url, setUrl] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    getDownloadURL(ref(storage, storagePath))
-      .then((downloadUrl) => {
-        if (!cancelled) setUrl(downloadUrl)
-      })
-      .catch(() => undefined)
-
-    return () => {
-      cancelled = true
-    }
-  }, [storagePath])
+  const url = usePhotoUrl(storagePath)
 
   return (
     <div className={styles.thumb}>
