@@ -1,4 +1,9 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import {
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth'
 import { useState } from 'react'
 import { auth } from '../../../firebase/config'
 
@@ -16,6 +21,9 @@ function toErrorMessage(error: unknown): string {
     }
     if (code === 'auth/invalid-email') {
       return 'Ugyldig e-mailadresse.'
+    }
+    if (code === 'auth/too-many-requests') {
+      return 'For mange forsøg lige nu. Vent lidt, og prøv igen.'
     }
   }
   return 'Der skete en fejl. Prøv igen.'
@@ -49,9 +57,29 @@ export function useAuthActions() {
     }
   }
 
+  /**
+   * Sender en mail med et link til at vælge ny adgangskode (Firebases egen
+   * side). Firebase afslører ikke, om e-mailen findes — derfor samme
+   * besked uanset hvad. Returnerer true, når mailen er sendt afsted.
+   */
+  async function resetPassword(email: string): Promise<boolean> {
+    setPending(true)
+    setError(null)
+    try {
+      auth.languageCode = 'da'
+      await sendPasswordResetEmail(auth, email)
+      return true
+    } catch (err) {
+      setError(toErrorMessage(err))
+      return false
+    } finally {
+      setPending(false)
+    }
+  }
+
   async function logout() {
     await signOut(auth)
   }
 
-  return { login, signup, logout, error, pending }
+  return { login, signup, resetPassword, logout, error, pending }
 }
