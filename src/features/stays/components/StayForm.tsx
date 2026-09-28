@@ -6,6 +6,7 @@ import type { Place } from '../../../shared/types/place'
 import { useSaveStay } from '../hooks/useSaveStay'
 import { validateStayDates } from '../logic/stayDates'
 import type { Stay, StayDetails } from '../types'
+import { StayConfirmationPaste } from './StayConfirmationPaste'
 import styles from './StayForm.module.css'
 
 type TextKey = 'name' | 'bookingRef' | 'accessCode' | 'wifi' | 'hostPhone' | 'note'
@@ -58,6 +59,7 @@ export function StayForm({
   )
   const [useAsDayTo, setUseAsDayTo] = useState(true)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [showPaste, setShowPaste] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const { create, update, remove, pending, error } = useSaveStay(tripId)
 
@@ -97,7 +99,24 @@ export function StayForm({
 
   return (
     <div className={styles.form}>
-      <p className={styles.title}>{stay ? 'Overnatning' : 'Ny overnatning'}</p>
+      <div className={styles.titleRow}>
+        <p className={styles.title}>{stay ? 'Overnatning' : 'Ny overnatning'}</p>
+        <button
+          type="button"
+          className={styles.pasteToggle}
+          onClick={() => setShowPaste((prev) => !prev)}
+        >
+          {showPaste ? 'Skjul indsæt' : 'Indsæt bekræftelse'}
+        </button>
+      </div>
+      {showPaste && (
+        <StayConfirmationPaste
+          referenceDate={
+            details.checkInDate || initialCheckIn || new Date().toISOString().slice(0, 10)
+          }
+          onFill={(filled) => setDetails((prev) => ({ ...prev, ...filled }))}
+        />
+      )}
 
       <TextField
         id="stay-name"

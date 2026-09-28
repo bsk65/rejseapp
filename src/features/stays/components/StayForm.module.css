@@ -7,9 +7,27 @@
   border-radius: 10px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .title {
   margin: 0;
   font-weight: 600;
+}
+
+.pasteToggle {
+  min-height: 40px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* Dato og klokkeslæt side om side. */
