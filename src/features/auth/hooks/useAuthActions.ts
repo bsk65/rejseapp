@@ -6,6 +6,8 @@ import {
 } from 'firebase/auth'
 import { useState } from 'react'
 import { auth } from '../../../firebase/config'
+import { PRIVACY_VERSION } from '../privacyVersion'
+import { acceptPrivacyPolicy } from '../repository'
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error && 'code' in error) {
@@ -49,7 +51,9 @@ export function useAuthActions() {
     setPending(true)
     setError(null)
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
+      const credential = await createUserWithEmailAndPassword(auth, email, password)
+      // Accepten blev givet med hakket i formularen (kræves for at oprette).
+      await acceptPrivacyPolicy(credential.user.uid, PRIVACY_VERSION)
     } catch (err) {
       setError(toErrorMessage(err))
     } finally {

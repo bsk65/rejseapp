@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Button } from '../../../shared/ui/Button'
 import { TextField } from '../../../shared/ui/TextField'
 import { useAuthActions } from '../hooks/useAuthActions'
+import { PRIVACY_URL } from '../privacyVersion'
 import styles from './LoginPage.module.css'
 
 type Mode = 'login' | 'signup' | 'reset'
@@ -59,6 +60,18 @@ export function LoginPage() {
             required
           />
         )}
+        {mode === 'signup' && (
+          // required: browseren nægter at sende formularen uden hak.
+          <label className={styles.consentRow}>
+            <input type="checkbox" required />
+            <span>
+              Jeg accepterer{' '}
+              <a href={PRIVACY_URL} target="_blank" rel="noopener">
+                privatlivspolitikken
+              </a>
+            </span>
+          </label>
+        )}
         {error && <p className={styles.error}>{error}</p>}
         {resetSentTo && (
           <p className={styles.success}>
@@ -86,6 +99,9 @@ export function LoginPage() {
               ? 'Har du allerede en bruger? Log ind'
               : 'Tilbage til log ind'}
         </button>
+        <a href={PRIVACY_URL} className={styles.policyLink} target="_blank" rel="noopener">
+          Privatlivspolitik
+        </a>
       </form>
     </div>
   )

@@ -62,6 +62,13 @@ React + TypeScript + Vite. Firebase (Auth, Firestore, Storage, Cloud Functions).
 - **"Scan boardingkort"** (Billetter & tider): foto/skærmbillede → stregkode (`barcode.ts`: browserens BarcodeDetector, ellers ZXing) → `parseBoardingPass` (IATA BCBP, faste feltpositioner; året mangler i stregkoden og vælges tættest på rejsen) → `planBoardingPass` finder dag og evt. eksisterende fly med samme nummer (opdateres i stedet for dublet) → flyopslag for resten. Fejler opslaget, gemmes boardingkortets egne data alligevel.
 - **Selve boardingkortet gemmes** som billede i Storage (`trips/{tripId}/{uid}/boardingkort-{uuid}`, samme regel som billeder) og kobles til flyet i `boardingPasses` — én pr. passager (`withBoardingPass`: rejsefællers bevares, samme passager scannet igen erstattes og den gamle fil slettes). "Vis boardingkort" står under flyet i Billetter & tider og i flyets formular (hvor det også kan fjernes). `BoardingPassViewer` viser det i fuld skærm på hvidt og holder skærmen tændt (`shared/hooks/useWakeLock`). **En web-app kan ikke styre skærmens lysstyrke** (intet web-API til det) — brugeren må selv skrue op; det står i visningen.
 
+## Privatlivspolitik
+
+- Politikken er en statisk side, `public/privatliv.html` (læsbar uden login; service workeren må ikke erstatte den med appen — se `navigateFallbackDenylist` i vite.config.ts).
+- Accept gemmes på brugerens profil `users/{uid}` som `privacyAcceptedVersion` + `privacyAcceptedAt` (`features/auth/repository.ts`). Ved oprettelse kræves et hak; eksisterende brugere uden gældende accept får `PrivacyGate` i stedet for appen (i `RequireAuth`), som kun kan accepteres eller logges ud af. En læsefejl låser ikke brugeren ude.
+- **Ændres politikken væsentligt:** opdatér teksten og "Sidst opdateret" i privatliv.html OG `PRIVACY_VERSION` i `features/auth/privacyVersion.ts` — så bliver alle bedt om at acceptere igen. Samme model som i søsterprojektet "3D bueskydning".
+- Tilføjes nye slags persondata eller nye eksterne tjenester (som AeroDataBox, Nominatim), skal politikken opdateres tilsvarende.
+
 ## Firebase-projekt
 
 - Projekt: `rejseappen-b2f3f` (Firebase Console)

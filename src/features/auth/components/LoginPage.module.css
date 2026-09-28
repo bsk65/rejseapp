@@ -50,3 +50,27 @@
   font-size: 0.9rem;
   line-height: 1.4;
 }
+
+.consentRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 0.9rem;
+}
+
+.consentRow input {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.consentRow a,
+.policyLink {
+  color: var(--color-accent);
+}
+
+.policyLink {
+  align-self: center;
+  font-size: 0.8rem;
+}

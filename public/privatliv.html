@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Privatlivspolitik – Rejseappen</title>
+    <!-- VIGTIGT: "Sidst opdateret" skal matche PRIVACY_VERSION i
+         src/features/auth/privacyVersion.ts. Ændres politikken væsentligt,
+         opdateres begge, og alle brugere bliver bedt om at acceptere igen. -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #ffffff;
+        --text: #0f172a;
+        --muted: #475569;
+        --accent: #0369a1;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f172a;
+          --text: #f1f5f9;
+          --muted: #94a3b8;
+          --accent: #38bdf8;
+        }
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        line-height: 1.55;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 1.6rem;
+      }
+      h2 {
+        margin: 28px 0 8px;
+        font-size: 1.15rem;
+      }
+      h3 {
+        margin: 18px 0 6px;
+        font-size: 1rem;
+      }
+      p,
+      li {
+        overflow-wrap: anywhere;
+      }
+      .updated {
+        margin: 0 0 16px;
+        color: var(--muted);
+      }
+      a {
+        color: var(--accent);
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a class="back" href="/">← Til Rejseappen</a>
+      <h1>Privatlivspolitik for Rejseappen</h1>
+      <p class="updated">Sidst opdateret: 28. september 2026</p>
+
+      <h2>1. Dataansvarlig</h2>
+      <p>
+        Rejseappen drives af:<br />
+        Bjarne Stubkjær Klausen<br />
+        Bavnehøj 9<br />
+        5560 Aarup<br />
+        E-mail: <a href="mailto:bsklausen@proton.me">bsklausen@proton.me</a>
+      </p>
+      <p>
+        Da appen drives af mig som privatperson uden tilknyttet virksomhed, er jeg personligt
+        dataansvarlig for de personoplysninger, der behandles i forbindelse med din brug af appen.
+      </p>
+
+      <h2>2. Hvilke oplysninger indsamler vi</h2>
+      <p>Når du opretter en konto og bruger appen, behandler vi følgende oplysninger:</p>
+      <ul>
+        <li><strong>E-mailadresse</strong> og en adgangskode (adgangskoden gemmes kun krypteret af Firebase Authentication — vi kan ikke se den).</li>
+        <li>
+          <strong>Dine rejser</strong>, som du selv indtaster: titel, datoer, destinationer og steder
+          for hver dag, transport (f.eks. selskab, fly- eller tognummer, tider, sæde og
+          bookingnummer) og overnatninger (f.eks. navn, adresse, tider, bookingnummer, telefonnummer
+          og evt. dørkode og wifi-oplysninger).
+        </li>
+        <li>
+          <strong>Boardingkort</strong>, hvis du scanner dem: et billede af boardingkortet samt de
+          oplysninger, der står i stregkoden (bl.a. passagerens navn, bookingnummer, rute og sæde).
+        </li>
+        <li>
+          <strong>Billeder</strong>, du uploader, inklusive de oplysninger, der er gemt i billedet
+          (optagelsestidspunkt og evt. GPS-position).
+        </li>
+        <li>
+          <strong>Lokationsdata</strong>, hvis du aktivt vælger det: GPS-spor fra telefonen,
+          manuelle check-ins og spor, du importerer fra en GPX-fil (se punkt 2a).
+        </li>
+        <li>
+          <strong>Venner og deling</strong>: hvem du har tilføjet som ven, og hvem du deler en rejse
+          med.
+        </li>
+      </ul>
+      <p>
+        Oplysningerne indsamles direkte fra dig. Du bestemmer selv, hvor meget du indtaster —
+        bortset fra e-mailadressen er ingen af oplysningerne nødvendige for at bruge appen.
+      </p>
+
+      <h3>2a. Om GPS-sporing og lokation</h3>
+      <p>
+        Appen kan spore din rute, mens du rejser. Sporingen er slået fra som standard og kører kun,
+        mens du aktivt har startet den og har appen åben. Du kan også checke ind på et sted eller
+        importere et spor fra f.eks. et ur. Lokationsdata bruges til at vise din rute på kortet og i
+        opsummeringen af rejsen.
+      </p>
+      <p>
+        Sporingen kan stoppes når som helst, og gemte punkter og importerede spor kan slettes i
+        appen.
+      </p>
+
+      <h3>2b. Hvem kan se dine oplysninger i appen</h3>
+      <p>
+        Din e-mailadresse kan ses af andre brugere, der tilføjer dig som ven (det er sådan, man
+        finder hinanden). En rejse kan kun ses af de personer, som rejsens opretter har delt den
+        med. Rejsens dage, transport og overnatninger kan ses og redigeres af alle, rejsen er delt
+        med. Billeder og GPS-spor kan kun ses af andre, hvis rejsens opretter har slået deling af
+        dem til — ellers ser kun du og rejsens opretter dem. Boardingkort, du har gemt ved et fly,
+        kan ses af dem, rejsen er delt med.
+      </p>
+
+      <h2>3. Formål med behandlingen</h2>
+      <p>Vi behandler dine oplysninger for at:</p>
+      <ul>
+        <li>oprette og administrere din brugerkonto og give dig adgang til at logge ind</li>
+        <li>gemme og vise dine rejser, så du kan planlægge og dokumentere dem</li>
+        <li>dele rejser med de rejsefæller, du selv vælger</li>
+        <li>
+          slå fly op ud fra flynummer og dato og finde steder på kortet, når du beder om det (se
+          punkt 5)
+        </li>
+        <li>kunne kontakte dig om væsentlige forhold vedrørende din konto eller appen</li>
+      </ul>
+      <p>
+        Vi sælger ikke dine oplysninger og videregiver dem ikke til tredjeparter med henblik på
+        markedsføring. Appen sender ikke nyhedsbreve.
+      </p>
+
+      <h2>4. Retsgrundlag for behandlingen</h2>
+      <ul>
+        <li>
+          Databeskyttelsesforordningens artikel 6, stk. 1, litra b (kontraktopfyldelse): Vi har brug
+          for din e-mail for at kunne levere login-funktionen, og for de rejseoplysninger, du selv
+          indtaster, for at kunne levere appens kernefunktion — at gemme, vise og dele dine rejser.
+        </li>
+        <li>
+          Databeskyttelsesforordningens artikel 6, stk. 1, litra a (samtykke): GPS-lokationsdata
+          behandler vi kun, hvis du aktivt starter sporing, checker ind eller importerer et spor. Du
+          kan til enhver tid trække samtykket tilbage ved at stoppe sporingen og slette de gemte
+          punkter.
+        </li>
+      </ul>
+      <p>
+        Hvis du indtaster oplysninger om andre personer (f.eks. rejsefællers navne på et
+        boardingkort), skal du sikre dig, at de er indforståede med det.
+      </p>
+
+      <h2>5. Hvem har adgang til dine oplysninger (databehandlere og andre modtagere)</h2>
+      <p>
+        <strong>Firebase (Google)</strong> bruges til drift af appens backend: login, database,
+        lagring af billeder og boardingkort samt opslag af fly. Google fungerer som databehandler på
+        vores vegne og behandler kun data efter vores instruks. Vi har indgået Googles standard
+        "Data Processing and Security Terms" (Firebase/Google Cloud DPA), som opfylder
+        databeskyttelsesforordningens krav til databehandleraftaler. Data opbevares på servere i
+        Europa.
+      </p>
+      <p>Når du bruger bestemte funktioner, sendes begrænsede oplysninger til disse tjenester:</p>
+      <ul>
+        <li>
+          <strong>AeroDataBox (via RapidAPI)</strong>: Når du trykker "Hent flyoplysninger" eller
+          scanner et boardingkort, sendes flynummer og dato — ikke dit navn eller andre
+          personoplysninger — for at hente lufthavne og tider.
+        </li>
+        <li>
+          <strong>OpenStreetMap / Nominatim</strong>: Når du søger efter et sted, sendes den tekst,
+          du søger på. Når kortet vises, hentes kortbilleder fra OpenStreetMap. I begge tilfælde
+          modtager tjenesten din IP-adresse, som ved almindelig brug af en hjemmeside.
+        </li>
+      </ul>
+      <p>
+        Der er ikke herudover andre modtagere af dine oplysninger, medmindre det følger af lovkrav.
+      </p>
+
+      <h2>6. Overførsel til tredjelande</h2>
+      <p>
+        Google/Firebase kan i visse tilfælde behandle data uden for EU/EØS, herunder i USA. Sådanne
+        overførsler er dækket af EU-Kommissionens standardkontraktbestemmelser (SCC), som Google
+        har tilsluttet sig, jf. artikel 46 i databeskyttelsesforordningen. Det samme gælder
+        RapidAPI, der modtager flynummer og dato ved flyopslag.
+      </p>
+      <p>
+        Du kan læse mere om Googles/Firebases databeskyttelsesvilkår på:
+        <a href="https://firebase.google.com/support/privacy">firebase.google.com/support/privacy</a>
+      </p>
+
+      <h2>7. Opbevaring og sletning</h2>
+      <p>
+        Vi opbevarer dine oplysninger, så længe du har en aktiv konto i appen. Du kan selv slette
+        enkelte rejsedata i appen (f.eks. transport, overnatninger, billeder, boardingkort og
+        GPS-spor).
+      </p>
+      <p>
+        Ønsker du din konto og alle dine oplysninger slettet, kan du kontakte os på
+        <a href="mailto:bsklausen@proton.me">bsklausen@proton.me</a>. Vi sletter dine
+        personoplysninger uden unødigt ophold og senest inden for 30 dage, medmindre vi er retligt
+        forpligtet til at opbevare visse oplysninger i længere tid. Rejser, du har delt med andre,
+        slettes også for dem, hvis du har oprettet rejsen.
+      </p>
+
+      <h2>8. Dine rettigheder</h2>
+      <p>Du har efter databeskyttelsesforordningen ret til at:</p>
+      <ul>
+        <li>få indsigt i, hvilke oplysninger vi behandler om dig</li>
+        <li>få rettet urigtige oplysninger</li>
+        <li>få slettet dine oplysninger ("retten til at blive glemt")</li>
+        <li>få begrænset behandlingen i visse tilfælde</li>
+        <li>gøre indsigelse mod behandlingen</li>
+        <li>dataportabilitet – modtage dine oplysninger i et struktureret, almindeligt anvendt format</li>
+        <li>
+          trække dit samtykke til lokationsdata tilbage til enhver tid, uden at det påvirker
+          lovligheden af den behandling, der er sket, inden det blev trukket tilbage
+        </li>
+      </ul>
+      <p>
+        Ønsker du at gøre brug af en eller flere af disse rettigheder, kan du kontakte os på
+        <a href="mailto:bsklausen@proton.me">bsklausen@proton.me</a>.
+      </p>
+      <p>
+        Du har derudover ret til at klage til Datatilsynet, hvis du er utilfreds med den måde, vi
+        behandler dine oplysninger på:<br />
+        Datatilsynet, Carl Jacobsens Vej 35, 2500 Valby –
+        <a href="https://www.datatilsynet.dk">www.datatilsynet.dk</a>
+      </p>
+
+      <h2>9. Sikkerhed</h2>
+      <p>
+        Vi har truffet passende tekniske og organisatoriske foranstaltninger for at beskytte dine
+        oplysninger mod uautoriseret adgang, ændring eller sletning, herunder:
+      </p>
+      <ul>
+        <li>kryptering af data under overførsel (HTTPS)</li>
+        <li>
+          adgangsregler i databasen, så en rejse kun kan læses af dem, den er delt med
+        </li>
+        <li>brug af Firebase Authentication til sikker login-håndtering</li>
+      </ul>
+      <p>
+        Gem helst ikke oplysninger i appen, som ville være skadelige, hvis de kom i de forkerte
+        hænder (f.eks. adgangskoder til andre tjenester).
+      </p>
+
+      <h2>10. Ændringer til denne politik</h2>
+      <p>
+        Vi kan opdatere denne privatlivspolitik løbende, f.eks. hvis appen udvikler sig, eller
+        lovgivningen ændrer sig. Ved væsentlige ændringer bliver du bedt om at læse og acceptere
+        politikken igen, næste gang du åbner appen.
+      </p>
+
+      <h2>11. Kontakt</h2>
+      <p>
+        Har du spørgsmål til denne privatlivspolitik eller vores behandling af dine oplysninger, er
+        du velkommen til at kontakte:<br />
+        Bjarne Klausen<br />
+        E-mail: <a href="mailto:bsklausen@proton.me">bsklausen@proton.me</a>
+      </p>
+    </main>
+  </body>
+</html>

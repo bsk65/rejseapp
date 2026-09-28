@@ -3,6 +3,7 @@ import { useAuthActions } from '../../auth/hooks/useAuthActions'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { Button } from '../../../shared/ui/Button'
 import { AppQrButton } from '../../../shared/ui/AppQrButton'
+import { PRIVACY_URL } from '../../auth/privacyVersion'
 import { useTrips } from '../hooks/useTrips'
 import { CreateTripForm } from './CreateTripForm'
 import { TripList } from './TripList'
@@ -35,6 +36,10 @@ export function TripsPage() {
       )}
 
       <TripList trips={trips} loading={loading} />
+
+      <a href={PRIVACY_URL} className={styles.policyLink} target="_blank" rel="noopener">
+        Privatlivspolitik
+      </a>
     </div>
   )
 }
