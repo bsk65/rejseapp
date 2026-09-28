@@ -3,7 +3,8 @@ import { TransportModeIcon } from '../../segments/components/TransportModeIcon'
 import type { Segment } from '../../segments/types'
 import { BedIcon } from '../../stays/components/BedIcon'
 import type { DayStayEvent } from '../../stays/logic/stayDates'
-import { clockTime, routeLabel } from '../logic/daySummary'
+import { clockTime } from '../../../shared/utils/date'
+import { routeLabel } from '../logic/daySummary'
 import styles from './DaySummary.module.css'
 
 /** Den korte udgave af en dag, når den er foldet sammen: rute, transport, overnatning, billeder. */

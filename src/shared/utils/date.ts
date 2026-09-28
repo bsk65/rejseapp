@@ -23,3 +23,8 @@ export function localIsoDate(time: number): string {
   const day = String(d.getDate()).padStart(2, '0')
   return `${d.getFullYear()}-${month}-${day}`
 }
+
+/** Klokkeslættet (HH:mm) i et tidspunkt — fuld dato+tid ("2026-09-29T17:10") eller kun tid. */
+export function clockTime(value: string | undefined): string | undefined {
+  return value?.match(/(\d{2}:\d{2})/)?.[1]
+}

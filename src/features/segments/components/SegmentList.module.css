@@ -7,22 +7,46 @@
   gap: 6px;
 }
 
+/* Samme kort-form som overnatningerne (stays/DayStays), så transport er lige
+   så tydelig. */
 .item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  min-height: 40px;
-  padding: 4px 8px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
   text-align: left;
   cursor: pointer;
 }
 
 .item:active {
   background: var(--color-surface);
+}
+
+.item svg {
+  flex-shrink: 0;
+  color: var(--day-color, var(--color-accent));
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.title {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDaysToIsoDate, formatDayDate, localIsoDate } from './date'
+import { addDaysToIsoDate, clockTime, formatDayDate, localIsoDate } from './date'
 
 describe('addDaysToIsoDate', () => {
   it('adds a positive offset', () => {
@@ -24,5 +24,13 @@ describe('formatDayDate', () => {
 describe('localIsoDate', () => {
   it('formats the local calendar date, also late in the evening', () => {
     expect(localIsoDate(new Date(2026, 9, 4, 23, 30).getTime())).toBe('2026-10-04')
+  })
+})
+
+describe('clockTime', () => {
+  it('reads the time from a full date-time or a bare time', () => {
+    expect(clockTime('2026-09-29T17:10')).toBe('17:10')
+    expect(clockTime('09:35')).toBe('09:35')
+    expect(clockTime('2026-09-29')).toBeUndefined()
   })
 })

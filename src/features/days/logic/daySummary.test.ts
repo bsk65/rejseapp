@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Day } from '../types'
-import { clockTime, initiallyExpandedDayIds, routeLabel } from './daySummary'
+import { initiallyExpandedDayIds, routeLabel } from './daySummary'
 
 const billund = { name: 'Billund', lat: 55.7, lng: 9.1, placeId: 'bll' }
 const paris = { name: 'Paris', lat: 48.9, lng: 2.3, placeId: 'par' }
@@ -18,14 +18,6 @@ describe('routeLabel', () => {
 
   it('is empty without places', () => {
     expect(routeLabel(undefined, undefined)).toBeUndefined()
-  })
-})
-
-describe('clockTime', () => {
-  it('reads the time from a full date-time or a bare time', () => {
-    expect(clockTime('2026-09-29T17:10')).toBe('17:10')
-    expect(clockTime('09:35')).toBe('09:35')
-    expect(clockTime('2026-09-29')).toBeUndefined()
   })
 })
 

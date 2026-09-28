@@ -1,19 +1,14 @@
-import { formatDayDate } from '../../../shared/utils/date'
+import { clockTime, formatDayDate } from '../../../shared/utils/date'
 import { dayColorIndex } from '../../../shared/utils/dayColors'
 import type { Ticket } from '../logic/tickets'
 import { transportModeLabel } from '../types'
 import { TransportModeIcon } from './TransportModeIcon'
 import styles from './TicketCard.module.css'
 
-/** Klokkeslæt fra et segment-tidspunkt (fuld dato+tid eller kun tid). */
-function timeOf(value: string | undefined): string | undefined {
-  return value?.match(/(\d{2}:\d{2})/)?.[1]
-}
-
 export function TicketCard({ ticket, onSelect }: { ticket: Ticket; onSelect: () => void }) {
   const { segment } = ticket
   const title = [segment.carrier, segment.number].filter(Boolean).join(' ')
-  const arrival = timeOf(segment.arrivalTime)
+  const arrival = clockTime(segment.arrivalTime)
   const extras = [
     segment.terminal && `Terminal ${segment.terminal}`,
     segment.seat && `Plads ${segment.seat}`,
