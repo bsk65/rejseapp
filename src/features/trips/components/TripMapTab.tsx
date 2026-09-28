@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import type { LatLng, Place } from '../../../shared/types/place'
 import { resolveDayColor } from '../../../shared/utils/dayColors'
+import { placeLabel } from '../../../shared/utils/placeLabel'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import { TrackingPanel } from '../../tracking/components/TrackingPanel'
@@ -109,7 +110,7 @@ export function TripMapTab({
               data-selected={place.placeId === selectedPlaceId}
             >
               <span className={styles.destinationIndex}>{index + 1}</span>
-              <span>{place.name}</span>
+              <span>{placeLabel(place)}</span>
             </li>
           ))}
         </ul>

@@ -38,6 +38,17 @@
   cursor: pointer;
 }
 
+.resultName,
+.resultArea {
+  display: block;
+}
+
+.resultArea {
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
 .resultButton:active {
   opacity: 0.85;
 }

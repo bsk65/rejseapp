@@ -67,7 +67,8 @@ export function PlaceSearchInput({
                 className={styles.resultButton}
                 onClick={() => handleSelect(place)}
               >
-                {place.name}
+                <span className={styles.resultName}>{place.name}</span>
+                {place.area && <span className={styles.resultArea}>{place.area}</span>}
               </button>
             </li>
           ))}

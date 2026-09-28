@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Place } from '../types/place'
+import { placeLabel } from '../utils/placeLabel'
 import { PlaceSearchInput } from './PlaceSearchInput'
 import styles from './PlaceField.module.css'
 
@@ -17,7 +18,7 @@ export function PlaceField({
   if (place && !editing) {
     return (
       <button type="button" className={styles.chip} onClick={() => setEditing(true)}>
-        {label}: {place.name}
+        {label}: {placeLabel(place)}
       </button>
     )
   }

@@ -6,6 +6,7 @@ import type { Place } from '../../../shared/types/place'
 import { useCreateDays } from '../../days/hooks/useCreateDays'
 import { useCreateTrip } from '../hooks/useCreateTrip'
 import { computeEndDate, countTripDays, parseDayCount } from '../logic/tripDates'
+import { placeLabel } from '../../../shared/utils/placeLabel'
 import styles from './CreateTripForm.module.css'
 
 /** Øvre grænse — dage oprettes i én Firestore-batch (maks. 500 skrivninger). */
@@ -125,7 +126,7 @@ export function CreateTripForm({
         <ul className={styles.destinations}>
           {destinations.map((place) => (
             <li key={place.placeId} className={styles.destinationChip}>
-              <span>{place.name}</span>
+              <span>{placeLabel(place)}</span>
               <button
                 type="button"
                 onClick={() => removeDestination(place.placeId)}
