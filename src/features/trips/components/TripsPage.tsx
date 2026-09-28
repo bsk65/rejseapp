@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuthActions } from '../../auth/hooks/useAuthActions'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { Button } from '../../../shared/ui/Button'
+import { AppQrButton } from '../../../shared/ui/AppQrButton'
 import { useTrips } from '../hooks/useTrips'
 import { CreateTripForm } from './CreateTripForm'
 import { TripList } from './TripList'
@@ -19,9 +20,12 @@ export function TripsPage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Mine rejser</h1>
-        <button className={styles.logout} onClick={() => void logout()}>
-          Log ud
-        </button>
+        <div className={styles.headerActions}>
+          <button className={styles.logout} onClick={() => void logout()}>
+            Log ud
+          </button>
+          <AppQrButton />
+        </div>
       </header>
 
       {showForm ? (

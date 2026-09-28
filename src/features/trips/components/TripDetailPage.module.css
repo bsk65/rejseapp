@@ -108,3 +108,9 @@
   color: var(--color-danger);
   font-size: 0.9rem;
 }
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

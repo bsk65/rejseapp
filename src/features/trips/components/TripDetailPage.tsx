@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { AppQrButton } from '../../../shared/ui/AppQrButton'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { DaysList } from '../../days/components/DaysList'
@@ -75,9 +76,12 @@ export function TripDetailPage() {
 
   return (
     <div className={styles.page}>
-      <Link to="/" className={styles.back}>
-        ← Mine rejser
-      </Link>
+      <div className={styles.topBar}>
+        <Link to="/" className={styles.back}>
+          ← Mine rejser
+        </Link>
+        <AppQrButton />
+      </div>
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>{trip.title}</h1>
