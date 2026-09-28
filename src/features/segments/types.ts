@@ -1,5 +1,14 @@
 import type { Place } from '../../shared/types/place'
 
+/** Et gemt billede af et boardingkort. Hver passager har sit eget (rejsefæller på samme fly). */
+export type BoardingPassImage = {
+  storagePath: string
+  /** Som det står i stregkoden, f.eks. "KLAUSEN/BJARNE MR". */
+  passengerName: string
+  /** Hvem der gemte det (kun ejeren kan slette selve filen i Storage). */
+  ownerUid: string
+}
+
 export type TransportMode = 'fly' | 'tog' | 'bil' | 'bus' | 'færge' | 'gang'
 export type SegmentStatus = 'planlagt' | 'bekræftet'
 
@@ -17,6 +26,7 @@ export type Segment = {
   seat?: string
   bookingRef?: string
   freeText?: string
+  boardingPasses?: BoardingPassImage[]
   /** Hvem der oprettede segmentet — kun informativ, ikke sikkerhedsrelevant. */
   ownerUid: string
   /** Denormaliseret fra rejsens memberUids — se CLAUDE.md. */

@@ -3,6 +3,8 @@ import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { TextField } from '../../../shared/ui/TextField'
 import { useDeleteSegment } from '../hooks/useDeleteSegment'
+import { useRemoveBoardingPass } from '../hooks/useRemoveBoardingPass'
+import { BoardingPassButtons } from './BoardingPassButtons'
 import { FlightLookupButton } from './FlightLookupButton'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
 import { withAirlineCode } from '../logic/airlineCodes'
@@ -48,10 +50,11 @@ export function SegmentDetailForm({
   })
   const { saveSegment, pending } = useUpdateSegment()
   const { removeSegment, pending: deleting } = useDeleteSegment()
+  const { passes, remove: removePass } = useRemoveBoardingPass(tripId, dayId, segment)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   async function handleDelete() {
-    await removeSegment(tripId, dayId, segment.id)
+    await removeSegment(tripId, dayId, segment.id, passes)
     onClose()
   }
 
@@ -76,6 +79,8 @@ export function SegmentDetailForm({
   return (
     <div className={styles.form}>
       <p className={styles.title}>{transportModeLabel[segment.mode]}-detaljer</p>
+
+      <BoardingPassButtons passes={passes} onRemove={removePass} />
 
       {showsCarrier && (
         <TextField

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { DEFAULT_WARMUP_RULES, isGpsStable } from '../logic/isGpsStable'
 import { DEFAULT_RECORDING_RULES, shouldRecordPoint, type GpsFix } from '../logic/shouldRecordPoint'
 import { toGpsFix, describeGeolocationError } from '../geolocation'
-import { useWakeLock } from './useWakeLock'
+import { useWakeLock } from '../../../shared/hooks/useWakeLock'
 
 /**
  * Løbende GPS-sporing via navigator.geolocation.watchPosition. Efter start

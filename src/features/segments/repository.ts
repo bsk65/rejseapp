@@ -13,8 +13,15 @@ import {
   type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { db } from '../../firebase/config'
-import type { Segment, SegmentDetails, SegmentStatus, TransportMode } from './types'
+import { deleteObject, ref, uploadBytes } from 'firebase/storage'
+import { db, storage } from '../../firebase/config'
+import type {
+  BoardingPassImage,
+  Segment,
+  SegmentDetails,
+  SegmentStatus,
+  TransportMode,
+} from './types'
 
 function segmentsCollection(tripId: string, dayId: string) {
   return collection(db, 'trips', tripId, 'days', dayId, 'segments')
@@ -36,6 +43,7 @@ function toSegment(docSnap: QueryDocumentSnapshot<DocumentData>): Segment {
     seat: data.seat ?? undefined,
     bookingRef: data.bookingRef ?? undefined,
     freeText: data.freeText ?? undefined,
+    boardingPasses: data.boardingPasses ?? undefined,
     ownerUid: data.ownerUid,
     memberUids: data.memberUids ?? [data.ownerUid],
   }
@@ -86,12 +94,48 @@ export async function createSegment(
   })
 }
 
+/** Sletter segmentet og dets gemte boardingkort-billeder (dem, man selv har lov at slette). */
 export async function deleteSegment(
   tripId: string,
   dayId: string,
   segmentId: string,
+  boardingPasses: BoardingPassImage[] = [],
 ): Promise<void> {
   await deleteDoc(doc(segmentsCollection(tripId, dayId), segmentId))
+  await Promise.all(boardingPasses.map((pass) => deleteStorageFile(pass.storagePath)))
+}
+
+/** Storage tillader kun ejeren at slette — en rejsefælles fil efterlades bare. */
+export function deleteStorageFile(storagePath: string): Promise<void> {
+  return deleteObject(ref(storage, storagePath)).catch(() => undefined)
+}
+
+/**
+ * Gemmer billedet af et boardingkort i Storage og returnerer stien. Ligger i
+ * uploaderens egen mappe under rejsen (samme regel som billeder, se storage.rules).
+ */
+export async function uploadBoardingPassImage(
+  tripId: string,
+  ownerUid: string,
+  file: File,
+): Promise<string> {
+  const storagePath = `trips/${tripId}/${ownerUid}/boardingkort-${crypto.randomUUID()}`
+  await uploadBytes(ref(storage, storagePath), file, { contentType: file.type || 'image/jpeg' })
+  return storagePath
+}
+
+/** Fjerner ét boardingkort fra flyet (og filen, hvis man selv har gemt den). */
+export async function removeBoardingPass(
+  tripId: string,
+  dayId: string,
+  segmentId: string,
+  remaining: BoardingPassImage[],
+  removedPath: string,
+): Promise<void> {
+  await updateDoc(doc(segmentsCollection(tripId, dayId), segmentId), {
+    boardingPasses: remaining,
+  })
+  await deleteStorageFile(removedPath)
 }
 
 export async function updateSegment(

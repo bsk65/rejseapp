@@ -7,8 +7,14 @@ import { flightToSegmentDetails, pickFlight } from '../logic/flightToDetails'
 import { parseBoardingPass } from '../logic/parseBoardingPass'
 import { planBoardingPass, type PlannedLeg } from '../logic/planBoardingPass'
 import type { TicketEntry } from '../logic/tickets'
-import { createSegment, updateSegment } from '../repository'
-import type { SegmentDetails } from '../types'
+import { withBoardingPass } from '../logic/boardingPassImages'
+import {
+  createSegment,
+  deleteStorageFile,
+  updateSegment,
+  uploadBoardingPassImage,
+} from '../repository'
+import type { BoardingPassImage, SegmentDetails } from '../types'
 
 /** Flyopslag er "nice to have" her — fejler det, gemmes boardingkortets egne data alligevel. */
 async function tryLookup(plan: PlannedLeg): Promise<Partial<SegmentDetails>> {
@@ -64,9 +70,25 @@ export function useBoardingPassImport({
     try {
       const pass = parseBoardingPass(await readBarcodeFromImage(file))
       const reference = days[0] ? new Date(`${days[0].date}T12:00:00Z`) : new Date()
+      const plans = planBoardingPass(pass, days, entries, reference)
       const results: string[] = []
 
-      for (const plan of planBoardingPass(pass, days, entries, reference)) {
+      // Selve billedet gemmes også (én gang, også ved flere strækninger), så
+      // boardingkortet kan vises ved gaten. Fejler det, gemmes flyet alligevel.
+      const image: BoardingPassImage | undefined = plans.some((plan) => plan.dayId)
+        ? await uploadBoardingPassImage(tripId, userUid, file)
+            .then((storagePath) => ({
+              storagePath,
+              passengerName: pass.passengerName,
+              ownerUid: userUid,
+            }))
+            .catch(() => {
+              results.push('Boardingkortets billede kunne ikke gemmes — flyet gemmes alligevel.')
+              return undefined
+            })
+        : undefined
+
+      for (const plan of plans) {
         const label = `${plan.flightNumber} ${formatDayDate(plan.date)}`
         if (!plan.dayId) {
           results.push(`${label} ligger uden for rejsens datoer og blev ikke gemt.`)
@@ -80,6 +102,9 @@ export function useBoardingPassImport({
           bookingRef: plan.leg.bookingRef,
           seat: plan.leg.seat,
           status: 'bekræftet',
+          ...(image
+            ? { boardingPasses: withBoardingPass(existing?.segment.boardingPasses, image) }
+            : {}),
           ...(looked.departurePlace || existing?.segment.freeText
             ? {}
             : { freeText: `${plan.leg.fromAirport} → ${plan.leg.toAirport}` }),
@@ -87,6 +112,11 @@ export function useBoardingPassImport({
 
         if (existing) {
           await updateSegment(tripId, plan.dayId, existing.segment.id, details)
+          // Samme passager scannet igen: det gamle billede er erstattet i listen — slet filen.
+          const replaced = (existing.segment.boardingPasses ?? []).filter(
+            (old) => !details.boardingPasses?.some((kept) => kept.storagePath === old.storagePath),
+          )
+          await Promise.all(replaced.map((old) => deleteStorageFile(old.storagePath)))
           results.push(`${label} er opdateret${plan.leg.seat ? ` (sæde ${plan.leg.seat})` : ''}.`)
         } else {
           await createSegment(tripId, plan.dayId, userUid, memberUids, 'fly', details)

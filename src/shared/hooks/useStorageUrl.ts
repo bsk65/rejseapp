@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
-import { getPhotoUrl } from '../repository'
+import { getStorageUrl } from '../api/storage'
 
-/** Download-URL for et billede i Storage (null indtil den er hentet eller hvis det fejler). */
-export function usePhotoUrl(storagePath: string): string | null {
+/**
+ * Download-URL for en fil i Storage (billede, boardingkort) — null indtil den
+ * er hentet, eller hvis det fejler.
+ */
+export function useStorageUrl(storagePath: string): string | null {
   const [loaded, setLoaded] = useState<{ path: string; url: string } | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    getPhotoUrl(storagePath)
+    getStorageUrl(storagePath)
       .then((url) => {
         if (!cancelled) setLoaded({ path: storagePath, url })
       })

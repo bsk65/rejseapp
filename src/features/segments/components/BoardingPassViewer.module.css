@@ -1,0 +1,48 @@
+/* Hele skærmen hvid — giver mest lys og bedst kontrast til stregkoden. */
+.dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.dialog::backdrop {
+  background: #ffffff;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  padding: 16px;
+}
+
+.name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.image {
+  display: block;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 80dvh;
+  object-fit: contain;
+}
+
+.loading,
+.hint {
+  margin: 0;
+  color: #475569;
+  font-size: 0.85rem;
+  text-align: center;
+}

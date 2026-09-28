@@ -60,6 +60,7 @@ React + TypeScript + Vite. Firebase (Auth, Firestore, Storage, Cloud Functions).
 - Deploy: `firebase deploy --only functions` (predeploy bygger `functions/lib`). Secret sættes én gang med `firebase functions:secrets:set AERODATABOX_API_KEY`.
 - **"Hent flyoplysninger"** i fly-segmentets formular udfylder felterne (gemmes først ved Gem).
 - **"Scan boardingkort"** (Billetter & tider): foto/skærmbillede → stregkode (`barcode.ts`: browserens BarcodeDetector, ellers ZXing) → `parseBoardingPass` (IATA BCBP, faste feltpositioner; året mangler i stregkoden og vælges tættest på rejsen) → `planBoardingPass` finder dag og evt. eksisterende fly med samme nummer (opdateres i stedet for dublet) → flyopslag for resten. Fejler opslaget, gemmes boardingkortets egne data alligevel.
+- **Selve boardingkortet gemmes** som billede i Storage (`trips/{tripId}/{uid}/boardingkort-{uuid}`, samme regel som billeder) og kobles til flyet i `boardingPasses` — én pr. passager (`withBoardingPass`: rejsefællers bevares, samme passager scannet igen erstattes og den gamle fil slettes). "Vis boardingkort" står under flyet i Billetter & tider og i flyets formular (hvor det også kan fjernes). `BoardingPassViewer` viser det i fuld skærm på hvidt og holder skærmen tændt (`shared/hooks/useWakeLock`). **En web-app kan ikke styre skærmens lysstyrke** (intet web-API til det) — brugeren må selv skrue op; det står i visningen.
 
 ## Firebase-projekt
 
@@ -91,6 +92,7 @@ trips/{tripId}/days/{dayId}/segments/{segId}
   mode (fly|tog|bil|bus|færge|gang), status (planlagt|bekræftet),
   carrier?, number?, departurePlace?, departureTime?, terminal?,
   arrivalPlace?, arrivalTime?, seat?, bookingRef?, freeText?,
+  boardingPasses?: { storagePath, passengerName, ownerUid }[],
   ownerUid (kun informativ), memberUids: string[]
 
 trips/{tripId}/stays/{stayId}

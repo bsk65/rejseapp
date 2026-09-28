@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 
 /**
- * Holder skærmen tændt mens `active` er sand — browseren stopper typisk
- * GPS-målinger når skærmen slukker. Browseren frigiver låsen selv når fanen
+ * Holder skærmen tændt mens `active` er sand — bruges under GPS-sporing
+ * (browseren stopper typisk GPS-målinger, når skærmen slukker) og mens et
+ * boardingkort vises. Browseren frigiver låsen selv når fanen
  * skjules, så den genanmodes når fanen bliver synlig igen. Understøttes
  * Wake Lock ikke, sker der bare ingenting.
  */
@@ -22,7 +23,7 @@ export function useWakeLock(active: boolean): void {
           sentinel = next
         }
       } catch {
-        // F.eks. strømsparetilstand — sporingen virker stadig, skærmen kan bare slukke.
+        // F.eks. strømsparetilstand — alt virker stadig, skærmen kan bare slukke.
       }
     }
 

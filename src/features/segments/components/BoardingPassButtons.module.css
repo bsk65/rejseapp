@@ -1,0 +1,50 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  gap: 6px;
+}
+
+.show {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-accent);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.remove,
+.confirmRemove {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.remove {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+
+.confirmRemove {
+  border: none;
+  background: var(--color-danger);
+  color: #ffffff;
+}

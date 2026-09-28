@@ -1,4 +1,4 @@
-import { usePhotoUrl } from '../hooks/usePhotoUrl'
+import { useStorageUrl } from '../../../shared/hooks/useStorageUrl'
 import styles from './PhotoThumbnail.module.css'
 
 export function PhotoThumbnail({
@@ -8,7 +8,7 @@ export function PhotoThumbnail({
   storagePath: string
   onDelete?: () => void
 }) {
-  const url = usePhotoUrl(storagePath)
+  const url = useStorageUrl(storagePath)
 
   return (
     <div className={styles.thumb}>

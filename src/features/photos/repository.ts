@@ -14,7 +14,7 @@ import {
   type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage'
+import { deleteObject, ref, uploadBytes } from 'firebase/storage'
 import { db, storage } from '../../firebase/config'
 import { computeViewerUids } from '../../shared/utils/computeViewerUids'
 import type { Photo } from './types'
@@ -72,10 +72,6 @@ export async function uploadPhoto(
     ...(extra.location ? { location: extra.location } : {}),
     ...(extra.dayId ? { dayId: extra.dayId } : {}),
   })
-}
-
-export function getPhotoUrl(storagePath: string): Promise<string> {
-  return getDownloadURL(ref(storage, storagePath))
 }
 
 export async function deletePhoto(

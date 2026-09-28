@@ -13,6 +13,7 @@ import {
   type TimelineItem,
 } from '../logic/ticketTimeline'
 import { buildTickets, formatCountdown, TICKET_MODES, type Ticket } from '../logic/tickets'
+import { BoardingPassButtons } from './BoardingPassButtons'
 import { BoardingPassScan } from './BoardingPassScan'
 import { SegmentDetailForm } from './SegmentDetailForm'
 import { TicketCard } from './TicketCard'
@@ -51,7 +52,12 @@ export function TicketsView({
 
   function renderItem(item: TimelineItem) {
     if (item.kind === 'ticket') {
-      return <TicketCard ticket={item.ticket} onSelect={() => setEditingTicket(item.ticket)} />
+      return (
+        <div className={styles.ticketWithPasses}>
+          <TicketCard ticket={item.ticket} onSelect={() => setEditingTicket(item.ticket)} />
+          <BoardingPassButtons passes={item.ticket.segment.boardingPasses} />
+        </div>
+      )
     }
     return (
       <StayMomentCard
