@@ -175,3 +175,8 @@ En overnatning (hotel, Airbnb …) ligger på rejsen — ikke på en dag — for
 8. Opsummering/afspilning
 
 Appen skal være kørende og brugbar efter hvert trin.
+
+## Arkiv og sletning af rejser
+
+- **Arkiv:** forsiden har fanerne **Rejser** (i gang/kommende, nærmeste først) og **Arkiv** (overståede, seneste først). En rejse arkiveres automatisk dagen efter sidste rejsedag (`splitTripsByArchive` i `trips/logic/tripArchive.ts`, ud fra `startDate` + `days`) — intet gemmes, og `status`-feltet bruges ikke til det.
+- **Slet rejse** (kun ejeren, nederst på fanen Dage, med bekræftelse): `useDeleteTrip` sletter billeder (`deleteTripPhotos`) og spor (`deleteTripTrack`) i batches af 20 (slette-reglen bruger `get()` for andres dokumenter), derefter dage/segmenter/overnatninger og **til sidst** selve rejse-dokumentet, så en afbrudt sletning kan gentages. Storage-filer (billeder, boardingkort) slettes kun for ejerens egne — rejsefællers filer efterlades, da Storage-reglen kun lader uploaderen slette (se ovenfor om Storage).

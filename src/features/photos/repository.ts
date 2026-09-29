@@ -112,3 +112,30 @@ export async function cascadePhotoSharing(
   })
   await batch.commit()
 }
+
+/**
+ * Sletter alle rejsens billeder (bruges når hele rejsen slettes). Kun trippens
+ * ejer kalder den. Slette-reglen slår trippen op med get() for andres billeder,
+ * og Firestore tillader kun 20 get()-kald pr. batch — derfor små batches.
+ * Storage lader kun uploaderen slette sin fil, så rejsefællers billedfiler
+ * efterlades (de kan ikke længere findes, når dokumentet er væk).
+ */
+export async function deleteTripPhotos(tripId: string, tripOwnerUid: string): Promise<void> {
+  // Ejeren er altid med i photoViewerUids, så filteret rammer alle billeder.
+  const snapshot = await getDocs(
+    query(photosCollection(tripId), where('photoViewerUids', 'array-contains', tripOwnerUid)),
+  )
+  const DELETE_BATCH_SIZE = 20
+  for (let start = 0; start < snapshot.docs.length; start += DELETE_BATCH_SIZE) {
+    const batch = writeBatch(db)
+    snapshot.docs.slice(start, start + DELETE_BATCH_SIZE).forEach((d) => batch.delete(d.ref))
+    await batch.commit()
+  }
+  await Promise.all(
+    snapshot.docs.map((d) =>
+      deleteObject(ref(storage, (d.data() as { storagePath: string }).storagePath)).catch(
+        () => undefined,
+      ),
+    ),
+  )
+}

@@ -83,7 +83,8 @@ service cloud.firestore {
       // af trippens sharedCategories og indeholder altid mindst trippens ejer
       // og den der oprettede dokumentet. Se computeViewerUids i
       // src/shared/utils og CLAUDE.md. Trippens ejer må opdatere selve
-      // adgangsfeltet på andres dokumenter (cascade ved ændret deling).
+      // adgangsfeltet på andres dokumenter (cascade ved ændret deling) og slette
+      // dem, når hele rejsen slettes (se useDeleteTrip).
       match /photos/{photoId} {
         allow read: if isMember(resource.data.photoViewerUids);
         allow create: if isMember(request.resource.data.photoViewerUids)
@@ -91,7 +92,7 @@ service cloud.firestore {
           && isTripMember(tripId);
         allow update: if isOwner(resource.data.ownerUid)
           || (isTripOwner(tripId) && onlyChanges(['photoViewerUids']));
-        allow delete: if isOwner(resource.data.ownerUid);
+        allow delete: if isOwner(resource.data.ownerUid) || isTripOwner(tripId);
       }
 
       match /track/{pointId} {
@@ -101,7 +102,7 @@ service cloud.firestore {
           && isTripMember(tripId);
         allow update: if isOwner(resource.data.ownerUid)
           || (isTripOwner(tripId) && onlyChanges(['trackViewerUids']));
-        allow delete: if isOwner(resource.data.ownerUid);
+        allow delete: if isOwner(resource.data.ownerUid) || isTripOwner(tripId);
       }
     }
   }

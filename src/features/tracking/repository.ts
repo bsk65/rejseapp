@@ -131,3 +131,20 @@ export async function cascadeTrackSharing(
     await batch.commit()
   }
 }
+
+/**
+ * Sletter alle rejsens sporingspunkter og check-ins (bruges når hele rejsen
+ * slettes). Kun trippens ejer kalder den; slette-reglen bruger get() for
+ * andres punkter, så batches holdes på 20 (samme grænse som ved import).
+ */
+export async function deleteTripTrack(tripId: string, tripOwnerUid: string): Promise<void> {
+  // Ejeren er altid med i trackViewerUids, så filteret rammer alle punkter.
+  const snapshot = await getDocs(
+    query(trackCollection(tripId), where('trackViewerUids', 'array-contains', tripOwnerUid)),
+  )
+  for (let start = 0; start < snapshot.docs.length; start += IMPORT_BATCH_SIZE) {
+    const batch = writeBatch(db)
+    snapshot.docs.slice(start, start + IMPORT_BATCH_SIZE).forEach((d) => batch.delete(d.ref))
+    await batch.commit()
+  }
+}

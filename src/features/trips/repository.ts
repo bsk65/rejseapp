@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
@@ -14,7 +15,8 @@ import {
   type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { db } from '../../firebase/config'
+import { deleteObject, ref } from 'firebase/storage'
+import { db, storage } from '../../firebase/config'
 import type { NewTripInput, SharedCategories, Trip, TripStatus } from './types'
 
 const tripsCollection = collection(db, 'trips')
@@ -128,4 +130,51 @@ export async function updateTripMembers(
   )
 
   await batch.commit()
+}
+
+/** Firestore tillader max 500 skrivninger pr. batch — vi holder god afstand. */
+const DELETE_BATCH_SIZE = 400
+
+/**
+ * Sletter rejsens dage, segmenter og overnatninger (inkl. ejerens egne
+ * boardingkort-filer) og til sidst selve rejsen. Billeder og spor slettes
+ * først af deres egne features (se useDeleteTrip). Rejse-dokumentet slettes
+ * sidst, så en afbrudt sletning kan gentages — reglerne for billeder/spor
+ * slår trippen op for at se, om man er dens ejer.
+ */
+export async function deleteTripContent(tripId: string, ownerUid: string): Promise<void> {
+  const daysSnapshot = await getDocs(
+    query(collection(db, 'trips', tripId, 'days'), where('memberUids', 'array-contains', ownerUid)),
+  )
+  const staysSnapshot = await getDocs(
+    query(
+      collection(db, 'trips', tripId, 'stays'),
+      where('memberUids', 'array-contains', ownerUid),
+    ),
+  )
+  const segmentsSnapshots = await Promise.all(
+    daysSnapshot.docs.map((dayDoc) =>
+      getDocs(
+        query(collection(dayDoc.ref, 'segments'), where('memberUids', 'array-contains', ownerUid)),
+      ),
+    ),
+  )
+  const segmentDocs = segmentsSnapshots.flatMap((snapshot) => snapshot.docs)
+  const refs = [...segmentDocs, ...daysSnapshot.docs, ...staysSnapshot.docs].map((d) => d.ref)
+
+  for (let start = 0; start < refs.length; start += DELETE_BATCH_SIZE) {
+    const batch = writeBatch(db)
+    refs.slice(start, start + DELETE_BATCH_SIZE).forEach((docRef) => batch.delete(docRef))
+    await batch.commit()
+  }
+
+  // Storage lader kun uploaderen slette — rejsefællers boardingkort efterlades.
+  const boardingPaths = segmentDocs.flatMap((segDoc) =>
+    ((segDoc.data().boardingPasses ?? []) as { storagePath: string }[]).map((p) => p.storagePath),
+  )
+  await Promise.all(
+    boardingPaths.map((path) => deleteObject(ref(storage, path)).catch(() => undefined)),
+  )
+
+  await deleteDoc(doc(db, 'trips', tripId))
 }

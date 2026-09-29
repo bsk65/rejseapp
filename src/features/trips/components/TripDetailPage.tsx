@@ -13,6 +13,7 @@ import { useStays } from '../../stays/hooks/useStays'
 import { SummaryView } from '../../summary/components/SummaryView'
 import { formatDateRange } from '../logic/tripDates'
 import { useTrip } from '../hooks/useTrip'
+import { DeleteTripButton } from './DeleteTripButton'
 import { ShareTripDialog } from './ShareTripDialog'
 import { TripMapTab } from './TripMapTab'
 import styles from './TripDetailPage.module.css'
@@ -171,6 +172,15 @@ export function TripDetailPage() {
           days={days}
           photos={photos}
           stays={stays}
+        />
+      )}
+
+      {isOwner && activeTab === 'dage' && (
+        <DeleteTripButton
+          tripId={trip.id}
+          ownerUid={trip.ownerUid}
+          title={trip.title}
+          shared={trip.memberUids.length > 1}
         />
       )}
     </div>
