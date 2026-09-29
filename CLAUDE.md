@@ -23,7 +23,7 @@ Gælder hele projektet, ikke kun ved aflevering.
 
 ## Sprog (dansk/engelsk)
 
-Hele appen findes på dansk og engelsk (knap "English"/"Dansk" øverst på forsiden, rejsesiden, login og privatlivs-dialogen). **Stående regel:** al ny brugervendt tekst skal i både `da` og `en` — aldrig hardcodes i JSX/TS, heller ikke midlertidigt.
+Hele appen findes på dansk og engelsk (sprogvælgeren "DA | EN" øverst på forsiden, rejsesiden, login og privatlivs-dialogen — det aktive sprog er fremhævet; en knap med navnet på det *andet* sprog blev misforstået som det aktuelle). **Stående regel:** al ny brugervendt tekst skal i både `da` og `en` — aldrig hardcodes i JSX/TS, heller ikke midlertidigt.
 
 - Teksterne ligger i `src/shared/i18n/texts/<område>.ts` (`common`, `auth`, `trips`, `days`, `segments`, `stays`, `tracking`, `summary`), oprettet med `defineTexts({ da, en })` — TypeScript fejler, hvis en nøgle mangler på det ene sprog, og en test tjekker, at `{pladsholdere}` er ens. Nyt område tilføjes i `texts/index.ts`.
 - I komponenter: `const { t, locale } = useT()` og `t('område.nøgle', { param })`. Komponenten gentegnes selv ved sprogskift (`useSyncExternalStore`). `t` er samme funktion pr. sprog, så den kan stå i en effekt-afhængighedsliste.
