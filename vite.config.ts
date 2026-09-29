@@ -3,6 +3,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  // Byggetidspunktet vises som versionsnummer nederst på forsiden (AppVersion),
+  // så man kan se, om telefonen har hentet den nyeste version.
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     react(),
     VitePWA({

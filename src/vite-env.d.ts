@@ -14,3 +14,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+/** Byggetidspunkt (ISO), sat af define i vite.config.ts. */
+declare const __BUILD_TIME__: string

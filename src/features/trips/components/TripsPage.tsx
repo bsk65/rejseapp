@@ -3,6 +3,7 @@ import { useAuthActions } from '../../auth/hooks/useAuthActions'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { Button } from '../../../shared/ui/Button'
 import { AppQrButton } from '../../../shared/ui/AppQrButton'
+import { AppVersion } from '../../../shared/ui/AppVersion'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useNow } from '../../../shared/hooks/useNow'
 import { localIsoDate } from '../../../shared/utils/date'
@@ -73,6 +74,7 @@ export function TripsPage() {
       <a href={PRIVACY_URL} className={styles.policyLink} target="_blank" rel="noopener">
         Privatlivspolitik
       </a>
+      <AppVersion />
     </div>
   )
 }
