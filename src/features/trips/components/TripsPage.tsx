@@ -4,6 +4,7 @@ import { LangToggle } from '../../../shared/ui/LangToggle'
 import { usePrivacyUrl } from '../../auth/hooks/usePrivacyUrl'
 import { useAuthActions } from '../../auth/hooks/useAuthActions'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
+import { ProfileNameEditor } from '../../friends/components/ProfileNameEditor'
 import { Button } from '../../../shared/ui/Button'
 import { AppQrButton } from '../../../shared/ui/AppQrButton'
 import { AppVersion } from '../../../shared/ui/AppVersion'
@@ -56,6 +57,8 @@ export function TripsPage() {
           <AppQrButton />
         </div>
       </header>
+
+      <ProfileNameEditor uid={user.uid} />
 
       {showForm ? (
         <CreateTripForm ownerUid={user.uid} onCreated={() => setShowForm(false)} />

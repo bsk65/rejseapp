@@ -4,6 +4,7 @@ import { dayColorIndex } from '../../../shared/utils/dayColors'
 import type { Ticket } from '../logic/tickets'
 import { transportModeLabel } from '../types'
 import { TransportModeIcon } from './TransportModeIcon'
+import { TravelersTag } from './TravelersTag'
 import styles from './TicketCard.module.css'
 
 export function TicketCard({ ticket, onSelect }: { ticket: Ticket; onSelect: () => void }) {
@@ -45,6 +46,7 @@ export function TicketCard({ ticket, onSelect }: { ticket: Ticket; onSelect: () 
         {extras.length > 0 && ` · ${extras.join(' · ')}`}
       </p>
 
+      <TravelersTag segment={segment} />
       <div className={styles.bottom}>
         {segment.bookingRef ? (
           <span className={styles.booking}>{segment.bookingRef}</span>

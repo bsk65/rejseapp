@@ -1,0 +1,17 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ens egen transport fremhæves en smule, så man hurtigt finder sin egen. */
+.tag[data-mine='true'] {
+  color: var(--color-text);
+  font-weight: 600;
+}

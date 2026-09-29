@@ -93,7 +93,7 @@ React + TypeScript + Vite. Firebase (Auth, Firestore, Storage, Cloud Functions).
 
 ```
 users/{uid}
-  uid, email
+  uid, email, displayName? (selvvalgt navn, vises for rejsefæller)
 
 users/{uid}/friends/{friendUid}
   uid, email
@@ -113,6 +113,7 @@ trips/{tripId}/days/{dayId}/segments/{segId}
   carrier?, number?, departurePlace?, departureTime?, terminal?,
   arrivalPlace?, arrivalTime?, seat?, bookingRef?, freeText?,
   boardingPasses?: { storagePath, passengerName, ownerUid }[],
+  travelerUids?: string[] (hvem der rejser med; mangler = ownerUid),
   ownerUid (kun informativ), memberUids: string[]
 
 trips/{tripId}/stays/{stayId}
@@ -188,6 +189,15 @@ En overnatning (hotel, Airbnb …) ligger på rejsen — ikke på en dag — for
 8. Opsummering/afspilning
 
 Appen skal være kørende og brugbar efter hvert trin.
+
+## Navne og "hvem er med" på delte rejser
+
+- **Navn:** hver bruger kan sætte sit navn på forsiden (`ProfileNameEditor`, gemmes som `displayName` på `users/{uid}`). Uden navn vises første del af e-mailen (`displayNameOf`). Navnene vises også i "Del rejse"-vennelisten.
+- **`PeopleProvider`** (friends-featuren) omkranser rejsesiden og henter medlemmernes profiler én gang (`subscribeToProfiles`, `in`-forespørgsler á 30). Komponenter bruger `usePeople()` → `{ selfUid, memberUids, shared, nameOf }`.
+- **Transport har `travelerUids`** — hvem der rejser med. Ældre segmenter uden feltet hører til den, der oprettede dem (`travelersOf`), så ingen migrering var nødvendig. Formularen har "Hvem er med?" (`TravelersPicker`, mindst én skal være valgt), og kortene under Dage og i "Billetter & tider" viser navnene (`TravelersTag`: "Dig", "Dig, Lars" eller "Alle") — alt dette kun på delte rejser.
+- **"Billetter & tider"** har på delte rejser filteret "Kun mine" / "Alles", og **"Næste" tæller kun ned til ens egne afgange** (og overnatninger), ikke en rejsefælles.
+- **Scan boardingkort** sætter passageren på flyet: navnet i stregkoden ("KLAUSEN/BJARNE MR") sammenholdes med rejsefællernes navne (`matchPassenger`, æ/ø/å = AE/OE/AA); passer ingen entydigt, er det den, der scanner. Scannes et fly, som en anden allerede har lagt ind, tilføjes man som rejsende på det.
+- Ingen regelændringer: alle medlemmer må i forvejen rette segmenter, og man må skrive sin egen `users/{uid}`.
 
 ## Arkiv og sletning af rejser
 

@@ -4,6 +4,7 @@ import { errorMessage, type Message } from '../../../shared/i18n/message'
 import { localeFor } from '../../../shared/i18n/translate'
 import { formatDayDate } from '../../../shared/utils/date'
 import type { Day } from '../../days/types'
+import { usePeople } from '../../friends/hooks/usePeople'
 import { lookupFlight } from '../api/flightLookup'
 import { readBarcodeFromImage } from '../barcode'
 import { flightToSegmentDetails, pickFlight } from '../logic/flightToDetails'
@@ -11,6 +12,8 @@ import { parseBoardingPass } from '../logic/parseBoardingPass'
 import { planBoardingPass, type PlannedLeg } from '../logic/planBoardingPass'
 import type { TicketEntry } from '../logic/tickets'
 import { withBoardingPass } from '../logic/boardingPassImages'
+import { matchPassenger } from '../logic/matchPassenger'
+import { travelersOf } from '../logic/travelers'
 import {
   createSegment,
   deleteStorageFile,
@@ -62,6 +65,7 @@ export function useBoardingPassImport({
   userUid: string
   memberUids: string[]
 }) {
+  const { nameOf } = usePeople()
   const [pending, setPending] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [error, setError] = useState<Message | null>(null)
@@ -74,6 +78,13 @@ export function useBoardingPassImport({
       const pass = parseBoardingPass(await readBarcodeFromImage(file))
       const reference = days[0] ? new Date(`${days[0].date}T12:00:00Z`) : new Date()
       const plans = planBoardingPass(pass, days, entries, reference)
+      // Hvilken rejsefælles boardingkort er det? Navnet i stregkoden sammenholdes med
+      // rejsefællernes navne — ellers er det den, der scanner.
+      const passengerUid =
+        matchPassenger(
+          pass.passengerName,
+          memberUids.map((uid) => ({ uid, name: nameOf(uid) })),
+        ) ?? userUid
       const results: Message[] = []
       const locale = localeFor(getLang())
 
@@ -107,6 +118,9 @@ export function useBoardingPassImport({
           bookingRef: plan.leg.bookingRef,
           seat: plan.leg.seat,
           status: 'bekræftet',
+          travelerUids: existing
+            ? [...new Set([...travelersOf(existing.segment), passengerUid])]
+            : [passengerUid],
           ...(image
             ? { boardingPasses: withBoardingPass(existing?.segment.boardingPasses, image) }
             : {}),

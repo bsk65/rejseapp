@@ -44,6 +44,7 @@ function toSegment(docSnap: QueryDocumentSnapshot<DocumentData>): Segment {
     bookingRef: data.bookingRef ?? undefined,
     freeText: data.freeText ?? undefined,
     boardingPasses: data.boardingPasses ?? undefined,
+    travelerUids: data.travelerUids ?? undefined,
     ownerUid: data.ownerUid,
     memberUids: data.memberUids ?? [data.ownerUid],
   }

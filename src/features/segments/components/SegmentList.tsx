@@ -2,6 +2,7 @@ import { useT } from '../../../shared/i18n/useT'
 import { describeSegment } from '../logic/describeSegment'
 import type { Segment } from '../types'
 import { TransportModeIcon } from './TransportModeIcon'
+import { TravelersTag } from './TravelersTag'
 import styles from './SegmentList.module.css'
 
 /** Dagens transport som tydelige kort (samme form som overnatningerne) — tryk for detaljer. */
@@ -28,6 +29,7 @@ export function SegmentList({
               <span className={styles.text}>
                 <span className={styles.title}>{title}</span>
                 <span className={styles.detail}>{detail}</span>
+                <TravelersTag segment={segment} />
               </span>
             </button>
           </li>

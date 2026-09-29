@@ -6,7 +6,9 @@ import { StayForm } from '../../stays/components/StayForm'
 import { StayMomentCard } from '../../stays/components/StayMomentCard'
 import { stayMoments } from '../../stays/logic/stayDates'
 import type { Stay } from '../../stays/types'
+import { usePeople } from '../../friends/hooks/usePeople'
 import { useTripSegments } from '../hooks/useTripSegments'
+import { isTravelling } from '../logic/travelers'
 import {
   buildTicketTimeline,
   findNextItem,
@@ -37,15 +39,24 @@ export function TicketsView({
   const { t } = useT()
   const { entries } = useTripSegments(tripId, days, userUid)
   const now = useNow()
+  const { shared } = usePeople()
   const [filter, setFilter] = useState<TicketFilter>('alle')
+  const [onlyMine, setOnlyMine] = useState(false)
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null)
   const [editingStay, setEditingStay] = useState<Stay | null>(null)
 
   const allTickets = buildTickets(entries, 'alle')
-  const tickets = filter === 'overnatning' ? [] : buildTickets(entries, filter)
+  const shownEntries = onlyMine
+    ? entries.filter((entry) => isTravelling(entry.segment, userUid))
+    : entries
+  const tickets = filter === 'overnatning' ? [] : buildTickets(shownEntries, filter)
   const moments = filter === 'alle' || filter === 'overnatning' ? stayMoments(stays) : []
   const items = buildTicketTimeline(tickets, moments)
-  const next = findNextItem(items, now)
+  // "Næste" er ens egen næste afgang (eller en overnatning) — ikke en rejsefælles fly.
+  const next = findNextItem(
+    items.filter((item) => item.kind === 'stay' || isTravelling(item.ticket.segment, userUid)),
+    now,
+  )
   const nextTime = next && itemTime(next)
   const presentModes = TICKET_MODES.filter((mode) =>
     allTickets.some((ticket) => ticket.segment.mode === mode),
@@ -92,6 +103,21 @@ export function TicketsView({
   return (
     <div className={styles.view}>
       {scan}
+      {shared && (
+        <div className={styles.filters}>
+          {[false, true].map((mine) => (
+            <button
+              key={String(mine)}
+              type="button"
+              className={styles.chip}
+              data-active={onlyMine === mine}
+              onClick={() => setOnlyMine(mine)}
+            >
+              {mine ? t('people.whoseMine') : t('people.whoseAll')}
+            </button>
+          ))}
+        </div>
+      )}
       <TicketFilters
         modes={presentModes}
         hasStays={stays.length > 0}

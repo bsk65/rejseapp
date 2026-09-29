@@ -4,6 +4,7 @@ import { Button } from '../../../shared/ui/Button'
 import { TextField } from '../../../shared/ui/TextField'
 import { useAddFriendByEmail } from '../../friends/hooks/useAddFriendByEmail'
 import { useFriends } from '../../friends/hooks/useFriends'
+import { useProfiles } from '../../friends/hooks/useProfiles'
 import { useUpdateSharedCategories } from '../hooks/useUpdateSharedCategories'
 import { useUpdateTripMembers } from '../hooks/useUpdateTripMembers'
 import type { SharedCategories } from '../types'
@@ -24,6 +25,7 @@ export function ShareTripDialog({
 }) {
   const { t } = useT()
   const { friends } = useFriends(ownerUid)
+  const profiles = useProfiles(friends.map((friend) => friend.uid))
   const { addByEmail, pending: addingFriend, error: addError } = useAddFriendByEmail(ownerUid)
   const { saveMembers, pending: savingMembers } = useUpdateTripMembers()
   const { saveSharedCategories, pending: savingCategories } = useUpdateSharedCategories()
@@ -81,7 +83,12 @@ export function ShareTripDialog({
                   checked={selected.has(friend.uid)}
                   onChange={() => toggle(friend.uid)}
                 />
-                {friend.email}
+                {profiles[friend.uid]?.displayName?.trim()
+                  ? t('people.friendName', {
+                      name: profiles[friend.uid].displayName!.trim(),
+                      email: friend.email,
+                    })
+                  : friend.email}
               </label>
             </li>
           ))}

@@ -28,6 +28,11 @@ export type Segment = {
   bookingRef?: string
   freeText?: string
   boardingPasses?: BoardingPassImage[]
+  /**
+   * Hvem der rejser med (rejsefællers uid'er). Mangler den, er det den, der
+   * oprettede segmentet — se travelersOf i logic/travelers.ts.
+   */
+  travelerUids?: string[]
   /** Hvem der oprettede segmentet — kun informativ, ikke sikkerhedsrelevant. */
   ownerUid: string
   /** Denormaliseret fra rejsens memberUids — se CLAUDE.md. */

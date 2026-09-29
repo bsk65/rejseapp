@@ -8,6 +8,8 @@ import { useDeleteSegment } from '../hooks/useDeleteSegment'
 import { useRemoveBoardingPass } from '../hooks/useRemoveBoardingPass'
 import { BoardingPassButtons } from './BoardingPassButtons'
 import { FlightLookupButton } from './FlightLookupButton'
+import { TravelersPicker } from './TravelersPicker'
+import { travelersOf } from '../logic/travelers'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
 import { withAirlineCode } from '../logic/airlineCodes'
 import { transportModeLabel, type Segment, type SegmentDetails, type SegmentStatus } from '../types'
@@ -51,6 +53,7 @@ export function SegmentDetailForm({
     seat: segment.seat,
     bookingRef: segment.bookingRef,
     freeText: segment.freeText,
+    travelerUids: travelersOf(segment),
   })
   const { saveSegment, pending } = useUpdateSegment()
   const { removeSegment, pending: deleting } = useDeleteSegment()
@@ -85,6 +88,11 @@ export function SegmentDetailForm({
       <p className={styles.title}>{t('segments.detailsTitle', { mode: modeName })}</p>
 
       <BoardingPassButtons passes={passes} onRemove={removePass} />
+
+      <TravelersPicker
+        travelers={details.travelerUids ?? travelersOf(segment)}
+        onChange={(travelers) => set('travelerUids', travelers)}
+      />
 
       {showsCarrier && (
         <TextField

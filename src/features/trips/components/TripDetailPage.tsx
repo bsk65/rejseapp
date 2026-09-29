@@ -7,6 +7,7 @@ import { LangToggle } from '../../../shared/ui/LangToggle'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { DaysList } from '../../days/components/DaysList'
+import { PeopleProvider } from '../../friends/components/PeopleProvider'
 import { useDays } from '../../days/hooks/useDays'
 import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import { PhotoUploadButton } from '../../photos/components/PhotoUploadButton'
@@ -81,116 +82,118 @@ export function TripDetailPage() {
   const tabs: TabOption<TripTab>[] = TABS.map((tab) => ({ id: tab.id, label: t(tab.labelKey) }))
 
   return (
-    <div className={styles.page}>
-      <div className={styles.topBar}>
-        <Link to="/" className={styles.back}>
-          {t('trips.backMyTrips')}
-        </Link>
-        <div className={styles.topActions}>
-          <LangToggle />
-          <AppQrButton />
-        </div>
-      </div>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>{trip.title}</h1>
-          <p className={styles.meta}>{formatDateRange(trip.startDate, trip.days)}</p>
-        </div>
-        {isOwner && (
-          <button
-            type="button"
-            className={styles.shareButton}
-            onClick={() => setShowShareDialog(true)}
-          >
-            {t('trips.shareTrip')}
-          </button>
-        )}
-      </div>
-
-      {showShareDialog && (
-        <ShareTripDialog
-          tripId={trip.id}
-          ownerUid={trip.ownerUid}
-          memberUids={trip.memberUids}
-          sharedCategories={trip.sharedCategories}
-          onClose={() => setShowShareDialog(false)}
-        />
-      )}
-
-      <Tabs tabs={tabs} active={activeTab} onChange={selectTab} />
-
-      {/* Alle faner forbliver monteret (kun skjult), så f.eks. en igangværende
-          GPS-sporing på "Kort & spor" ikke stopper, når man skifter fane. */}
-      <div className={styles.tabPanel} hidden={activeTab !== 'dage'}>
-        <PhotoUploadButton
-          tripId={trip.id}
-          uploaderUid={user.uid}
-          tripOwnerUid={trip.ownerUid}
-          memberUids={trip.memberUids}
-          sharePhotos={trip.sharedCategories.photos}
-          days={days}
-        />
-        {unsortedPhotos.length > 0 && (
-          <div>
-            <p className={styles.sectionLabel}>{t('trips.photosWithoutDay')}</p>
-            <PhotoGallery tripId={trip.id} photos={unsortedPhotos} />
+    <PeopleProvider selfUid={user.uid} memberUids={trip.memberUids}>
+      <div className={styles.page}>
+        <div className={styles.topBar}>
+          <Link to="/" className={styles.back}>
+            {t('trips.backMyTrips')}
+          </Link>
+          <div className={styles.topActions}>
+            <LangToggle />
+            <AppQrButton />
           </div>
+        </div>
+        <div className={styles.header}>
+          <div>
+            <h1 className={styles.title}>{trip.title}</h1>
+            <p className={styles.meta}>{formatDateRange(trip.startDate, trip.days)}</p>
+          </div>
+          {isOwner && (
+            <button
+              type="button"
+              className={styles.shareButton}
+              onClick={() => setShowShareDialog(true)}
+            >
+              {t('trips.shareTrip')}
+            </button>
+          )}
+        </div>
+
+        {showShareDialog && (
+          <ShareTripDialog
+            tripId={trip.id}
+            ownerUid={trip.ownerUid}
+            memberUids={trip.memberUids}
+            sharedCategories={trip.sharedCategories}
+            onClose={() => setShowShareDialog(false)}
+          />
         )}
-        {staysError && <p className={styles.error}>{t(staysError)}</p>}
-        <DaysList
-          tripId={trip.id}
-          memberUids={trip.memberUids}
-          userUid={user.uid}
-          stays={stays}
-          days={days}
-          photos={photos}
-          loading={daysLoading}
-          highlightedDayId={highlightedDayId}
-        />
-      </div>
 
-      <div className={styles.tabPanel} hidden={activeTab !== 'billetter'}>
-        <TicketsView
-          tripId={trip.id}
-          days={days}
-          stays={stays}
-          userUid={user.uid}
-          memberUids={trip.memberUids}
-        />
-      </div>
+        <Tabs tabs={tabs} active={activeTab} onChange={selectTab} />
 
-      <div className={styles.tabPanel} hidden={activeTab !== 'kort'}>
-        <TripMapTab
-          trip={trip}
-          userUid={user.uid}
-          days={days}
-          photos={photos}
-          stays={stays}
-          onShowDay={showDay}
-        />
-      </div>
+        {/* Alle faner forbliver monteret (kun skjult), så f.eks. en igangværende
+          GPS-sporing på "Kort & spor" ikke stopper, når man skifter fane. */}
+        <div className={styles.tabPanel} hidden={activeTab !== 'dage'}>
+          <PhotoUploadButton
+            tripId={trip.id}
+            uploaderUid={user.uid}
+            tripOwnerUid={trip.ownerUid}
+            memberUids={trip.memberUids}
+            sharePhotos={trip.sharedCategories.photos}
+            days={days}
+          />
+          {unsortedPhotos.length > 0 && (
+            <div>
+              <p className={styles.sectionLabel}>{t('trips.photosWithoutDay')}</p>
+              <PhotoGallery tripId={trip.id} photos={unsortedPhotos} />
+            </div>
+          )}
+          {staysError && <p className={styles.error}>{t(staysError)}</p>}
+          <DaysList
+            tripId={trip.id}
+            memberUids={trip.memberUids}
+            userUid={user.uid}
+            stays={stays}
+            days={days}
+            photos={photos}
+            loading={daysLoading}
+            highlightedDayId={highlightedDayId}
+          />
+        </div>
 
-      {/* Opsummeringen monteres kun, mens fanen er åben — der er intet at
+        <div className={styles.tabPanel} hidden={activeTab !== 'billetter'}>
+          <TicketsView
+            tripId={trip.id}
+            days={days}
+            stays={stays}
+            userUid={user.uid}
+            memberUids={trip.memberUids}
+          />
+        </div>
+
+        <div className={styles.tabPanel} hidden={activeTab !== 'kort'}>
+          <TripMapTab
+            trip={trip}
+            userUid={user.uid}
+            days={days}
+            photos={photos}
+            stays={stays}
+            onShowDay={showDay}
+          />
+        </div>
+
+        {/* Opsummeringen monteres kun, mens fanen er åben — der er intet at
           bevare, og animationen skal ikke køre i baggrunden. */}
-      {activeTab === 'opsummering' && (
-        <SummaryView
-          tripId={trip.id}
-          userUid={user.uid}
-          dayCount={trip.days}
-          days={days}
-          photos={photos}
-          stays={stays}
-        />
-      )}
+        {activeTab === 'opsummering' && (
+          <SummaryView
+            tripId={trip.id}
+            userUid={user.uid}
+            dayCount={trip.days}
+            days={days}
+            photos={photos}
+            stays={stays}
+          />
+        )}
 
-      {isOwner && activeTab === 'dage' && (
-        <DeleteTripButton
-          tripId={trip.id}
-          ownerUid={trip.ownerUid}
-          title={trip.title}
-          shared={trip.memberUids.length > 1}
-        />
-      )}
-    </div>
+        {isOwner && activeTab === 'dage' && (
+          <DeleteTripButton
+            tripId={trip.id}
+            ownerUid={trip.ownerUid}
+            title={trip.title}
+            shared={trip.memberUids.length > 1}
+          />
+        )}
+      </div>
+    </PeopleProvider>
   )
 }
