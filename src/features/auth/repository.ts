@@ -13,7 +13,18 @@ export function subscribeToAcceptedPrivacyVersion(
 ): Unsubscribe {
   return onSnapshot(
     doc(db, 'users', uid),
-    (snap) => onChange((snap.data()?.privacyAcceptedVersion as string | undefined) ?? null),
+    // Metadata-ændringer med, så vi også får besked, når den ventende
+    // skrivning er bekræftet, selvom selve data ikke ændrer sig.
+    { includeMetadataChanges: true },
+    (snap) => {
+      const version = (snap.data()?.privacyAcceptedVersion as string | undefined) ?? null
+      // Ved login gemmer useEnsureUserProfile profilen (merge), og Firestore
+      // viser først den lokale, ventende skrivning — uden serverens felter.
+      // Den må ikke tolkes som "ikke accepteret", ellers blinker PrivacyGate
+      // ved hver åbning. Vent på serverens svar.
+      if (!version && snap.metadata.hasPendingWrites) return
+      onChange(version)
+    },
     onError,
   )
 }
