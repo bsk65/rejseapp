@@ -5,9 +5,11 @@ import { TextField } from '../../../shared/ui/TextField'
 import { useAddFriendByEmail } from '../../friends/hooks/useAddFriendByEmail'
 import { useFriends } from '../../friends/hooks/useFriends'
 import { useProfiles } from '../../friends/hooks/useProfiles'
+import { useRemoveFriend } from '../../friends/hooks/useRemoveFriend'
 import { useUpdateSharedCategories } from '../hooks/useUpdateSharedCategories'
 import { useUpdateTripMembers } from '../hooks/useUpdateTripMembers'
 import type { SharedCategories } from '../types'
+import { ShareFriendRow } from './ShareFriendRow'
 import styles from './ShareTripDialog.module.css'
 
 export function ShareTripDialog({
@@ -25,7 +27,19 @@ export function ShareTripDialog({
 }) {
   const { t } = useT()
   const { friends } = useFriends(ownerUid)
-  const profiles = useProfiles(friends.map((friend) => friend.uid))
+  const { remove: removeFriend } = useRemoveFriend()
+  const friendUids = friends.map((friend) => friend.uid)
+  // Rejsefæller, der er fjernet fra vennelisten, vises stadig, så delingen
+  // kan slås fra.
+  const otherMembers = memberUids.filter((uid) => uid !== ownerUid && !friendUids.includes(uid))
+  const profiles = useProfiles([...friendUids, ...otherMembers])
+
+  function labelOf(uid: string, fallbackEmail?: string): string {
+    const profile = profiles[uid]
+    const email = profile?.email ?? fallbackEmail ?? '…'
+    const name = profile?.displayName?.trim()
+    return name ? t('people.friendName', { name, email }) : email
+  }
   const { addByEmail, pending: addingFriend, error: addError } = useAddFriendByEmail(ownerUid)
   const { saveMembers, pending: savingMembers } = useUpdateTripMembers()
   const { saveSharedCategories, pending: savingCategories } = useUpdateSharedCategories()
@@ -71,26 +85,26 @@ export function ShareTripDialog({
     <div className={styles.dialog}>
       <p className={styles.title}>{t('trips.shareWith')}</p>
 
-      {friends.length === 0 ? (
+      {friends.length === 0 && otherMembers.length === 0 ? (
         <p className={styles.empty}>{t('trips.noFriends')}</p>
       ) : (
         <ul className={styles.list}>
           {friends.map((friend) => (
-            <li key={friend.uid}>
-              <label className={styles.friendRow}>
-                <input
-                  type="checkbox"
-                  checked={selected.has(friend.uid)}
-                  onChange={() => toggle(friend.uid)}
-                />
-                {profiles[friend.uid]?.displayName?.trim()
-                  ? t('people.friendName', {
-                      name: profiles[friend.uid].displayName!.trim(),
-                      email: friend.email,
-                    })
-                  : friend.email}
-              </label>
-            </li>
+            <ShareFriendRow
+              key={friend.uid}
+              label={labelOf(friend.uid, friend.email)}
+              checked={selected.has(friend.uid)}
+              onToggle={() => toggle(friend.uid)}
+              onRemove={() => removeFriend(ownerUid, friend.uid)}
+            />
+          ))}
+          {otherMembers.map((uid) => (
+            <ShareFriendRow
+              key={uid}
+              label={labelOf(uid)}
+              checked={selected.has(uid)}
+              onToggle={() => toggle(uid)}
+            />
           ))}
         </ul>
       )}

@@ -35,6 +35,65 @@
   font-size: 0.9rem;
 }
 
+.friendItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.friendLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.friendLine .friendRow {
+  flex: 1;
+  min-width: 0;
+}
+
+.friendName {
+  overflow-wrap: anywhere;
+}
+
+.removeFriend,
+.linkButton,
+.dangerLink {
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 0 6px;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.removeFriend,
+.linkButton {
+  color: var(--color-text-muted);
+}
+
+.dangerLink {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.confirmRemove {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-danger);
+  border-radius: 10px;
+}
+
+.confirmText {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
 .addFriend {
   display: flex;
   flex-direction: column;
