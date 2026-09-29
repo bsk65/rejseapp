@@ -17,6 +17,13 @@
   background: var(--color-surface);
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .title {
   margin: 0;
   font-size: 1.3rem;

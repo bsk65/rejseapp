@@ -11,3 +11,6 @@ export const PRIVACY_URL = '/privatliv.html'
 export function hasAcceptedCurrentPolicy(acceptedVersion: string | null | undefined): boolean {
   return acceptedVersion === PRIVACY_VERSION
 }
+
+/** Engelsk udgave af politikken — samme indhold og version som den danske. */
+export const PRIVACY_URL_EN = '/privacy.html'

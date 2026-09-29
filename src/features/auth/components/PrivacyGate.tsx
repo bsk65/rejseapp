@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
+import { LangToggle } from '../../../shared/ui/LangToggle'
 import { useAuthActions } from '../hooks/useAuthActions'
-import { PRIVACY_URL } from '../privacyVersion'
+import { usePrivacyUrl } from '../hooks/usePrivacyUrl'
 import styles from './PrivacyGate.module.css'
 
 /**
@@ -10,18 +12,20 @@ import styles from './PrivacyGate.module.css'
  * Kan bevidst ikke lukkes — kun accepteres, eller man kan logge ud.
  */
 export function PrivacyGate({ onAccept }: { onAccept: () => Promise<void> }) {
+  const { t } = useT()
+  const privacyUrl = usePrivacyUrl()
   const [checked, setChecked] = useState(false)
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [saveFailed, setSaveFailed] = useState(false)
   const { logout } = useAuthActions()
 
   async function handleContinue() {
     setPending(true)
-    setError(null)
+    setSaveFailed(false)
     try {
       await onAccept()
     } catch {
-      setError('Kunne ikke gemme din accept. Tjek forbindelsen, og prøv igen.')
+      setSaveFailed(true)
       setPending(false)
     }
   }
@@ -29,25 +33,24 @@ export function PrivacyGate({ onAccept }: { onAccept: () => Promise<void> }) {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>Privatlivspolitik</h1>
-        <p className={styles.text}>
-          Rejseappen gemmer dine rejser, billeder, boardingkort og — hvis du slår det til — dit
-          GPS-spor. Læs, hvordan oplysningerne bruges og deles, og bekræft, at du accepterer
-          privatlivspolitikken, for at fortsætte.
-        </p>
-        <a href={PRIVACY_URL} target="_blank" rel="noopener" className={styles.link}>
-          Læs privatlivspolitikken
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>{t('auth.privacyPolicy')}</h1>
+          <LangToggle />
+        </div>
+        <p className={styles.text}>{t('auth.gateText')}</p>
+        <a href={privacyUrl} target="_blank" rel="noopener" className={styles.link}>
+          {t('auth.gateRead')}
         </a>
         <label className={styles.checkRow}>
           <input type="checkbox" checked={checked} onChange={(e) => setChecked(e.target.checked)} />
-          Jeg accepterer privatlivspolitikken
+          {t('auth.gateAccept')}
         </label>
-        {error && <p className={styles.error}>{error}</p>}
+        {saveFailed && <p className={styles.error}>{t('auth.gateSaveError')}</p>}
         <Button type="button" disabled={!checked || pending} onClick={() => void handleContinue()}>
-          Fortsæt
+          {t('auth.gateContinue')}
         </Button>
         <button type="button" className={styles.logout} onClick={() => void logout()}>
-          Log ud
+          {t('auth.logout')}
         </button>
       </div>
     </div>

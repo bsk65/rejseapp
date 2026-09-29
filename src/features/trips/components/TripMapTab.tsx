@@ -11,6 +11,7 @@ import { groupTrackLines } from '../../tracking/logic/groupTrackLines'
 import { isRouteSource } from '../../tracking/types'
 import type { Trip } from '../types'
 import { TripMap, type MapFocus } from './TripMap'
+import { useT } from '../../../shared/i18n/useT'
 import styles from './TripDetailPage.module.css'
 
 /** Fanen "Kort & spor": kort, destinationsliste og sporing. */
@@ -29,6 +30,7 @@ export function TripMapTab({
   stays: Stay[]
   onShowDay: (dayId: string) => void
 }) {
+  const { t } = useT()
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null)
   const { points: trackPoints, error: trackError } = useTrack(trip.id, userUid)
   const trackLines = useMemo(
@@ -52,7 +54,7 @@ export function TripMapTab({
     setFocus({
       kind: 'selected',
       key: importId,
-      label: points[0].label ?? 'Importeret spor',
+      label: points[0].label ?? t('trips.importedTrack'),
       points: points.map(({ lat, lng }) => ({ lat, lng })),
     })
     mapAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })

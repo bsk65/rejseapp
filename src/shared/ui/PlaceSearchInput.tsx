@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react'
 import { searchPlaces } from '../api/nominatim'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import type { Place } from '../types/place'
+import { useT } from '../i18n/useT'
 import { TextField } from './TextField'
 import styles from './PlaceSearchInput.module.css'
 
 export function PlaceSearchInput({
-  label = 'Søg efter sted',
+  label,
   onSelect,
 }: {
   label?: string
   onSelect: (place: Place) => void
 }) {
+  const { t } = useT()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<Place[]>([])
   const [loading, setLoading] = useState(false)
@@ -32,7 +34,7 @@ export function PlaceSearchInput({
         setResults(await searchPlaces(debouncedQuery, controller.signal))
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return
-        setError('Kunne ikke søge efter steder.')
+        setError(t('common.placeSearchError'))
       } finally {
         setLoading(false)
       }
@@ -40,7 +42,7 @@ export function PlaceSearchInput({
     void run()
 
     return () => controller.abort()
-  }, [debouncedQuery, queryTooShort])
+  }, [debouncedQuery, queryTooShort, t])
 
   function handleSelect(place: Place) {
     onSelect(place)
@@ -51,12 +53,12 @@ export function PlaceSearchInput({
   return (
     <div className={styles.wrapper}>
       <TextField
-        label={label}
-        placeholder="Skriv en by eller et sted"
+        label={label ?? t('common.placeSearchLabel')}
+        placeholder={t('common.placeSearchPlaceholder')}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      {!queryTooShort && loading && <p className={styles.hint}>Søger…</p>}
+      {!queryTooShort && loading && <p className={styles.hint}>{t('common.searching')}</p>}
       {!queryTooShort && error && <p className={styles.error}>{error}</p>}
       {!queryTooShort && results.length > 0 && (
         <ul className={styles.results}>

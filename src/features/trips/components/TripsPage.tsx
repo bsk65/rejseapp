@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { useT } from '../../../shared/i18n/useT'
+import { LangToggle } from '../../../shared/ui/LangToggle'
+import { usePrivacyUrl } from '../../auth/hooks/usePrivacyUrl'
 import { useAuthActions } from '../../auth/hooks/useAuthActions'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { Button } from '../../../shared/ui/Button'
@@ -7,7 +10,7 @@ import { AppVersion } from '../../../shared/ui/AppVersion'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useNow } from '../../../shared/hooks/useNow'
 import { localIsoDate } from '../../../shared/utils/date'
-import { PRIVACY_URL } from '../../auth/privacyVersion'
+
 import { useTrips } from '../hooks/useTrips'
 import { splitTripsByArchive } from '../logic/tripArchive'
 import { CreateTripForm } from './CreateTripForm'
@@ -17,6 +20,8 @@ import styles from './TripsPage.module.css'
 type TripsTab = 'aktuelle' | 'arkiv'
 
 export function TripsPage() {
+  const { t } = useT()
+  const privacyUrl = usePrivacyUrl()
   const { user } = useAuthUser()
   const { logout } = useAuthActions()
   const { trips, loading } = useTrips(user?.uid ?? null)
@@ -29,17 +34,24 @@ export function TripsPage() {
   // Overståede rejser flyttes automatisk til Arkiv dagen efter sidste rejsedag.
   const { current, archived } = splitTripsByArchive(trips, today)
   const tabs: TabOption<TripsTab>[] = [
-    { id: 'aktuelle', label: 'Rejser' },
-    { id: 'arkiv', label: archived.length > 0 ? `Arkiv (${archived.length})` : 'Arkiv' },
+    { id: 'aktuelle', label: t('trips.tabCurrent') },
+    {
+      id: 'arkiv',
+      label:
+        archived.length > 0
+          ? t('trips.tabArchiveCount', { count: archived.length })
+          : t('trips.tabArchive'),
+    },
   ]
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Mine rejser</h1>
+        <h1 className={styles.title}>{t('trips.myTrips')}</h1>
         <div className={styles.headerActions}>
+          <LangToggle />
           <button className={styles.logout} onClick={() => void logout()}>
-            Log ud
+            {t('auth.logout')}
           </button>
           <AppQrButton />
         </div>
@@ -48,7 +60,7 @@ export function TripsPage() {
       {showForm ? (
         <CreateTripForm ownerUid={user.uid} onCreated={() => setShowForm(false)} />
       ) : (
-        <Button onClick={() => setShowForm(true)}>Opret ny rejse</Button>
+        <Button onClick={() => setShowForm(true)}>{t('trips.newTrip')}</Button>
       )}
 
       <Tabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
@@ -57,22 +69,18 @@ export function TripsPage() {
         <TripList
           trips={current}
           loading={loading}
-          emptyText={
-            archived.length > 0
-              ? 'Ingen kommende rejser. Overståede rejser ligger i Arkiv.'
-              : 'Du har ikke oprettet nogen rejser endnu.'
-          }
+          emptyText={archived.length > 0 ? t('trips.emptyCurrent') : t('trips.emptyNone')}
         />
       ) : (
         <TripList
           trips={archived}
           loading={loading}
-          emptyText="Overståede rejser havner her automatisk dagen efter sidste rejsedag."
+          emptyText={t('trips.emptyArchive')}
         />
       )}
 
-      <a href={PRIVACY_URL} className={styles.policyLink} target="_blank" rel="noopener">
-        Privatlivspolitik
+      <a href={privacyUrl} className={styles.policyLink} target="_blank" rel="noopener">
+        {t('auth.privacyPolicy')}
       </a>
       <AppVersion />
     </div>

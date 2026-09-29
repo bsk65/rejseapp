@@ -1,19 +1,24 @@
 import { useState, type FormEvent } from 'react'
+import type { TextKey } from '../../../shared/i18n/translator'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
+import { LangToggle } from '../../../shared/ui/LangToggle'
 import { TextField } from '../../../shared/ui/TextField'
 import { useAuthActions } from '../hooks/useAuthActions'
-import { PRIVACY_URL } from '../privacyVersion'
+import { usePrivacyUrl } from '../hooks/usePrivacyUrl'
 import styles from './LoginPage.module.css'
 
 type Mode = 'login' | 'signup' | 'reset'
 
-const SUBMIT_LABEL: Record<Mode, string> = {
-  login: 'Log ind',
-  signup: 'Opret bruger',
-  reset: 'Send link',
+const SUBMIT_LABEL: Record<Mode, TextKey> = {
+  login: 'auth.login',
+  signup: 'auth.signup',
+  reset: 'auth.sendLink',
 }
 
 export function LoginPage() {
+  const { t } = useT()
+  const privacyUrl = usePrivacyUrl()
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -35,14 +40,13 @@ export function LoginPage() {
   return (
     <div className={styles.page}>
       <form className={styles.form} onSubmit={(e) => void handleSubmit(e)}>
-        <h1 className={styles.title}>Rejseappen</h1>
-        {mode === 'reset' && (
-          <p className={styles.info}>
-            Skriv din e-mail, så sender vi et link, hvor du kan vælge en ny adgangskode.
-          </p>
-        )}
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>Rejseappen</h1>
+          <LangToggle />
+        </div>
+        {mode === 'reset' && <p className={styles.info}>{t('auth.resetInfo')}</p>}
         <TextField
-          label="E-mail"
+          label={t('auth.email')}
           type="email"
           autoComplete="email"
           value={email}
@@ -51,7 +55,7 @@ export function LoginPage() {
         />
         {mode !== 'reset' && (
           <TextField
-            label="Adgangskode"
+            label={t('auth.password')}
             type="password"
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             value={password}
@@ -65,27 +69,24 @@ export function LoginPage() {
           <label className={styles.consentRow}>
             <input type="checkbox" required />
             <span>
-              Jeg accepterer{' '}
-              <a href={PRIVACY_URL} target="_blank" rel="noopener">
-                privatlivspolitikken
+              {t('auth.acceptPrefix')}{' '}
+              <a href={privacyUrl} target="_blank" rel="noopener">
+                {t('auth.acceptLink')}
               </a>
             </span>
           </label>
         )}
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className={styles.error}>{t(error)}</p>}
         {resetSentTo && (
-          <p className={styles.success}>
-            Hvis der findes en bruger med {resetSentTo}, er der nu sendt et link dertil. Tjek også
-            spam-mappen. Når du har valgt en ny adgangskode, kan du logge ind her.
-          </p>
+          <p className={styles.success}>{t('auth.resetSent', { email: resetSentTo })}</p>
         )}
         <Button type="submit" disabled={pending}>
-          {SUBMIT_LABEL[mode]}
+          {t(SUBMIT_LABEL[mode])}
         </Button>
 
         {mode === 'login' && (
           <button type="button" className={styles.switchMode} onClick={() => switchMode('reset')}>
-            Glemt adgangskode?
+            {t('auth.forgotPassword')}
           </button>
         )}
         <button
@@ -94,13 +95,13 @@ export function LoginPage() {
           onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
         >
           {mode === 'login'
-            ? 'Ny her? Opret en bruger'
+            ? t('auth.toSignup')
             : mode === 'signup'
-              ? 'Har du allerede en bruger? Log ind'
-              : 'Tilbage til log ind'}
+              ? t('auth.toLogin')
+              : t('auth.backToLogin')}
         </button>
-        <a href={PRIVACY_URL} className={styles.policyLink} target="_blank" rel="noopener">
-          Privatlivspolitik
+        <a href={privacyUrl} className={styles.policyLink} target="_blank" rel="noopener">
+          {t('auth.privacyPolicy')}
         </a>
       </form>
     </div>

@@ -8,6 +8,7 @@ import { setCircleLayer } from '../../../shared/map/setCircleLayer'
 import { setLineLayer } from '../../../shared/map/setLineLayer'
 import { createStayMarker } from '../../../shared/map/stayMarker'
 import type { LatLng, Place } from '../../../shared/types/place'
+import { useT } from '../../../shared/i18n/useT'
 import styles from './TripMap.module.css'
 
 const ROUTE_SOURCE_ID = 'trip-route'
@@ -73,6 +74,7 @@ export function TripMap({
   focus: MapFocus
   onFocusChange: (focus: MapFocus) => void
 }) {
+  const { t } = useT()
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapLibreMap | null>(null)
   const [mapReady, setMapReady] = useState(false)
@@ -211,7 +213,7 @@ export function TripMap({
   })
 
   if (!hasContent) {
-    return <p className={styles.empty}>Tilføj destinationer for at se dem på kortet.</p>
+    return <p className={styles.empty}>{t('trips.mapEmpty')}</p>
   }
 
   return (
@@ -226,7 +228,7 @@ export function TripMap({
               onFocusChange(focus.kind === 'all' ? { kind: 'tracks' } : { kind: 'all' })
             }
           >
-            {focus.kind === 'all' ? 'Vis alle spor' : 'Vis hele rejsen'}
+            {focus.kind === 'all' ? t('trips.showAllTracks') : t('trips.showWholeTrip')}
           </button>
           {focus.kind === 'selected' && <span className={styles.focusLabel}>{focus.label}</span>}
         </div>

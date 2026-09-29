@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useT } from '../i18n/useT'
 import styles from './AppQrButton.module.css'
 
 /** Appens forside — ikke den aktuelle side, som kan kræve medlemskab af en rejse. */
@@ -12,6 +13,7 @@ function appUrl(): string {
  * søsterprojektet "3D bueskydning").
  */
 export function AppQrButton() {
+  const { t } = useT()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [open, setOpen] = useState(false)
   const [qrSrc, setQrSrc] = useState<string | null>(null)
@@ -60,7 +62,7 @@ export function AppQrButton() {
         type="button"
         className={styles.iconButton}
         onClick={show}
-        aria-label="Vis QR-kode til appen"
+        aria-label={t('common.qrShow')}
       >
         <img src="/icons/icon-192.png" alt="" className={styles.icon} />
       </button>
@@ -76,20 +78,20 @@ export function AppQrButton() {
       >
         <div className={styles.content}>
           <h2 className={styles.heading}>Rejseappen</h2>
-          <p className={styles.hint}>Scan koden med telefonens kamera for at åbne appen.</p>
+          <p className={styles.hint}>{t('common.qrHint')}</p>
           {qrSrc ? (
-            <img src={qrSrc} alt={`QR-kode til ${url}`} className={styles.qr} />
+            <img src={qrSrc} alt={t('common.qrAlt', { url })} className={styles.qr} />
           ) : (
             <div className={styles.qrPlaceholder} />
           )}
           <div className={styles.urlRow}>
             <input className={styles.url} value={url} readOnly onFocus={(e) => e.target.select()} />
             <button type="button" className={styles.copy} onClick={() => void copy()}>
-              {copied ? 'Kopieret' : 'Kopiér'}
+              {copied ? t('common.copied') : t('common.copy')}
             </button>
           </div>
           <button type="button" className={styles.close} onClick={close}>
-            Luk
+            {t('common.close')}
           </button>
         </div>
       </dialog>

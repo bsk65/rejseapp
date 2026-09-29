@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from 'react'
+import type { TextKey } from '../../../shared/i18n/translator'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceSearchInput } from '../../../shared/ui/PlaceSearchInput'
 import { TextField } from '../../../shared/ui/TextField'
@@ -19,13 +21,14 @@ export function CreateTripForm({
   ownerUid: string
   onCreated: () => void
 }) {
+  const { t } = useT()
   const [title, setTitle] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   // Tekst, ikke tal — ellers bliver et tomt felt til "0", og man ender med "04".
   const [daysText, setDaysText] = useState('')
   const [destinations, setDestinations] = useState<Place[]>([])
-  const [formError, setFormError] = useState<string | null>(null)
+  const [formError, setFormError] = useState<TextKey | null>(null)
   const { create, pending, error } = useCreateTrip(ownerUid)
   const { createDays } = useCreateDays()
 
@@ -68,11 +71,11 @@ export function CreateTripForm({
     event.preventDefault()
     const days = parseDayCount(daysText)
     if (!days) {
-      setFormError('Vælg en slutdato eller skriv antal dage.')
+      setFormError('trips.errorNoDays')
       return
     }
     if (days > MAX_DAYS) {
-      setFormError(`En rejse kan højst vare ${MAX_DAYS} dage.`)
+      setFormError('trips.errorTooManyDays')
       return
     }
     setFormError(null)
@@ -90,12 +93,18 @@ export function CreateTripForm({
   }
 
   const endBeforeStart = Boolean(startDate && endDate && endDate < startDate)
+  const shownError = formError ?? error
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <TextField label="Titel" value={title} onChange={(e) => setTitle(e.target.value)} required />
       <TextField
-        label="Startdato"
+        label={t('trips.title')}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <TextField
+        label={t('trips.startDate')}
         type="date"
         value={startDate}
         onChange={(e) => changeStartDate(e.target.value)}
@@ -104,24 +113,24 @@ export function CreateTripForm({
 
       <div className={styles.duration}>
         <TextField
-          label="Slutdato"
+          label={t('trips.endDate')}
           type="date"
           min={startDate || undefined}
           value={endDate}
           onChange={(e) => changeEndDate(e.target.value)}
         />
-        <span className={styles.or}>eller</span>
+        <span className={styles.or}>{t('trips.or')}</span>
         <TextField
-          label="Antal dage"
+          label={t('trips.dayCount')}
           inputMode="numeric"
-          placeholder="f.eks. 4"
+          placeholder={t('trips.dayCountPlaceholder')}
           value={daysText}
           onChange={(e) => changeDays(e.target.value)}
         />
       </div>
-      {endBeforeStart && <p className={styles.error}>Slutdatoen ligger før startdatoen.</p>}
+      {endBeforeStart && <p className={styles.error}>{t('trips.endBeforeStart')}</p>}
 
-      <PlaceSearchInput label="Tilføj destination" onSelect={addDestination} />
+      <PlaceSearchInput label={t('trips.addDestination')} onSelect={addDestination} />
       {destinations.length > 0 && (
         <ul className={styles.destinations}>
           {destinations.map((place) => (
@@ -130,7 +139,7 @@ export function CreateTripForm({
               <button
                 type="button"
                 onClick={() => removeDestination(place.placeId)}
-                aria-label={`Fjern ${place.name}`}
+                aria-label={t('trips.removeDestination', { name: place.name })}
               >
                 ×
               </button>
@@ -139,9 +148,9 @@ export function CreateTripForm({
         </ul>
       )}
 
-      {(formError || error) && <p className={styles.error}>{formError ?? error}</p>}
+      {shownError && <p className={styles.error}>{t(shownError, { max: MAX_DAYS })}</p>}
       <Button type="submit" disabled={pending || endBeforeStart}>
-        Opret rejse
+        {t('trips.createTrip')}
       </Button>
     </form>
   )

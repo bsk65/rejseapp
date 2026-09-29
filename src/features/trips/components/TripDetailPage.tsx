@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
+import type { TextKey } from '../../../shared/i18n/translator'
+import { useT } from '../../../shared/i18n/useT'
 import { AppQrButton } from '../../../shared/ui/AppQrButton'
+import { LangToggle } from '../../../shared/ui/LangToggle'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { DaysList } from '../../days/components/DaysList'
@@ -20,11 +23,11 @@ import styles from './TripDetailPage.module.css'
 
 type TripTab = 'dage' | 'billetter' | 'kort' | 'opsummering'
 
-const TABS: TabOption<TripTab>[] = [
-  { id: 'dage', label: 'Dage' },
-  { id: 'billetter', label: 'Billetter & tider' },
-  { id: 'kort', label: 'Kort & spor' },
-  { id: 'opsummering', label: 'Afspil' },
+const TABS: { id: TripTab; labelKey: TextKey }[] = [
+  { id: 'dage', labelKey: 'trips.tabDays' },
+  { id: 'billetter', labelKey: 'trips.tabTickets' },
+  { id: 'kort', labelKey: 'trips.tabMap' },
+  { id: 'opsummering', labelKey: 'trips.tabPlay' },
 ]
 
 function isTripTab(value: string | null): value is TripTab {
@@ -32,6 +35,7 @@ function isTripTab(value: string | null): value is TripTab {
 }
 
 export function TripDetailPage() {
+  const { t } = useT()
   const { tripId } = useParams<{ tripId: string }>()
   const { user } = useAuthUser()
   const { trip, loading } = useTrip(tripId)
@@ -60,28 +64,32 @@ export function TripDetailPage() {
   }
 
   if (loading) {
-    return <p className={styles.status}>Henter rejsen…</p>
+    return <p className={styles.status}>{t('trips.loadingTrip')}</p>
   }
 
   if (!trip || !user) {
     return (
       <div className={styles.page}>
-        <p className={styles.status}>Rejsen findes ikke, eller du har ikke adgang til den.</p>
-        <Link to="/">Tilbage til mine rejser</Link>
+        <p className={styles.status}>{t('trips.notFound')}</p>
+        <Link to="/">{t('common.backToTrips')}</Link>
       </div>
     )
   }
 
   const isOwner = user.uid === trip.ownerUid
   const unsortedPhotos = photos.filter((p) => !p.dayId)
+  const tabs: TabOption<TripTab>[] = TABS.map((tab) => ({ id: tab.id, label: t(tab.labelKey) }))
 
   return (
     <div className={styles.page}>
       <div className={styles.topBar}>
         <Link to="/" className={styles.back}>
-          ← Mine rejser
+          {t('trips.backMyTrips')}
         </Link>
-        <AppQrButton />
+        <div className={styles.topActions}>
+          <LangToggle />
+          <AppQrButton />
+        </div>
       </div>
       <div className={styles.header}>
         <div>
@@ -94,7 +102,7 @@ export function TripDetailPage() {
             className={styles.shareButton}
             onClick={() => setShowShareDialog(true)}
           >
-            Del rejse
+            {t('trips.shareTrip')}
           </button>
         )}
       </div>
@@ -109,7 +117,7 @@ export function TripDetailPage() {
         />
       )}
 
-      <Tabs tabs={TABS} active={activeTab} onChange={selectTab} />
+      <Tabs tabs={tabs} active={activeTab} onChange={selectTab} />
 
       {/* Alle faner forbliver monteret (kun skjult), så f.eks. en igangværende
           GPS-sporing på "Kort & spor" ikke stopper, når man skifter fane. */}
@@ -124,7 +132,7 @@ export function TripDetailPage() {
         />
         {unsortedPhotos.length > 0 && (
           <div>
-            <p className={styles.sectionLabel}>Billeder uden dag</p>
+            <p className={styles.sectionLabel}>{t('trips.photosWithoutDay')}</p>
             <PhotoGallery tripId={trip.id} photos={unsortedPhotos} />
           </div>
         )}

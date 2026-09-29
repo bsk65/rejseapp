@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { TextField } from '../../../shared/ui/TextField'
 import { useAddFriendByEmail } from '../../friends/hooks/useAddFriendByEmail'
@@ -21,6 +22,7 @@ export function ShareTripDialog({
   sharedCategories: SharedCategories
   onClose: () => void
 }) {
+  const { t } = useT()
   const { friends } = useFriends(ownerUid)
   const { addByEmail, pending: addingFriend, error: addError } = useAddFriendByEmail(ownerUid)
   const { saveMembers, pending: savingMembers } = useUpdateTripMembers()
@@ -65,10 +67,10 @@ export function ShareTripDialog({
 
   return (
     <div className={styles.dialog}>
-      <p className={styles.title}>Del rejse med</p>
+      <p className={styles.title}>{t('trips.shareWith')}</p>
 
       {friends.length === 0 ? (
-        <p className={styles.empty}>Du har ingen venner tilføjet endnu.</p>
+        <p className={styles.empty}>{t('trips.noFriends')}</p>
       ) : (
         <ul className={styles.list}>
           {friends.map((friend) => (
@@ -92,7 +94,7 @@ export function ShareTripDialog({
           checked={sharePhotos}
           onChange={(e) => setSharePhotos(e.target.checked)}
         />
-        Del billeder med rejsefæller
+        {t('trips.sharePhotos')}
       </label>
 
       <label className={styles.friendRow}>
@@ -101,33 +103,33 @@ export function ShareTripDialog({
           checked={shareTrack}
           onChange={(e) => setShareTrack(e.target.checked)}
         />
-        Del sporing og check-ins med rejsefæller
+        {t('trips.shareTrack')}
       </label>
 
       <div className={styles.addFriend}>
         <TextField
-          label="Tilføj ven via e-mail"
+          label={t('trips.addFriendEmail')}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        {addError && <p className={styles.error}>{addError}</p>}
+        {addError && <p className={styles.error}>{t(addError)}</p>}
         <Button
           type="button"
           variant="secondary"
           disabled={addingFriend}
           onClick={() => void handleAddFriend()}
         >
-          Tilføj ven
+          {t('trips.addFriend')}
         </Button>
       </div>
 
       <div className={styles.actions}>
         <Button type="button" variant="secondary" onClick={onClose}>
-          Annuller
+          {t('common.cancel')}
         </Button>
         <Button type="button" disabled={saving} onClick={() => void handleSave()}>
-          Gem deling
+          {t('trips.saveSharing')}
         </Button>
       </div>
     </div>

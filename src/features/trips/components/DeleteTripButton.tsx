@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { useDeleteTrip } from '../hooks/useDeleteTrip'
 import styles from './DeleteTripButton.module.css'
@@ -16,6 +17,7 @@ export function DeleteTripButton({
   title: string
   shared: boolean
 }) {
+  const { t } = useT()
   const navigate = useNavigate()
   const { deleteTrip, pending, error } = useDeleteTrip()
   const [confirming, setConfirming] = useState(false)
@@ -29,7 +31,7 @@ export function DeleteTripButton({
   if (!confirming) {
     return (
       <button type="button" className={styles.openButton} onClick={() => setConfirming(true)}>
-        Slet rejse
+        {t('trips.deleteTrip')}
       </button>
     )
   }
@@ -37,11 +39,10 @@ export function DeleteTripButton({
   return (
     <div className={styles.confirm}>
       <p className={styles.text}>
-        Slet “{title}” helt? Alle dage, transport, overnatninger, billeder og spor slettes, og det
-        kan ikke fortrydes.
-        {shared && ' Rejsen forsvinder også for dem, den er delt med.'}
+        {t('trips.deleteConfirm', { title })}
+        {shared && ` ${t('trips.deleteShared')}`}
       </p>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{t(error)}</p>}
       <div className={styles.actions}>
         <Button
           type="button"
@@ -49,7 +50,7 @@ export function DeleteTripButton({
           disabled={pending}
           onClick={() => setConfirming(false)}
         >
-          Fortryd
+          {t('common.undo')}
         </Button>
         <Button
           type="button"
@@ -57,7 +58,7 @@ export function DeleteTripButton({
           disabled={pending}
           onClick={() => void handleDelete()}
         >
-          {pending ? 'Sletter…' : 'Ja, slet rejsen'}
+          {pending ? t('trips.deleting') : t('trips.deleteYes')}
         </Button>
       </div>
     </div>

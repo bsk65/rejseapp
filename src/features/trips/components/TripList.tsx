@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import type { Trip } from '../types'
 import { TripListItem } from './TripListItem'
 import styles from './TripList.module.css'
@@ -11,8 +12,9 @@ export function TripList({
   loading: boolean
   emptyText: string
 }) {
+  const { t } = useT()
   if (loading) {
-    return <p className={styles.empty}>Henter dine rejser…</p>
+    return <p className={styles.empty}>{t('trips.loadingTrips')}</p>
   }
 
   if (trips.length === 0) {

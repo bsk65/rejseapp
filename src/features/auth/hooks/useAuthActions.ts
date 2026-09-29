@@ -6,33 +6,36 @@ import {
 } from 'firebase/auth'
 import { useState } from 'react'
 import { auth } from '../../../firebase/config'
+import { getLang } from '../../../shared/i18n/lang'
+import type { TextKey } from '../../../shared/i18n/translator'
 import { PRIVACY_VERSION } from '../privacyVersion'
 import { acceptPrivacyPolicy } from '../repository'
 
-function toErrorMessage(error: unknown): string {
+/** Fejlen som tekst-nøgle, så den vises på det aktuelle sprog, også efter et sprogskift. */
+function toErrorKey(error: unknown): TextKey {
   if (error instanceof Error && 'code' in error) {
     const code = (error as { code: string }).code
     if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
-      return 'Forkert e-mail eller adgangskode.'
+      return 'auth.errorCredentials'
     }
     if (code === 'auth/email-already-in-use') {
-      return 'Der findes allerede en bruger med denne e-mail.'
+      return 'auth.errorEmailInUse'
     }
     if (code === 'auth/weak-password') {
-      return 'Adgangskoden skal være mindst 6 tegn.'
+      return 'auth.errorWeakPassword'
     }
     if (code === 'auth/invalid-email') {
-      return 'Ugyldig e-mailadresse.'
+      return 'auth.errorInvalidEmail'
     }
     if (code === 'auth/too-many-requests') {
-      return 'For mange forsøg lige nu. Vent lidt, og prøv igen.'
+      return 'auth.errorTooMany'
     }
   }
-  return 'Der skete en fejl. Prøv igen.'
+  return 'auth.errorGeneric'
 }
 
 export function useAuthActions() {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TextKey | null>(null)
   const [pending, setPending] = useState(false)
 
   async function login(email: string, password: string) {
@@ -41,7 +44,7 @@ export function useAuthActions() {
     try {
       await signInWithEmailAndPassword(auth, email, password)
     } catch (err) {
-      setError(toErrorMessage(err))
+      setError(toErrorKey(err))
     } finally {
       setPending(false)
     }
@@ -55,7 +58,7 @@ export function useAuthActions() {
       // Accepten blev givet med hakket i formularen (kræves for at oprette).
       await acceptPrivacyPolicy(credential.user.uid, PRIVACY_VERSION)
     } catch (err) {
-      setError(toErrorMessage(err))
+      setError(toErrorKey(err))
     } finally {
       setPending(false)
     }
@@ -70,11 +73,11 @@ export function useAuthActions() {
     setPending(true)
     setError(null)
     try {
-      auth.languageCode = 'da'
+      auth.languageCode = getLang()
       await sendPasswordResetEmail(auth, email)
       return true
     } catch (err) {
-      setError(toErrorMessage(err))
+      setError(toErrorKey(err))
       return false
     } finally {
       setPending(false)
