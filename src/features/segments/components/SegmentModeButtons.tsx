@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import { transportModeLabel, type TransportMode } from '../types'
 import { TransportModeIcon } from './TransportModeIcon'
 import styles from './SegmentModeButtons.module.css'
@@ -11,6 +12,7 @@ export function SegmentModeButtons({
   onAdd: (mode: TransportMode) => void
   disabled?: boolean
 }) {
+  const { t } = useT()
   return (
     <div className={styles.row}>
       {modes.map((mode) => (
@@ -20,7 +22,7 @@ export function SegmentModeButtons({
           className={styles.button}
           disabled={disabled}
           onClick={() => onAdd(mode)}
-          aria-label={`Tilføj ${transportModeLabel[mode].toLowerCase()}`}
+          aria-label={t('segments.addMode', { mode: t(transportModeLabel[mode]).toLowerCase() })}
         >
           <TransportModeIcon mode={mode} />
         </button>

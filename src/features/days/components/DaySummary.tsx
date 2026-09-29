@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import type { Place } from '../../../shared/types/place'
 import { TransportModeIcon } from '../../segments/components/TransportModeIcon'
 import type { Segment } from '../../segments/types'
@@ -21,6 +22,7 @@ export function DaySummary({
   stayEvents: DayStayEvent[]
   photoCount: number
 }) {
+  const { t } = useT()
   const route = routeLabel(from, to)
   // Natten til næste dag er den, der er relevant at se — ikke udtjekningen.
   const sleep = stayEvents.find((event) => event.kind !== 'udtjek')
@@ -28,7 +30,9 @@ export function DaySummary({
 
   return (
     <div className={styles.summary}>
-      <span className={route ? styles.route : styles.empty}>{route ?? 'Intet planlagt endnu'}</span>
+      <span className={route ? styles.route : styles.empty}>
+        {route ?? t('days.nothingPlanned')}
+      </span>
       {hasDetails && (
         <span className={styles.chips}>
           {segments.map((segment) => (

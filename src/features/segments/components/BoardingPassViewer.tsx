@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useStorageUrl } from '../../../shared/hooks/useStorageUrl'
+import { useT } from '../../../shared/i18n/useT'
 import { useWakeLock } from '../../../shared/hooks/useWakeLock'
 import { formatPassengerName } from '../logic/boardingPassImages'
 import type { BoardingPassImage } from '../types'
@@ -17,6 +18,7 @@ export function BoardingPassViewer({
   pass: BoardingPassImage
   onClose: () => void
 }) {
+  const { t } = useT()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const url = useStorageUrl(pass.storagePath)
   useWakeLock(true)
@@ -36,13 +38,11 @@ export function BoardingPassViewer({
       <div className={styles.content}>
         <p className={styles.name}>{formatPassengerName(pass.passengerName)}</p>
         {url ? (
-          <img src={url} alt="Boardingkort" className={styles.image} />
+          <img src={url} alt={t('segments.passAlt')} className={styles.image} />
         ) : (
-          <p className={styles.loading}>Henter boardingkort…</p>
+          <p className={styles.loading}>{t('segments.loadingPass')}</p>
         )}
-        <p className={styles.hint}>
-          Skru op for lysstyrken, hvis scanneren har svært ved at læse koden. Tryk for at lukke.
-        </p>
+        <p className={styles.hint}>{t('segments.brightnessHint')}</p>
       </div>
     </dialog>
   )

@@ -19,7 +19,9 @@ export function TripListItem({ trip }: { trip: Trip }) {
         <div>
           <p className={styles.title}>
             {trip.title}
-            {trip.memberUids.length > 1 && <span className={styles.shared}>{t('trips.shared')}</span>}
+            {trip.memberUids.length > 1 && (
+              <span className={styles.shared}>{t('trips.shared')}</span>
+            )}
           </p>
           <p className={styles.meta}>{formatDateRange(trip.startDate, trip.days)}</p>
           {trip.destinations.length > 0 && (

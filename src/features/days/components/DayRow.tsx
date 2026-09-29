@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { formatDayDate } from '../../../shared/utils/date'
 import { dayColorIndex } from '../../../shared/utils/dayColors'
@@ -49,6 +50,7 @@ export function DayRow({
   isToday: boolean
   onToggle: () => void
 }) {
+  const { t, locale } = useT()
   const { setFromPlace, setToPlace } = useDayPlace()
   const { segments } = useSegments(tripId, day.id, userUid)
   const fromPlace = effectiveFromPlace(day, previousDay)
@@ -70,9 +72,9 @@ export function DayRow({
         aria-controls={bodyId}
       >
         <span className={styles.titleLine}>
-          <span className={styles.dayNumber}>Dag {day.dayNumber}</span>
-          <span className={styles.date}>{formatDayDate(day.date)}</span>
-          {isToday && <span className={styles.today}>I dag</span>}
+          <span className={styles.dayNumber}>{t('days.dayN', { n: day.dayNumber })}</span>
+          <span className={styles.date}>{formatDayDate(day.date, locale)}</span>
+          {isToday && <span className={styles.today}>{t('days.today')}</span>}
           <span className={styles.chevron} aria-hidden="true">
             ›
           </span>
@@ -92,12 +94,12 @@ export function DayRow({
         <div id={bodyId} className={styles.body}>
           <div className={styles.places}>
             <PlaceField
-              label="Fra"
+              label={t('days.from')}
               place={fromPlace}
               onSelect={(place) => void setFromPlace(tripId, day, place)}
             />
             <PlaceField
-              label="Til"
+              label={t('days.to')}
               place={day.toPlace}
               onSelect={(place) => void setToPlace(tripId, day, nextDay, place)}
             />

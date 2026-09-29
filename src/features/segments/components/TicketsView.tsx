@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNow } from '../../../shared/hooks/useNow'
+import { useT } from '../../../shared/i18n/useT'
 import type { Day } from '../../days/types'
 import { StayForm } from '../../stays/components/StayForm'
 import { StayMomentCard } from '../../stays/components/StayMomentCard'
@@ -33,6 +34,7 @@ export function TicketsView({
   userUid: string
   memberUids: string[]
 }) {
+  const { t } = useT()
   const { entries } = useTripSegments(tripId, days, userUid)
   const now = useNow()
   const [filter, setFilter] = useState<TicketFilter>('alle')
@@ -46,7 +48,7 @@ export function TicketsView({
   const next = findNextItem(items, now)
   const nextTime = next && itemTime(next)
   const presentModes = TICKET_MODES.filter((mode) =>
-    allTickets.some((t) => t.segment.mode === mode),
+    allTickets.some((ticket) => ticket.segment.mode === mode),
   )
   const dayNumberOf = (date: string) => days.find((day) => day.date === date)?.dayNumber
 
@@ -82,10 +84,7 @@ export function TicketsView({
     return (
       <div className={styles.view}>
         {scan}
-        <p className={styles.empty}>
-          Ingen fly, tog, busser, færger eller overnatninger endnu. Tilføj dem under de enkelte dage
-          på fanen “Dage” — så samles de her i tidsorden.
-        </p>
+        <p className={styles.empty}>{t('segments.ticketsEmpty')}</p>
       </div>
     )
   }
@@ -123,7 +122,7 @@ export function TicketsView({
       {next && nextTime && (
         <section className={styles.next}>
           <p className={styles.nextLabel}>
-            Næste · <strong>{formatCountdown(nextTime, now)}</strong>
+            {t('segments.next')} · <strong>{formatCountdown(nextTime, now, t)}</strong>
           </p>
           {renderItem(next)}
         </section>

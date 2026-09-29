@@ -1,12 +1,15 @@
-import { formatDayDate } from '../../../shared/utils/date'
 import { useState } from 'react'
+import { getLang } from '../../../shared/i18n/lang'
+import { errorMessage, type Message } from '../../../shared/i18n/message'
+import { localeFor } from '../../../shared/i18n/translate'
+import { formatDayDate } from '../../../shared/utils/date'
 import { lookupFlight } from '../api/flightLookup'
 import { flightToSegmentDetails, pickFlight } from '../logic/flightToDetails'
 import type { SegmentDetails } from '../types'
 
 export function useFlightLookup() {
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Message | null>(null)
 
   /** Slår flyet op og returnerer de felter, der kan udfyldes — eller undefined. */
   async function lookup(
@@ -19,14 +22,15 @@ export function useFlightLookup() {
     try {
       const flight = pickFlight(await lookupFlight(flightNumber, date), fromAirport)
       if (!flight) {
-        setError(
-          `Fandt ikke ${flightNumber} ${formatDayDate(date)}. Flyver det en anden dag, eller er flynummeret forkert?`,
-        )
+        setError({
+          key: 'segments.lookupNotFound',
+          params: { flight: flightNumber, date: formatDayDate(date, localeFor(getLang())) },
+        })
         return undefined
       }
       return flightToSegmentDetails(flight)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kunne ikke slå flyet op.')
+      setError(errorMessage(err, 'segments.lookupFailed'))
       return undefined
     } finally {
       setPending(false)

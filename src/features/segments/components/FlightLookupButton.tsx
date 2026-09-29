@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import { formatDayDate } from '../../../shared/utils/date'
 import { Button } from '../../../shared/ui/Button'
 import { useFlightLookup } from '../hooks/useFlightLookup'
@@ -18,6 +19,7 @@ export function FlightLookupButton({
   date: string
   onFound: (details: Partial<SegmentDetails>) => void
 }) {
+  const { t, locale } = useT()
   const { lookup, pending, error } = useFlightLookup()
   const canLookup = Boolean(flightNumber && flightNumber.trim().length >= 3)
 
@@ -35,14 +37,17 @@ export function FlightLookupButton({
         disabled={!canLookup || pending}
         onClick={() => void handleClick()}
       >
-        {pending ? 'Slår op…' : 'Hent flyoplysninger'}
+        {pending ? t('segments.lookingUp') : t('segments.lookupButton')}
       </Button>
       <p className={styles.hint}>
         {canLookup
-          ? `Udfylder lufthavne, tider og terminal for ${flightNumber} ${formatDayDate(date)}.`
-          : 'Skriv flynummeret (f.eks. SK1415), så kan resten hentes automatisk.'}
+          ? t('segments.lookupHint', {
+              flight: flightNumber ?? '',
+              date: formatDayDate(date, locale),
+            })
+          : t('segments.lookupNeedNumber')}
       </p>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{t(error.key, error.params)}</p>}
     </div>
   )
 }

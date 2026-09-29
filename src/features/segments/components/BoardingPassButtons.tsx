@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { formatPassengerName } from '../logic/boardingPassImages'
 import type { BoardingPassImage } from '../types'
 import { BoardingPassViewer } from './BoardingPassViewer'
@@ -15,6 +16,7 @@ export function BoardingPassButtons({
   passes: BoardingPassImage[] | undefined
   onRemove?: (pass: BoardingPassImage) => Promise<void>
 }) {
+  const { t } = useT()
   const [showing, setShowing] = useState<BoardingPassImage | null>(null)
   const [confirming, setConfirming] = useState<string | null>(null)
 
@@ -26,7 +28,7 @@ export function BoardingPassButtons({
         <div key={pass.storagePath} className={styles.row}>
           <button type="button" className={styles.show} onClick={() => setShowing(pass)}>
             <span aria-hidden="true">🎫</span>
-            Vis boardingkort · {formatPassengerName(pass.passengerName)}
+            {t('segments.showPass', { name: formatPassengerName(pass.passengerName) })}
           </button>
           {onRemove &&
             (confirming === pass.storagePath ? (
@@ -35,16 +37,18 @@ export function BoardingPassButtons({
                 className={styles.confirmRemove}
                 onClick={() => void onRemove(pass).then(() => setConfirming(null))}
               >
-                Ja, fjern
+                {t('segments.removeYes')}
               </button>
             ) : (
               <button
                 type="button"
                 className={styles.remove}
                 onClick={() => setConfirming(pass.storagePath)}
-                aria-label={`Fjern boardingkort for ${formatPassengerName(pass.passengerName)}`}
+                aria-label={t('segments.removePassLabel', {
+                  name: formatPassengerName(pass.passengerName),
+                })}
               >
-                Fjern
+                {t('segments.remove')}
               </button>
             ))}
         </div>

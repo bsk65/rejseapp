@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import type { TextKey } from '../../../shared/i18n/translator'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { TextField } from '../../../shared/ui/TextField'
@@ -11,14 +13,14 @@ import { withAirlineCode } from '../logic/airlineCodes'
 import { transportModeLabel, type Segment, type SegmentDetails, type SegmentStatus } from '../types'
 import styles from './SegmentDetailForm.module.css'
 
-const carrierLabel: Partial<Record<Segment['mode'], string>> = {
-  fly: 'Selskab',
-  tog: 'Operatør',
+const carrierLabel: Partial<Record<Segment['mode'], TextKey>> = {
+  fly: 'segments.carrierAirline',
+  tog: 'segments.carrierOperator',
 }
 
-const numberLabel: Partial<Record<Segment['mode'], string>> = {
-  fly: 'Flynummer',
-  tog: 'Tognummer',
+const numberLabel: Partial<Record<Segment['mode'], TextKey>> = {
+  fly: 'segments.numberFlight',
+  tog: 'segments.numberTrain',
 }
 
 export function SegmentDetailForm({
@@ -35,6 +37,8 @@ export function SegmentDetailForm({
   segment: Segment
   onClose: () => void
 }) {
+  const { t } = useT()
+  const modeName = t(transportModeLabel[segment.mode])
   const [details, setDetails] = useState<SegmentDetails>({
     status: segment.status,
     carrier: segment.carrier,
@@ -78,20 +82,20 @@ export function SegmentDetailForm({
 
   return (
     <div className={styles.form}>
-      <p className={styles.title}>{transportModeLabel[segment.mode]}-detaljer</p>
+      <p className={styles.title}>{t('segments.detailsTitle', { mode: modeName })}</p>
 
       <BoardingPassButtons passes={passes} onRemove={removePass} />
 
       {showsCarrier && (
         <TextField
-          label={carrierLabel[segment.mode] ?? 'Selskab'}
+          label={t(carrierLabel[segment.mode] ?? 'segments.carrierCompany')}
           value={details.carrier ?? ''}
           onChange={(e) => set('carrier', e.target.value || undefined)}
         />
       )}
       {showsCarrier && (
         <TextField
-          label={numberLabel[segment.mode] ?? 'Nummer'}
+          label={t(numberLabel[segment.mode] ?? 'segments.number')}
           value={details.number ?? ''}
           onChange={(e) => set('number', e.target.value || undefined)}
         />
@@ -105,38 +109,38 @@ export function SegmentDetailForm({
       )}
 
       <PlaceField
-        label="Fra"
+        label={t('days.from')}
         place={details.departurePlace}
         onSelect={(place) => set('departurePlace', place)}
       />
       <TextField
-        label="Afgangstidspunkt"
+        label={t('segments.departureTime')}
         type="datetime-local"
         value={details.departureTime ?? ''}
         onChange={(e) => set('departureTime', e.target.value || undefined)}
       />
       {showsTerminal && (
         <TextField
-          label="Terminal"
+          label={t('segments.terminal')}
           value={details.terminal ?? ''}
           onChange={(e) => set('terminal', e.target.value || undefined)}
         />
       )}
 
       <PlaceField
-        label="Til"
+        label={t('days.to')}
         place={details.arrivalPlace}
         onSelect={(place) => set('arrivalPlace', place)}
       />
       <TextField
-        label="Ankomsttidspunkt"
+        label={t('segments.arrivalTime')}
         type="datetime-local"
         value={details.arrivalTime ?? ''}
         onChange={(e) => set('arrivalTime', e.target.value || undefined)}
       />
       {showsSeat && (
         <TextField
-          label={segment.mode === 'fly' ? 'Sæde' : 'Vogn/plads'}
+          label={segment.mode === 'fly' ? t('segments.seatFly') : t('segments.seatTrain')}
           value={details.seat ?? ''}
           onChange={(e) => set('seat', e.target.value || undefined)}
         />
@@ -144,14 +148,14 @@ export function SegmentDetailForm({
 
       {showsCarrier && (
         <TextField
-          label="Booking-ref"
+          label={t('segments.bookingRef')}
           value={details.bookingRef ?? ''}
           onChange={(e) => set('bookingRef', e.target.value || undefined)}
         />
       )}
 
       <TextField
-        label="Note"
+        label={t('segments.note')}
         value={details.freeText ?? ''}
         onChange={(e) => set('freeText', e.target.value || undefined)}
       />
@@ -164,17 +168,17 @@ export function SegmentDetailForm({
             set('status', (e.target.checked ? 'bekræftet' : 'planlagt') satisfies SegmentStatus)
           }
         />
-        Bekræftet booking
+        {t('segments.confirmedBooking')}
       </label>
 
       {confirmingDelete ? (
         <div className={styles.confirmDelete}>
           <p className={styles.confirmText}>
-            Slet denne {transportModeLabel[segment.mode].toLowerCase()}-booking helt?
+            {t('segments.deleteConfirm', { mode: modeName.toLowerCase() })}
           </p>
           <div className={styles.actions}>
             <Button type="button" variant="secondary" onClick={() => setConfirmingDelete(false)}>
-              Fortryd
+              {t('common.undo')}
             </Button>
             <Button
               type="button"
@@ -182,7 +186,7 @@ export function SegmentDetailForm({
               disabled={deleting}
               onClick={() => void handleDelete()}
             >
-              Ja, slet
+              {t('segments.deleteYes')}
             </Button>
           </div>
         </div>
@@ -194,13 +198,13 @@ export function SegmentDetailForm({
             className={styles.deleteButton}
             onClick={() => setConfirmingDelete(true)}
           >
-            Slet
+            {t('common.delete')}
           </Button>
           <Button type="button" variant="secondary" onClick={onClose}>
-            Annuller
+            {t('common.cancel')}
           </Button>
           <Button type="button" disabled={pending} onClick={() => void handleSave()}>
-            Gem
+            {t('common.save')}
           </Button>
         </div>
       )}

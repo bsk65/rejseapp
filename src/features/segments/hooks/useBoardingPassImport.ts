@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { getLang } from '../../../shared/i18n/lang'
+import { errorMessage, type Message } from '../../../shared/i18n/message'
+import { localeFor } from '../../../shared/i18n/translate'
 import { formatDayDate } from '../../../shared/utils/date'
 import type { Day } from '../../days/types'
 import { lookupFlight } from '../api/flightLookup'
@@ -60,8 +63,8 @@ export function useBoardingPassImport({
   memberUids: string[]
 }) {
   const [pending, setPending] = useState(false)
-  const [messages, setMessages] = useState<string[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [error, setError] = useState<Message | null>(null)
 
   async function importImage(file: File): Promise<void> {
     setPending(true)
@@ -71,7 +74,8 @@ export function useBoardingPassImport({
       const pass = parseBoardingPass(await readBarcodeFromImage(file))
       const reference = days[0] ? new Date(`${days[0].date}T12:00:00Z`) : new Date()
       const plans = planBoardingPass(pass, days, entries, reference)
-      const results: string[] = []
+      const results: Message[] = []
+      const locale = localeFor(getLang())
 
       // Selve billedet gemmes også (én gang, også ved flere strækninger), så
       // boardingkortet kan vises ved gaten. Fejler det, gemmes flyet alligevel.
@@ -83,15 +87,16 @@ export function useBoardingPassImport({
               ownerUid: userUid,
             }))
             .catch(() => {
-              results.push('Boardingkortets billede kunne ikke gemmes — flyet gemmes alligevel.')
+              results.push({ key: 'segments.imageNotSaved' })
               return undefined
             })
         : undefined
 
       for (const plan of plans) {
-        const label = `${plan.flightNumber} ${formatDayDate(plan.date)}`
+        const label = `${plan.flightNumber} ${formatDayDate(plan.date, locale)}`
+        const seat = plan.leg.seat
         if (!plan.dayId) {
-          results.push(`${label} ligger uden for rejsens datoer og blev ikke gemt.`)
+          results.push({ key: 'segments.outsideTrip', params: { label } })
           continue
         }
         const existing = entries.find((e) => e.segment.id === plan.existingSegmentId)
@@ -117,15 +122,23 @@ export function useBoardingPassImport({
             (old) => !details.boardingPasses?.some((kept) => kept.storagePath === old.storagePath),
           )
           await Promise.all(replaced.map((old) => deleteStorageFile(old.storagePath)))
-          results.push(`${label} er opdateret${plan.leg.seat ? ` (sæde ${plan.leg.seat})` : ''}.`)
+          results.push(
+            seat
+              ? { key: 'segments.updatedSeat', params: { label, seat } }
+              : { key: 'segments.updated', params: { label } },
+          )
         } else {
           await createSegment(tripId, plan.dayId, userUid, memberUids, 'fly', details)
-          results.push(`${label} er tilføjet${plan.leg.seat ? ` (sæde ${plan.leg.seat})` : ''}.`)
+          results.push(
+            seat
+              ? { key: 'segments.addedSeat', params: { label, seat } }
+              : { key: 'segments.added', params: { label } },
+          )
         }
       }
       setMessages(results)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kunne ikke læse boardingkortet.')
+      setError(errorMessage(err, 'segments.readFailed'))
     } finally {
       setPending(false)
     }

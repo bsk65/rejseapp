@@ -1,4 +1,5 @@
 import { useRef, type ChangeEvent } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import type { Day } from '../../days/types'
 import { useBoardingPassImport } from '../hooks/useBoardingPassImport'
@@ -13,6 +14,7 @@ export function BoardingPassScan(props: {
   userUid: string
   memberUids: string[]
 }) {
+  const { t } = useT()
   const inputRef = useRef<HTMLInputElement>(null)
   const { importImage, pending, messages, error } = useBoardingPassImport(props)
 
@@ -38,15 +40,13 @@ export function BoardingPassScan(props: {
         disabled={pending}
         onClick={() => inputRef.current?.click()}
       >
-        {pending ? 'Læser boardingkort…' : 'Scan boardingkort'}
+        {pending ? t('segments.readingPass') : t('segments.scanPass')}
       </Button>
-      <p className={styles.hint}>
-        Tag et foto af stregkoden, eller vælg et skærmbillede af dit mobil-boardingkort.
-      </p>
-      {error && <p className={styles.error}>{error}</p>}
-      {messages.map((message) => (
-        <p key={message} className={styles.message}>
-          {message}
+      <p className={styles.hint}>{t('segments.scanHint')}</p>
+      {error && <p className={styles.error}>{t(error.key, error.params)}</p>}
+      {messages.map((message, index) => (
+        <p key={index} className={styles.message}>
+          {t(message.key, message.params)}
         </p>
       ))}
     </div>

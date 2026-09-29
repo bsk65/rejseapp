@@ -9,6 +9,7 @@
  * @zxing/browser's egen billed-aflæsning fandt i praksis ikke PDF417-koder,
  * som samme bibliotek aflæste fint på denne måde.
  */
+import { TextError } from '../../shared/i18n/message'
 
 type DetectedBarcode = { rawValue: string }
 type BarcodeDetectorLike = { detect: (source: ImageBitmap) => Promise<DetectedBarcode[]> }
@@ -96,9 +97,7 @@ export async function readBarcodeFromImage(file: File): Promise<string> {
   try {
     const text = (await detectNatively(bitmap)) ?? (await detectWithZxing(bitmap))
     if (!text) {
-      throw new Error(
-        'Kunne ikke finde en stregkode i billedet. Prøv et skarpere billede, hvor hele stregkoden er med.',
-      )
+      throw new TextError('segments.noBarcode')
     }
     return text
   } finally {

@@ -72,11 +72,7 @@ export function TripsPage() {
           emptyText={archived.length > 0 ? t('trips.emptyCurrent') : t('trips.emptyNone')}
         />
       ) : (
-        <TripList
-          trips={archived}
-          loading={loading}
-          emptyText={t('trips.emptyArchive')}
-        />
+        <TripList trips={archived} loading={loading} emptyText={t('trips.emptyArchive')} />
       )}
 
       <a href={privacyUrl} className={styles.policyLink} target="_blank" rel="noopener">

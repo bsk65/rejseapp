@@ -1,3 +1,5 @@
+import { TextError } from '../../../shared/i18n/message'
+
 /**
  * Læser teksten fra stregkoden på et boardingkort (IATA Resolution 792,
  * "Bar Coded Boarding Pass", format "M"). Stregkoden er ren tekst med felter
@@ -55,12 +57,12 @@ function stripLeadingZeros(value: string): string {
 export function parseBoardingPass(raw: string): BoardingPass {
   const text = raw.replace(/\r?\n/g, '')
   if (text[0] !== 'M' || text.length < FIRST_LEG_START + LEG_MANDATORY_LENGTH) {
-    throw new Error('Stregkoden ligner ikke et boardingkort.')
+    throw new TextError('segments.notBoardingPass')
   }
 
   const legCount = Number(text[1])
   if (!Number.isInteger(legCount) || legCount < 1 || legCount > 4) {
-    throw new Error('Stregkoden ligner ikke et boardingkort.')
+    throw new TextError('segments.notBoardingPass')
   }
 
   const legs: BoardingPassLeg[] = []
@@ -82,7 +84,7 @@ export function parseBoardingPass(raw: string): BoardingPass {
   }
 
   if (legs.length === 0 || legs.some((leg) => !/^[A-Z]{3}$/.test(leg.fromAirport))) {
-    throw new Error('Stregkoden ligner ikke et boardingkort.')
+    throw new TextError('segments.notBoardingPass')
   }
 
   return { passengerName: field(text, 2, 20), legs }

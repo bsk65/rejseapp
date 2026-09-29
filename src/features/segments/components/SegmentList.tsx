@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import { describeSegment } from '../logic/describeSegment'
 import type { Segment } from '../types'
 import { TransportModeIcon } from './TransportModeIcon'
@@ -11,6 +12,7 @@ export function SegmentList({
   segments: Segment[]
   onSelect: (segment: Segment) => void
 }) {
+  const { t } = useT()
   if (segments.length === 0) {
     return null
   }
@@ -18,7 +20,7 @@ export function SegmentList({
   return (
     <ul className={styles.list}>
       {segments.map((segment) => {
-        const { title, detail } = describeSegment(segment)
+        const { title, detail } = describeSegment(segment, t)
         return (
           <li key={segment.id}>
             <button type="button" className={styles.item} onClick={() => onSelect(segment)}>

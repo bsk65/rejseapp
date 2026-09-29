@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import type { Segment, TransportMode } from '../types'
-import { buildTickets, findNextDeparture, formatCountdown, type TicketEntry } from './tickets'
+import { translatorFor } from '../../../shared/i18n/translator'
+import {
+  buildTickets,
+  findNextDeparture,
+  formatCountdown as formatCountdownWith,
+  type TicketEntry,
+} from './tickets'
+
+const formatCountdown = (departsAt: string, now: Date) =>
+  formatCountdownWith(departsAt, now, translatorFor('da'))
 
 function entry(
   id: string,

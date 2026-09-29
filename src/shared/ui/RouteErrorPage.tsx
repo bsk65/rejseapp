@@ -30,9 +30,7 @@ export function RouteErrorPage() {
     <div className={styles.page}>
       <h1 className={styles.title}>{t('common.errorTitle')}</h1>
       <p className={styles.text}>
-        {staleChunk
-          ? t('common.errorStale')
-          : t('common.errorUnexpected')}
+        {staleChunk ? t('common.errorStale') : t('common.errorUnexpected')}
       </p>
       <Button type="button" onClick={() => window.location.reload()}>
         {t('common.reload')}

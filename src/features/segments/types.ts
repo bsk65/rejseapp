@@ -1,3 +1,4 @@
+import type { TextKey } from '../../shared/i18n/translator'
 import type { Place } from '../../shared/types/place'
 
 /** Et gemt billede af et boardingkort. Hver passager har sit eget (rejsefæller på samme fly). */
@@ -36,11 +37,12 @@ export type Segment = {
 /** Felter en bruger kan redigere via detalje-formularen — ikke id/mode/ownerUid/memberUids. */
 export type SegmentDetails = Omit<Segment, 'id' | 'mode' | 'ownerUid' | 'memberUids'>
 
-export const transportModeLabel: Record<TransportMode, string> = {
-  fly: 'Fly',
-  tog: 'Tog',
-  bil: 'Bil',
-  bus: 'Bus',
-  færge: 'Færge',
-  gang: 'Gang',
+/** Tekst-nøgle for transportformens navn — oversættes med t(). */
+export const transportModeLabel: Record<TransportMode, TextKey> = {
+  fly: 'segments.modeFly',
+  tog: 'segments.modeTog',
+  bil: 'segments.modeBil',
+  bus: 'segments.modeBus',
+  færge: 'segments.modeFaerge',
+  gang: 'segments.modeGang',
 }

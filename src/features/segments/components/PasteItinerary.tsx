@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { TextField } from '../../../shared/ui/TextField'
 import { useCreateSegment } from '../hooks/useCreateSegment'
@@ -18,6 +19,7 @@ export function PasteItinerary({
   memberUids: string[]
   onDone: () => void
 }) {
+  const { t } = useT()
   const [text, setText] = useState('')
   const [draft, setDraft] = useState<ParsedFlightDraft | null>(null)
   const { addSegment, pending } = useCreateSegment()
@@ -35,7 +37,7 @@ export function PasteItinerary({
     if (!draft) return
     const routeNote =
       draft.departureAirport && draft.arrivalAirport
-        ? `Rute: ${draft.departureAirport} → ${draft.arrivalAirport}`
+        ? t('segments.routeNote', { from: draft.departureAirport, to: draft.arrivalAirport })
         : undefined
 
     await addSegment(tripId, dayId, creatorUid, memberUids, 'fly', {
@@ -54,7 +56,7 @@ export function PasteItinerary({
   return (
     <div className={styles.wrapper}>
       <label className={styles.label} htmlFor="paste-itinerary">
-        Indsæt rejseplan (fra bekræftelses-mail)
+        {t('segments.pasteLabel')}
       </label>
       <textarea
         id="paste-itinerary"
@@ -62,49 +64,49 @@ export function PasteItinerary({
         rows={5}
         value={text}
         onChange={(e) => handleTextChange(e.target.value)}
-        placeholder="Sæt teksten fra din flybekræftelse ind her…"
+        placeholder={t('segments.pastePlaceholder')}
       />
 
       {draft && (
         <div className={styles.preview}>
-          <p className={styles.previewTitle}>Foreslået segment — ret hvis nødvendigt:</p>
+          <p className={styles.previewTitle}>{t('segments.pasteSuggested')}</p>
           <TextField
-            label="Selskab"
+            label={t('segments.carrierAirline')}
             value={draft.carrier ?? ''}
             onChange={(e) => updateDraft('carrier', e.target.value)}
           />
           <TextField
-            label="Flynummer"
+            label={t('segments.numberFlight')}
             value={draft.number ?? ''}
             onChange={(e) => updateDraft('number', e.target.value)}
           />
           <TextField
-            label="Fra lufthavn (kode)"
+            label={t('segments.fromAirport')}
             value={draft.departureAirport ?? ''}
             onChange={(e) => updateDraft('departureAirport', e.target.value.toUpperCase())}
           />
           <TextField
-            label="Til lufthavn (kode)"
+            label={t('segments.toAirport')}
             value={draft.arrivalAirport ?? ''}
             onChange={(e) => updateDraft('arrivalAirport', e.target.value.toUpperCase())}
           />
           <TextField
-            label="Afgang"
+            label={t('segments.departure')}
             value={draft.departureTime ?? ''}
             onChange={(e) => updateDraft('departureTime', e.target.value)}
           />
           <TextField
-            label="Ankomst"
+            label={t('segments.arrival')}
             value={draft.arrivalTime ?? ''}
             onChange={(e) => updateDraft('arrivalTime', e.target.value)}
           />
           <TextField
-            label="Booking-ref"
+            label={t('segments.bookingRef')}
             value={draft.bookingRef ?? ''}
             onChange={(e) => updateDraft('bookingRef', e.target.value)}
           />
           <Button type="button" disabled={pending} onClick={() => void handleApprove()}>
-            Godkend og tilføj
+            {t('segments.approveAdd')}
           </Button>
         </div>
       )}

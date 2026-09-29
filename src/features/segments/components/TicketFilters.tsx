@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import { BedIcon } from '../../stays/components/BedIcon'
 import { transportModeLabel, type TransportMode } from '../types'
 import { TransportModeIcon } from './TransportModeIcon'
@@ -17,6 +18,7 @@ export function TicketFilters({
   active: TicketFilter
   onChange: (filter: TicketFilter) => void
 }) {
+  const { t } = useT()
   if (modes.length + (hasStays ? 1 : 0) < 2) return null
 
   return (
@@ -27,7 +29,7 @@ export function TicketFilters({
         data-active={active === 'alle'}
         onClick={() => onChange('alle')}
       >
-        Alle
+        {t('segments.filterAll')}
       </button>
       {modes.map((mode) => (
         <button
@@ -38,7 +40,7 @@ export function TicketFilters({
           onClick={() => onChange(mode)}
         >
           <TransportModeIcon mode={mode} />
-          {transportModeLabel[mode]}
+          {t(transportModeLabel[mode])}
         </button>
       ))}
       {hasStays && (
@@ -49,7 +51,7 @@ export function TicketFilters({
           onClick={() => onChange('overnatning')}
         >
           <BedIcon />
-          Overnatning
+          {t('segments.filterStays')}
         </button>
       )}
     </div>

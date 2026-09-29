@@ -5,6 +5,7 @@ import type { Stay } from '../../stays/types'
 import { useExpandedDays } from '../hooks/useExpandedDays'
 import type { Day } from '../types'
 import { DayRow } from './DayRow'
+import { useT } from '../../../shared/i18n/useT'
 import styles from './DaysList.module.css'
 
 export function DaysList({
@@ -27,6 +28,7 @@ export function DaysList({
   highlightedDayId: string | null
 }) {
   const today = localIsoDate(useNow().getTime())
+  const { t } = useT()
   const { isExpanded, toggle, allExpanded, toggleAll } = useExpandedDays(
     days,
     highlightedDayId,
@@ -34,7 +36,7 @@ export function DaysList({
   )
 
   if (loading) {
-    return <p className={styles.status}>Henter dage…</p>
+    return <p className={styles.status}>{t('days.loading')}</p>
   }
 
   if (days.length === 0) {
@@ -44,7 +46,7 @@ export function DaysList({
   return (
     <div className={styles.wrapper}>
       <button type="button" className={styles.toggleAll} onClick={toggleAll}>
-        {allExpanded ? 'Fold alle dage sammen' : 'Fold alle dage ud'}
+        {allExpanded ? t('days.collapseAll') : t('days.expandAll')}
       </button>
       <ul className={styles.list}>
         {days.map((day, index) => (

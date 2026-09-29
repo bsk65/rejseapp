@@ -1,6 +1,16 @@
 import { FirebaseError } from 'firebase/app'
 import { httpsCallable } from 'firebase/functions'
 import { functions } from '../../../firebase/config'
+import { TextError } from '../../../shared/i18n/message'
+import type { TextKey } from '../../../shared/i18n/translator'
+
+/** Cloud Function'ens fejlkoder → beskeder på brugerens sprog. */
+const FUNCTION_ERROR_KEYS: Record<string, TextKey> = {
+  'functions/not-found': 'segments.lookupNotSetUp',
+  'functions/invalid-argument': 'segments.lookupInvalid',
+  'functions/resource-exhausted': 'segments.lookupTooMany',
+  'functions/unavailable': 'segments.lookupUnavailable',
+}
 
 /** Spejling af FlightInfo i functions/src/flightInfo.ts — hold dem ens. */
 export type FlightEndpoint = {
@@ -34,12 +44,11 @@ export async function lookupFlight(flightNumber: string, date: string): Promise<
     const result = await lookupFlightCallable({ flightNumber, date })
     return result.data
   } catch (err) {
-    if (err instanceof FirebaseError && err.code === 'functions/not-found') {
-      throw new Error('Flyopslag er ikke sat op endnu (Cloud Function mangler).', { cause: err })
-    }
-    if (err instanceof FirebaseError && err.message) {
-      throw new Error(err.message, { cause: err })
-    }
-    throw new Error('Kunne ikke slå flyet op lige nu.', { cause: err })
+    // Cloud Function'ens egne beskeder er på dansk — vis i stedet en oversat
+    // besked ud fra fejlkoden.
+    const code = err instanceof FirebaseError ? err.code : undefined
+    throw new TextError(FUNCTION_ERROR_KEYS[code ?? ''] ?? 'segments.lookupFailed', undefined, {
+      cause: err,
+    })
   }
 }

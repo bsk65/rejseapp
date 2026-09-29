@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { describeSegment } from './describeSegment'
+import { translatorFor } from '../../../shared/i18n/translator'
+import { describeSegment as describeWith } from './describeSegment'
 import type { Segment } from '../types'
+
+const describeSegment = (segment: Segment) => describeWith(segment, translatorFor('da'))
 
 function makeSegment(overrides: Partial<Segment>): Segment {
   return {

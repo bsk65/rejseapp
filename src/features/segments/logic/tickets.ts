@@ -1,3 +1,4 @@
+import type { Translate } from '../../../shared/i18n/translator'
 import type { Segment, TransportMode } from '../types'
 
 /** Transportformer hvor man skal passe en tid og typisk har billet/boardingkort. */
@@ -69,13 +70,15 @@ export function findNextDeparture(tickets: Ticket[], now: Date): Ticket | undefi
 }
 
 /** "om 12 min", "om 2 t 15 min", "om 3 dage". */
-export function formatCountdown(departsAt: string, now: Date): string {
+export function formatCountdown(departsAt: string, now: Date, t: Translate): string {
   const minutes = Math.max(0, Math.round((new Date(departsAt).getTime() - now.getTime()) / 60_000))
-  if (minutes < 60) return `om ${minutes} min`
+  if (minutes < 60) return t('segments.inMinutes', { m: minutes })
   const hours = Math.floor(minutes / 60)
   if (hours < 48) {
     const rest = minutes % 60
-    return rest > 0 ? `om ${hours} t ${rest} min` : `om ${hours} t`
+    return rest > 0
+      ? t('segments.inHoursMinutes', { h: hours, m: rest })
+      : t('segments.inHours', { h: hours })
   }
-  return `om ${Math.floor(hours / 24)} dage`
+  return t('segments.inDays', { d: Math.floor(hours / 24) })
 }

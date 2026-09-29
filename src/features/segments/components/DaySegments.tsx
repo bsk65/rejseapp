@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { useCreateSegment } from '../hooks/useCreateSegment'
 import type { Segment } from '../types'
@@ -22,6 +23,7 @@ export function DaySegments({
   /** Dagens segmenter — hentes af dagen selv (DayRow), som også viser dem i resuméet. */
   segments: Segment[]
 }) {
+  const { t } = useT()
   const { user } = useAuthUser()
   const { addSegment, pending } = useCreateSegment()
   const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null)
@@ -53,7 +55,7 @@ export function DaySegments({
         className={styles.pasteToggle}
         onClick={() => setShowPaste((prev) => !prev)}
       >
-        {showPaste ? 'Skjul indsæt rejseplan' : 'Indsæt rejseplan'}
+        {showPaste ? t('segments.pasteHide') : t('segments.pasteShow')}
       </button>
 
       {showPaste && (
