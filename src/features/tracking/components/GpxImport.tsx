@@ -1,4 +1,5 @@
 import { useRef, type ChangeEvent } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { formatDayDate } from '../../../shared/utils/date'
 import { useDeleteTrackPoints } from '../hooks/useDeleteTrackPoints'
@@ -19,6 +20,7 @@ export function GpxImport({
   selectedImportId: string | null
   onSelectImport: (importId: string) => void
 }) {
+  const { t, locale } = useT()
   const inputRef = useRef<HTMLInputElement>(null)
   const { importFile, pending, progress, error, result } = useGpxImport(context)
   const { remove, pendingIds } = useDeleteTrackPoints()
@@ -47,20 +49,21 @@ export function GpxImport({
         onClick={() => inputRef.current?.click()}
       >
         {progress
-          ? `Gemmer spor… ${progress.saved} af ${progress.total}`
+          ? t('tracking.savingTrack', { saved: progress.saved, total: progress.total })
           : pending
-            ? 'Læser fil…'
-            : 'Importér GPS-spor (GPX)'}
+            ? t('tracking.readingFile')
+            : t('tracking.importGpx')}
       </Button>
-      <p className={styles.hint}>
-        Fra ur eller Strava: åbn turen på strava.com → ⋯ → “Eksportér GPX”.
-      </p>
+      <p className={styles.hint}>{t('tracking.gpxHint')}</p>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{t(error.key, error.params)}</p>}
       {result && (
         <p className={styles.success}>
-          “{result.label}” er importeret ({result.pointCount} punkter,{' '}
-          {formatDayDate(result.startedAt.slice(0, 10))}).
+          {t('tracking.imported', {
+            label: result.label,
+            n: result.pointCount,
+            date: formatDayDate(result.startedAt.slice(0, 10), locale),
+          })}
         </p>
       )}
 
@@ -77,17 +80,22 @@ export function GpxImport({
                 className={styles.selectButton}
                 onClick={() => onSelectImport(imp.importId)}
               >
-                <span>{imp.label}</span>
+                <span>{imp.label ?? t('trips.importedTrack')}</span>
                 <span className={styles.meta}>
-                  {formatDayDate(imp.startedAt.slice(0, 10))} · {imp.pointCount} punkter
-                  {imp.importId === selectedImportId ? ' · vist på kortet' : ' · tryk for at vise'}
+                  {formatDayDate(imp.startedAt.slice(0, 10), locale)} ·{' '}
+                  {t('tracking.points', { n: imp.pointCount })} ·{' '}
+                  {imp.importId === selectedImportId
+                    ? t('tracking.shownOnMap')
+                    : t('tracking.tapToShow')}
                 </span>
               </button>
               {imp.ownerUid === context.userUid && (
                 <button
                   type="button"
                   className={styles.deleteButton}
-                  aria-label={`Slet sporet ${imp.label}`}
+                  aria-label={t('tracking.deleteTrack', {
+                    label: imp.label ?? t('trips.importedTrack'),
+                  })}
                   disabled={pendingIds === imp.importId}
                   onClick={() => void remove(context.tripId, imp.importId, imp.pointIds)}
                 >

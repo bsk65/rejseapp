@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import type { Translate } from '../../../shared/i18n/translator'
+import { useT } from '../../../shared/i18n/useT'
 import type { Place } from '../../../shared/types/place'
 import { addDaysToIsoDate } from '../../../shared/utils/date'
 import { stayEventsForDate, type StayEventKind } from '../logic/stayDates'
@@ -7,10 +9,16 @@ import { BedIcon } from './BedIcon'
 import { StayForm } from './StayForm'
 import styles from './DayStays.module.css'
 
-function describeEvent(kind: StayEventKind, stay: Stay): string {
-  if (kind === 'indtjek') return stay.checkInTime ? `Indtjek fra ${stay.checkInTime}` : 'Indtjek'
-  if (kind === 'udtjek') return stay.checkOutTime ? `Udtjek senest ${stay.checkOutTime}` : 'Udtjek'
-  return 'Nat'
+function describeEvent(kind: StayEventKind, stay: Stay, t: Translate): string {
+  if (kind === 'indtjek') {
+    return stay.checkInTime ? t('stays.checkInAt', { time: stay.checkInTime }) : t('stays.checkIn')
+  }
+  if (kind === 'udtjek') {
+    return stay.checkOutTime
+      ? t('stays.checkOutAt', { time: stay.checkOutTime })
+      : t('stays.checkOut')
+  }
+  return t('stays.night')
 }
 
 /**
@@ -32,6 +40,7 @@ export function DayStays({
   stays: Stay[]
   setAsDayTo: (place: Place) => Promise<void>
 }) {
+  const { t } = useT()
   const [editing, setEditing] = useState<Stay | 'ny' | null>(null)
   const events = stayEventsForDate(stays, date)
 
@@ -50,7 +59,7 @@ export function DayStays({
                 <BedIcon />
                 <span className={styles.text}>
                   <span className={styles.name}>{stay.name}</span>
-                  <span className={styles.detail}>{describeEvent(kind, stay)}</span>
+                  <span className={styles.detail}>{describeEvent(kind, stay, t)}</span>
                 </span>
               </button>
             </li>
@@ -73,7 +82,7 @@ export function DayStays({
       ) : (
         <button type="button" className={styles.addButton} onClick={() => setEditing('ny')}>
           <BedIcon />
-          Tilføj overnatning
+          {t('stays.addStay')}
         </button>
       )}
     </div>

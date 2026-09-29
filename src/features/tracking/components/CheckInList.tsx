@@ -1,9 +1,10 @@
+import { useT } from '../../../shared/i18n/useT'
 import { useDeleteTrackPoint } from '../hooks/useDeleteTrackPoint'
 import type { TrackPoint } from '../types'
 import styles from './CheckInList.module.css'
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleString('da-DK', {
+function formatTime(iso: string, locale: string): string {
+  return new Date(iso).toLocaleString(locale, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -24,6 +25,7 @@ export function CheckInList({
   userUid: string
   checkIns: TrackPoint[]
 }) {
+  const { t, locale } = useT()
   const { remove } = useDeleteTrackPoint()
 
   if (checkIns.length === 0) {
@@ -36,13 +38,13 @@ export function CheckInList({
         <li key={point.id} className={styles.item}>
           <div className={styles.text}>
             <span>{describePlace(point)}</span>
-            <span className={styles.time}>{formatTime(point.timestamp)}</span>
+            <span className={styles.time}>{formatTime(point.timestamp, locale)}</span>
           </div>
           {point.ownerUid === userUid && (
             <button
               type="button"
               className={styles.deleteButton}
-              aria-label="Slet check-in"
+              aria-label={t('tracking.deleteCheckIn')}
               onClick={() => void remove(tripId, point.id)}
             >
               ✕

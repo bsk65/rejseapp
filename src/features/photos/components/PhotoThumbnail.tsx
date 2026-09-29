@@ -1,4 +1,5 @@
 import { useStorageUrl } from '../../../shared/hooks/useStorageUrl'
+import { useT } from '../../../shared/i18n/useT'
 import styles from './PhotoThumbnail.module.css'
 
 export function PhotoThumbnail({
@@ -8,6 +9,7 @@ export function PhotoThumbnail({
   storagePath: string
   onDelete?: () => void
 }) {
+  const { t } = useT()
   const url = useStorageUrl(storagePath)
 
   return (
@@ -22,7 +24,7 @@ export function PhotoThumbnail({
           type="button"
           className={styles.deleteButton}
           onClick={onDelete}
-          aria-label="Slet billede"
+          aria-label={t('tracking.deletePhoto')}
         >
           ×
         </button>

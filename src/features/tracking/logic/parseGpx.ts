@@ -1,3 +1,4 @@
+import { TextError } from '../../../shared/i18n/message'
 import type { GpsFix } from './shouldRecordPoint'
 
 export type ParsedGpx = {
@@ -37,7 +38,7 @@ function decodeXmlText(text: string): string {
  */
 export function parseGpx(xml: string): ParsedGpx {
   if (!/<gpx\b/i.test(xml)) {
-    throw new Error('Filen er ikke en GPX-fil.')
+    throw new TextError('tracking.errorNotGpx')
   }
 
   const fixes: GpsFix[] = []

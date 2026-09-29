@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import type { PlaybackSpeed } from '../hooks/usePlayback'
 import styles from './PlaybackControls.module.css'
 
@@ -20,13 +21,14 @@ export function PlaybackControls({
   onCycleSpeed: () => void
   onSeek: (ms: number) => void
 }) {
+  const { t } = useT()
   return (
     <div className={styles.controls}>
       <button
         type="button"
         className={styles.playButton}
         onClick={onTogglePlay}
-        aria-label={playing ? 'Pause' : 'Afspil'}
+        aria-label={playing ? t('summary.pause') : t('summary.play')}
       >
         {playing ? '❚❚' : '▶'}
       </button>
@@ -38,13 +40,13 @@ export function PlaybackControls({
         step={50}
         value={elapsed}
         onChange={(event) => onSeek(Number(event.target.value))}
-        aria-label="Hvor langt i rejsen"
+        aria-label={t('summary.scrubber')}
       />
       <button
         type="button"
         className={styles.smallButton}
         onClick={onCycleSpeed}
-        aria-label="Skift hastighed"
+        aria-label={t('summary.speed')}
       >
         {speed}×
       </button>
@@ -52,7 +54,7 @@ export function PlaybackControls({
         type="button"
         className={styles.smallButton}
         onClick={onRestart}
-        aria-label="Afspil forfra"
+        aria-label={t('summary.restart')}
       >
         ↺
       </button>

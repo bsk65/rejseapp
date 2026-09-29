@@ -1,21 +1,26 @@
 import { useState } from 'react'
 import { searchPlaces } from '../../../shared/api/nominatim'
+import type { TextKey } from '../../../shared/i18n/translator'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import type { Place } from '../../../shared/types/place'
 import { parseStayConfirmation, type ParsedStay } from '../logic/parseStayConfirmation'
 import type { StayDetails } from '../types'
 import styles from './StayConfirmationPaste.module.css'
 
-const FIELD_NAMES: Partial<Record<keyof ParsedStay, string>> = {
-  name: 'navn',
-  address: 'adresse',
-  checkInDate: 'indtjek',
-  checkOutDate: 'udtjek',
-  bookingRef: 'bookingnummer',
-  hostPhone: 'telefon',
-  accessCode: 'dørkode',
-  wifi: 'wifi',
+const FIELD_NAMES: Partial<Record<keyof ParsedStay, TextKey>> = {
+  name: 'stays.fieldName',
+  address: 'stays.fieldAddress',
+  checkInDate: 'stays.fieldCheckIn',
+  checkOutDate: 'stays.fieldCheckOut',
+  bookingRef: 'stays.fieldBookingRef',
+  hostPhone: 'stays.fieldPhone',
+  accessCode: 'stays.fieldAccessCode',
+  wifi: 'stays.fieldWifi',
 }
+
+/** Resultatet af sidste udfyldning — oversættes først, når det vises. */
+type FillResult = { found: TextKey[]; missingAddress?: string } | 'nothing'
 
 /**
  * "Indsæt bekræftelse": teksten fra en Booking-, Airbnb- eller hotelmail
@@ -29,40 +34,45 @@ export function StayConfirmationPaste({
   referenceDate: string
   onFill: (details: Partial<StayDetails>) => void
 }) {
+  const { t } = useT()
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const [result, setResult] = useState<FillResult | null>(null)
 
   async function handleFill() {
-    const result = parseStayConfirmation(text, referenceDate)
-    const { address, ...parsed } = result
-    const found = (Object.keys(result) as (keyof ParsedStay)[])
+    const parsedResult = parseStayConfirmation(text, referenceDate)
+    const { address, ...parsed } = parsedResult
+    const found = (Object.keys(parsedResult) as (keyof ParsedStay)[])
       .map((key) => FIELD_NAMES[key])
-      .filter(Boolean)
+      .filter((key): key is TextKey => Boolean(key))
 
     if (found.length === 0) {
-      setMessage('Kunne ikke finde noget i teksten. Udfyld felterne selv.')
+      setResult('nothing')
       return
     }
 
     setBusy(true)
     let place: Place | undefined
-    let addressNote = ''
-    if (address) {
-      place = (await searchPlaces(address).catch(() => []))[0]
-      if (!place) addressNote = ` Adressen “${address}” blev ikke fundet — søg den selv.`
-    }
+    if (address) place = (await searchPlaces(address).catch(() => []))[0]
     setBusy(false)
 
     onFill({ ...parsed, ...(place ? { place } : {}) })
     setText('')
-    setMessage(`Udfyldt: ${found.join(', ')}. Tjek felterne, og tryk Gem.${addressNote}`)
+    setResult({ found, missingAddress: address && !place ? address : undefined })
+  }
+
+  function describeResult(shown: FillResult): string {
+    if (shown === 'nothing') return t('stays.nothingFound')
+    const filled = t('stays.filled', { fields: shown.found.map((key) => t(key)).join(', ') })
+    return shown.missingAddress
+      ? `${filled} ${t('stays.addressNotFound', { address: shown.missingAddress })}`
+      : filled
   }
 
   return (
     <div className={styles.wrapper}>
       <label className={styles.label} htmlFor="stay-confirmation">
-        Indsæt bekræftelse (Booking, Airbnb, hotel)
+        {t('stays.pasteLabel')}
       </label>
       <textarea
         id="stay-confirmation"
@@ -70,7 +80,7 @@ export function StayConfirmationPaste({
         rows={4}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Kopiér teksten fra bekræftelsesmailen, og sæt den ind her…"
+        placeholder={t('stays.pastePlaceholder')}
       />
       <Button
         type="button"
@@ -78,9 +88,9 @@ export function StayConfirmationPaste({
         disabled={!text.trim() || busy}
         onClick={() => void handleFill()}
       >
-        {busy ? 'Slår adressen op…' : 'Udfyld felterne'}
+        {busy ? t('stays.lookingUpAddress') : t('stays.fillFields')}
       </Button>
-      {message && <p className={styles.message}>{message}</p>}
+      {result && <p className={styles.message}>{describeResult(result)}</p>}
     </div>
   )
 }

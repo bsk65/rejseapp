@@ -1,3 +1,4 @@
+import type { TextKey } from '../../../shared/i18n/translator'
 import type { Stay } from '../types'
 
 /** Antal nætter mellem to ISO-datoer (YYYY-MM-DD), uafhængigt af tidszone. */
@@ -6,10 +7,10 @@ export function nightCount(checkInDate: string, checkOutDate: string): number {
   return Math.round(ms / 86_400_000)
 }
 
-/** Fejltekst til formularen, eller null hvis datoerne er i orden. */
-export function validateStayDates(checkInDate: string, checkOutDate: string): string | null {
-  if (!checkInDate || !checkOutDate) return 'Vælg både indtjeknings- og udtjekningsdato.'
-  if (nightCount(checkInDate, checkOutDate) < 1) return 'Udtjekning skal være efter indtjekning.'
+/** Fejltekst (tekst-nøgle) til formularen, eller null hvis datoerne er i orden. */
+export function validateStayDates(checkInDate: string, checkOutDate: string): TextKey | null {
+  if (!checkInDate || !checkOutDate) return 'stays.errorDatesMissing'
+  if (nightCount(checkInDate, checkOutDate) < 1) return 'stays.errorDatesOrder'
   return null
 }
 

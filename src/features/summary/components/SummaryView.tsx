@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import type { Stay } from '../../stays/types'
@@ -25,6 +26,7 @@ export function SummaryView({
   photos: Photo[]
   stays: Stay[]
 }) {
+  const { t, locale } = useT()
   const { points, error } = useTrack(tripId, userUid)
   const stops = useMemo(() => buildJourney(days, points, photos), [days, points, photos])
   const totalKm = useMemo(() => {
@@ -37,19 +39,16 @@ export function SummaryView({
   return (
     <div className={styles.view}>
       <dl className={styles.stats}>
-        <Stat label="Dage" value={String(dayCount)} />
-        <Stat label="Tilbagelagt" value={formatKm(totalKm)} />
-        <Stat label="Billeder på kortet" value={String(photoCount)} />
-        <Stat label="Check-ins" value={String(checkInCount)} />
+        <Stat label={t('summary.statDays')} value={String(dayCount)} />
+        <Stat label={t('summary.statDistance')} value={formatKm(totalKm, locale)} />
+        <Stat label={t('summary.statPhotos')} value={String(photoCount)} />
+        <Stat label={t('summary.statCheckIns')} value={String(checkInCount)} />
       </dl>
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{t(error.key, error.params)}</p>}
 
       {stops.length < 2 ? (
-        <p className={styles.empty}>
-          Der er endnu ikke nok at afspille. Tilføj Fra/Til-steder på dagene, spor turen, eller
-          upload billeder med GPS-position — så kan hele rejsen afspilles her.
-        </p>
+        <p className={styles.empty}>{t('summary.notEnough')}</p>
       ) : (
         <JourneyPlayer stops={stops} days={days} stays={stays} />
       )}

@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import type { TextKey } from '../../../shared/i18n/translator'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { TextField } from '../../../shared/ui/TextField'
@@ -9,7 +11,7 @@ import type { Stay, StayDetails } from '../types'
 import { StayConfirmationPaste } from './StayConfirmationPaste'
 import styles from './StayForm.module.css'
 
-type TextKey = 'name' | 'bookingRef' | 'accessCode' | 'wifi' | 'hostPhone' | 'note'
+type TextFieldKey = 'name' | 'bookingRef' | 'accessCode' | 'wifi' | 'hostPhone' | 'note'
 
 /** Kun de redigerbare felter — id/ownerUid/memberUids må ikke skrives med tilbage. */
 function detailsOf(stay: Stay): StayDetails {
@@ -52,6 +54,7 @@ export function StayForm({
   setAsDayTo?: (place: Place) => Promise<void>
   onClose: () => void
 }) {
+  const { t } = useT()
   const [details, setDetails] = useState<StayDetails>(() =>
     stay
       ? detailsOf(stay)
@@ -60,14 +63,14 @@ export function StayForm({
   const [useAsDayTo, setUseAsDayTo] = useState(true)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [showPaste, setShowPaste] = useState(false)
-  const [validationError, setValidationError] = useState<string | null>(null)
+  const [validationError, setValidationError] = useState<TextKey | null>(null)
   const { create, update, remove, pending, error } = useSaveStay(tripId)
 
   function set<K extends keyof StayDetails>(field: K, value: StayDetails[K]) {
     setDetails((prev) => ({ ...prev, [field]: value }))
   }
 
-  function textField(key: TextKey, label: string, type = 'text') {
+  function textField(key: TextFieldKey, label: string, type = 'text') {
     return (
       <TextField
         id={`stay-${key}`}
@@ -82,7 +85,7 @@ export function StayForm({
   async function handleSave() {
     const name = details.name.trim() || details.place?.name || ''
     const dateError = validateStayDates(details.checkInDate, details.checkOutDate)
-    if (!name) return setValidationError('Skriv et navn eller vælg en adresse.')
+    if (!name) return setValidationError('stays.errorName')
     if (dateError) return setValidationError(dateError)
     setValidationError(null)
 
@@ -93,6 +96,8 @@ export function StayForm({
     onClose()
   }
 
+  const shownError = validationError ?? error
+
   async function handleDelete() {
     if (stay && (await remove(stay.id))) onClose()
   }
@@ -100,13 +105,13 @@ export function StayForm({
   return (
     <div className={styles.form}>
       <div className={styles.titleRow}>
-        <p className={styles.title}>{stay ? 'Overnatning' : 'Ny overnatning'}</p>
+        <p className={styles.title}>{stay ? t('stays.stay') : t('stays.newStay')}</p>
         <button
           type="button"
           className={styles.pasteToggle}
           onClick={() => setShowPaste((prev) => !prev)}
         >
-          {showPaste ? 'Skjul indsæt' : 'Indsæt bekræftelse'}
+          {showPaste ? t('stays.pasteHide') : t('stays.pasteShow')}
         </button>
       </div>
       {showPaste && (
@@ -120,11 +125,15 @@ export function StayForm({
 
       <TextField
         id="stay-name"
-        label="Navn (hotel, Airbnb …)"
+        label={t('stays.name')}
         value={details.name}
         onChange={(e) => set('name', e.target.value)}
       />
-      <PlaceField label="Adresse" place={details.place} onSelect={(place) => set('place', place)} />
+      <PlaceField
+        label={t('stays.address')}
+        place={details.place}
+        onSelect={(place) => set('place', place)}
+      />
       {!stay && setAsDayTo && details.place && (
         <label className={styles.checkRow}>
           <input
@@ -132,21 +141,21 @@ export function StayForm({
             checked={useAsDayTo}
             onChange={(e) => setUseAsDayTo(e.target.checked)}
           />
-          Brug adressen som dagens “Til”
+          {t('stays.useAsDayTo')}
         </label>
       )}
 
       <div className={styles.pair}>
         <TextField
           id="stay-checkin-date"
-          label="Indtjek"
+          label={t('stays.checkIn')}
           type="date"
           value={details.checkInDate}
           onChange={(e) => set('checkInDate', e.target.value)}
         />
         <TextField
           id="stay-checkin-time"
-          label="Fra kl."
+          label={t('stays.checkInFrom')}
           type="time"
           value={details.checkInTime ?? ''}
           onChange={(e) => set('checkInTime', e.target.value || undefined)}
@@ -155,34 +164,34 @@ export function StayForm({
       <div className={styles.pair}>
         <TextField
           id="stay-checkout-date"
-          label="Udtjek"
+          label={t('stays.checkOut')}
           type="date"
           value={details.checkOutDate}
           onChange={(e) => set('checkOutDate', e.target.value)}
         />
         <TextField
           id="stay-checkout-time"
-          label="Senest kl."
+          label={t('stays.checkOutBy')}
           type="time"
           value={details.checkOutTime ?? ''}
           onChange={(e) => set('checkOutTime', e.target.value || undefined)}
         />
       </div>
 
-      {textField('bookingRef', 'Bookingnummer')}
-      {textField('accessCode', 'Dørkode / nøgleboks')}
-      {textField('wifi', 'Wifi (netværk og kode)')}
-      {textField('hostPhone', 'Telefon til vært/reception', 'tel')}
-      {textField('note', 'Note')}
+      {textField('bookingRef', t('stays.bookingRef'))}
+      {textField('accessCode', t('stays.accessCode'))}
+      {textField('wifi', t('stays.wifi'))}
+      {textField('hostPhone', t('stays.hostPhone'), 'tel')}
+      {textField('note', t('stays.note'))}
 
-      {(validationError ?? error) && <p className={styles.error}>{validationError ?? error}</p>}
+      {shownError && <p className={styles.error}>{t(shownError)}</p>}
 
       {confirmingDelete ? (
         <div className={styles.confirmDelete}>
-          <p className={styles.confirmText}>Slet overnatningen “{details.name}” helt?</p>
+          <p className={styles.confirmText}>{t('stays.deleteConfirm', { name: details.name })}</p>
           <div className={styles.actions}>
             <Button type="button" variant="secondary" onClick={() => setConfirmingDelete(false)}>
-              Fortryd
+              {t('common.undo')}
             </Button>
             <Button
               type="button"
@@ -190,7 +199,7 @@ export function StayForm({
               disabled={pending}
               onClick={() => void handleDelete()}
             >
-              Ja, slet
+              {t('stays.deleteYes')}
             </Button>
           </div>
         </div>
@@ -203,14 +212,14 @@ export function StayForm({
               className={styles.deleteButton}
               onClick={() => setConfirmingDelete(true)}
             >
-              Slet
+              {t('common.delete')}
             </Button>
           )}
           <Button type="button" variant="secondary" onClick={onClose}>
-            Annuller
+            {t('common.cancel')}
           </Button>
           <Button type="button" disabled={pending} onClick={() => void handleSave()}>
-            Gem
+            {t('common.save')}
           </Button>
         </div>
       )}

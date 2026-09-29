@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
+import type { TextKey } from '../../../shared/i18n/translator'
 import { subscribeToStays } from '../repository'
 import type { Stay } from '../types'
 
 export function useStays(tripId: string | undefined, memberUid: string | undefined) {
   const [stays, setStays] = useState<Stay[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TextKey | null>(null)
 
   useEffect(() => {
     if (!tripId || !memberUid) return
@@ -15,7 +16,10 @@ export function useStays(tripId: string | undefined, memberUid: string | undefin
         setStays(next)
         setError(null)
       },
-      (err) => setError('Kunne ikke hente overnatninger: ' + err.message),
+      (err) => {
+        console.error('Kunne ikke hente overnatninger', err)
+        setError('stays.errorLoad')
+      },
     )
   }, [tripId, memberUid])
 

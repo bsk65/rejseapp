@@ -1,3 +1,4 @@
+import { useT } from '../../../shared/i18n/useT'
 import { formatDayDate } from '../../../shared/utils/date'
 import { dayColorIndex } from '../../../shared/utils/dayColors'
 import { nightCount, type StayMoment } from '../logic/stayDates'
@@ -15,10 +16,14 @@ export function StayMomentCard({
   dayNumber?: number
   onSelect: () => void
 }) {
+  const { t, locale } = useT()
   const { stay } = moment
   const nights = nightCount(stay.checkInDate, stay.checkOutDate)
   const isCheckIn = moment.kind === 'indtjek'
-  const codes = [stay.accessCode && `Kode ${stay.accessCode}`, stay.wifi && `Wifi ${stay.wifi}`]
+  const codes = [
+    stay.accessCode && t('stays.codeN', { code: stay.accessCode }),
+    stay.wifi && t('stays.wifiN', { wifi: stay.wifi }),
+  ]
     .filter(Boolean)
     .join(' · ')
 
@@ -33,7 +38,7 @@ export function StayMomentCard({
         <span className={styles.time}>{moment.time ?? '--:--'}</span>
         <span className={styles.kind}>
           <BedIcon />
-          {isCheckIn ? 'Indtjek' : 'Udtjek'}
+          {isCheckIn ? t('stays.checkIn') : t('stays.checkOut')}
         </span>
       </div>
 
@@ -43,10 +48,10 @@ export function StayMomentCard({
       </p>
 
       <p className={styles.meta}>
-        {dayNumber && <span className={styles.day}>Dag {dayNumber} · </span>}
-        {formatDayDate(moment.date)}
-        {isCheckIn && ` · ${nights} ${nights === 1 ? 'nat' : 'nætter'}`}
-        {!isCheckIn && !moment.time && ' · tidspunkt ikke angivet'}
+        {dayNumber && <span className={styles.day}>{t('days.dayN', { n: dayNumber })} · </span>}
+        {formatDayDate(moment.date, locale)}
+        {isCheckIn && ` · ${nights === 1 ? t('stays.oneNight') : t('stays.nights', { n: nights })}`}
+        {!isCheckIn && !moment.time && ` · ${t('stays.noTime')}`}
       </p>
 
       {isCheckIn && (stay.bookingRef || codes) && (

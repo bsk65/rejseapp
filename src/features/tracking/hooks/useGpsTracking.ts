@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { Message } from '../../../shared/i18n/message'
 import { DEFAULT_WARMUP_RULES, isGpsStable } from '../logic/isGpsStable'
 import { DEFAULT_RECORDING_RULES, shouldRecordPoint, type GpsFix } from '../logic/shouldRecordPoint'
 import { toGpsFix, describeGeolocationError } from '../geolocation'
@@ -14,7 +15,7 @@ import { useWakeLock } from '../../../shared/hooks/useWakeLock'
 export function useGpsTracking(onRecord: (fix: GpsFix) => Promise<boolean>) {
   const [active, setActive] = useState(false)
   const [warmingUp, setWarmingUp] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Message | null>(null)
   const [recordedCount, setRecordedCount] = useState(0)
   const lastRecordedRef = useRef<GpsFix | null>(null)
   const recentFixesRef = useRef<GpsFix[]>([])
@@ -59,7 +60,7 @@ export function useGpsTracking(onRecord: (fix: GpsFix) => Promise<boolean>) {
         })
       },
       (err) => {
-        setError(describeGeolocationError(err))
+        setError({ key: describeGeolocationError(err) })
         if (err.code === err.PERMISSION_DENIED) setActive(false)
       },
       // maximumAge 0: aldrig en gemt (evt. grov) position fra før sporingen startede.
@@ -71,7 +72,7 @@ export function useGpsTracking(onRecord: (fix: GpsFix) => Promise<boolean>) {
 
   function start() {
     if (!('geolocation' in navigator)) {
-      setError('Din browser understøtter ikke GPS-sporing.')
+      setError({ key: 'tracking.errorNoGpsTracking' })
       return
     }
     lastRecordedRef.current = null

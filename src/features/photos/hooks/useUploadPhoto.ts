@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { TextKey } from '../../../shared/i18n/translator'
 import type { Day } from '../../days/types'
 import { computeViewerUids } from '../../../shared/utils/computeViewerUids'
 import { matchPhotoToDay } from '../logic/matchPhotoToDay'
@@ -7,7 +8,7 @@ import { uploadPhoto } from '../repository'
 
 export function useUploadPhoto() {
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TextKey | null>(null)
 
   async function upload(
     tripId: string,
@@ -30,7 +31,7 @@ export function useUploadPhoto() {
         dayId,
       })
     } catch {
-      setError('Kunne ikke uploade billedet. Prøv igen.')
+      setError('tracking.errorUpload')
     } finally {
       setPending(false)
     }

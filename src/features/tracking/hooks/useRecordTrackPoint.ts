@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import type { Message } from '../../../shared/i18n/message'
 import { computeViewerUids } from '../../../shared/utils/computeViewerUids'
 import type { GpsFix } from '../logic/shouldRecordPoint'
 import { addTrackPoint } from '../repository'
@@ -11,7 +12,7 @@ export function useRecordTrackPoint({
   memberUids,
   shareTrack,
 }: TrackingContext) {
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Message | null>(null)
 
   const record = useCallback(
     async (fix: GpsFix, source: TrackSource, label?: string): Promise<boolean> => {
@@ -28,7 +29,7 @@ export function useRecordTrackPoint({
         })
         return true
       } catch {
-        setError('Kunne ikke gemme positionen. Prøv igen.')
+        setError({ key: 'tracking.errorSavePosition' })
         return false
       }
     },

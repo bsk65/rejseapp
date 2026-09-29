@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { errorMessage, TextError, type Message } from '../../../shared/i18n/message'
 import { computeViewerUids } from '../../../shared/utils/computeViewerUids'
 import { parseGpx } from '../logic/parseGpx'
 import { thinTrack } from '../logic/thinTrack'
@@ -22,7 +23,7 @@ export function useGpxImport({
 }: TrackingContext) {
   const [pending, setPending] = useState(false)
   const [progress, setProgress] = useState<{ saved: number; total: number } | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Message | null>(null)
   const [result, setResult] = useState<GpxImportResult | null>(null)
 
   async function importFile(file: File): Promise<void> {
@@ -32,11 +33,7 @@ export function useGpxImport({
     try {
       const parsed = parseGpx(await file.text())
       if (parsed.fixes.length === 0) {
-        throw new Error(
-          parsed.skipped > 0
-            ? 'Sporet i filen har ingen tidspunkter, så det kan ikke placeres i rejsen.'
-            : 'Filen indeholder ikke noget GPS-spor.',
-        )
+        throw new TextError(parsed.skipped > 0 ? 'tracking.errorNoTimes' : 'tracking.errorNoTrack')
       }
 
       const fixes = [...parsed.fixes].sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1))
@@ -62,7 +59,7 @@ export function useGpxImport({
       )
       setResult({ label, pointCount: thinned.length, startedAt: thinned[0].timestamp })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kunne ikke importere filen.')
+      setError(errorMessage(err, 'tracking.errorImport'))
     } finally {
       setPending(false)
       setProgress(null)

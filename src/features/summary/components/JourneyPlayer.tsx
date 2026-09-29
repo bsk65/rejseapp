@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { formatDayDate } from '../../../shared/utils/date'
 import { dayColorIndex } from '../../../shared/utils/dayColors'
 import type { Day } from '../../days/types'
@@ -23,6 +24,7 @@ export function JourneyPlayer({
   days: Day[]
   stays: Stay[]
 }) {
+  const { t, locale } = useT()
   const timeline = useMemo(() => buildTimeline(stops), [stops])
   const path = useMemo(() => buildJourneyPath(stops), [stops])
   const playback = usePlayback(timeline.duration)
@@ -46,9 +48,11 @@ export function JourneyPlayer({
             className={styles.dayChip}
             data-day-color={day ? dayColorIndex(day.dayNumber) : undefined}
           >
-            {day ? `Dag ${day.dayNumber} · ${formatDayDate(day.date)}` : formatStopDate(stop.time)}
+            {day
+              ? `${t('days.dayN', { n: day.dayNumber })} · ${formatDayDate(day.date, locale)}`
+              : formatStopDate(stop.time, locale)}
           </span>
-          <span className={styles.kmChip}>{formatKm(state.km)}</span>
+          <span className={styles.kmChip}>{formatKm(state.km, locale)}</span>
         </div>
 
         {holding?.label && <p className={styles.placeLabel}>{holding.label}</p>}
@@ -74,8 +78,8 @@ export function JourneyPlayer({
   )
 }
 
-function formatStopDate(time: number): string {
-  return new Date(time).toLocaleDateString('da-DK', {
+function formatStopDate(time: number, locale: string): string {
+  return new Date(time).toLocaleDateString(locale, {
     weekday: 'short',
     day: 'numeric',
     month: 'short',

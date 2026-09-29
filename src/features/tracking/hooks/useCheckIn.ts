@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { errorMessage, type Message } from '../../../shared/i18n/message'
 import type { Place } from '../../../shared/types/place'
 import { getCurrentFix } from '../geolocation'
 import type { GpsFix } from '../logic/shouldRecordPoint'
@@ -8,7 +9,7 @@ export function useCheckIn(
   record: (fix: GpsFix, source: 'manuel', label?: string) => Promise<boolean>,
 ) {
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<Message | null>(null)
 
   async function checkInHere(): Promise<void> {
     setPending(true)
@@ -16,7 +17,7 @@ export function useCheckIn(
     try {
       await record(await getCurrentFix(), 'manuel')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kunne ikke finde din position.')
+      setError(errorMessage(err, 'tracking.errorFindPosition'))
     } finally {
       setPending(false)
     }

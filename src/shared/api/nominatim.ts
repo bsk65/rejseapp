@@ -1,3 +1,4 @@
+import { getLang } from '../i18n/lang'
 import type { Place } from '../types/place'
 
 type NominatimAddress = Partial<
@@ -87,7 +88,7 @@ export async function searchPlaces(query: string, signal?: AbortSignal): Promise
     return []
   }
 
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&accept-language=da&q=${encodeURIComponent(query)}`
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&accept-language=${getLang()}&q=${encodeURIComponent(query)}`
   const response = await fetch(url, { signal, headers: { Accept: 'application/json' } })
 
   if (!response.ok) {

@@ -1,11 +1,12 @@
 import { useState } from 'react'
+import type { TextKey } from '../../../shared/i18n/translator'
 import { createStay, deleteStay, updateStay } from '../repository'
 import type { StayDetails } from '../types'
 
 /** Opret, gem og slet overnatninger — med fælles pending/fejl-tilstand til formularen. */
 export function useSaveStay(tripId: string) {
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TextKey | null>(null)
 
   async function run(action: () => Promise<void>): Promise<boolean> {
     setPending(true)
@@ -13,8 +14,8 @@ export function useSaveStay(tripId: string) {
     try {
       await action()
       return true
-    } catch (err) {
-      setError('Kunne ikke gemme: ' + (err instanceof Error ? err.message : String(err)))
+    } catch {
+      setError('stays.errorSave')
       return false
     } finally {
       setPending(false)

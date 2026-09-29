@@ -1,4 +1,5 @@
 import { useRef, type ChangeEvent } from 'react'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import type { Day } from '../../days/types'
 import { useUploadPhoto } from '../hooks/useUploadPhoto'
@@ -20,6 +21,7 @@ export function PhotoUploadButton({
   days: Day[]
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useT()
   const { upload, pending, error } = useUploadPhoto()
 
   async function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -50,9 +52,9 @@ export function PhotoUploadButton({
         disabled={pending}
         onClick={() => inputRef.current?.click()}
       >
-        {pending ? 'Uploader…' : 'Tilføj billede'}
+        {pending ? t('tracking.uploading') : t('tracking.addPhoto')}
       </Button>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{t(error)}</p>}
     </div>
   )
 }

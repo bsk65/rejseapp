@@ -2,7 +2,8 @@ import type { TrackPoint } from '../types'
 
 export type ImportSummary = {
   importId: string
-  label: string
+  /** Sporets navn — mangler, hvis filen ikke havde et. */
+  label?: string
   ownerUid: string
   pointCount: number
   /** ISO-tidspunkt for sporets første punkt. */
@@ -23,7 +24,7 @@ export function summarizeImports(points: TrackPoint[]): ImportSummary[] {
     } else {
       byImport.set(point.importId, {
         importId: point.importId,
-        label: point.label ?? 'Importeret spor',
+        label: point.label,
         ownerUid: point.ownerUid,
         pointCount: 1,
         startedAt: point.timestamp,

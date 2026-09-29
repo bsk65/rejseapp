@@ -1,4 +1,6 @@
 import { useCallback, useState } from 'react'
+import type { Message } from '../../../shared/i18n/message'
+import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceSearchInput } from '../../../shared/ui/PlaceSearchInput'
 import { useCheckIn } from '../hooks/useCheckIn'
@@ -19,10 +21,11 @@ export function TrackingPanel({
 }: {
   context: TrackingContext
   points: TrackPoint[]
-  loadError: string | null
+  loadError: Message | null
   selectedImportId: string | null
   onSelectImport: (importId: string) => void
 }) {
+  const { t } = useT()
   const { record, error: recordError } = useRecordTrackPoint(context)
   const recordGps = useCallback((fix: GpsFix) => record(fix, 'gps'), [record])
   const gps = useGpsTracking(recordGps)
@@ -36,8 +39,8 @@ export function TrackingPanel({
   return (
     <section className={styles.panel}>
       <div className={styles.header}>
-        <p className={styles.title}>Sporing</p>
-        <p className={styles.meta}>{routePointCount} GPS-punkter</p>
+        <p className={styles.title}>{t('tracking.title')}</p>
+        <p className={styles.meta}>{t('tracking.gpsPoints', { n: routePointCount })}</p>
       </div>
 
       {gps.active ? (
@@ -45,20 +48,17 @@ export function TrackingPanel({
           <p className={styles.status}>
             <span className={styles.liveDot} />
             {gps.warmingUp
-              ? 'Venter på et stabilt GPS-signal…'
-              : 'Sporer din rute… ' + gps.recordedCount + ' punkter gemt'}
+              ? t('tracking.warmingUp')
+              : t('tracking.tracking', { n: gps.recordedCount })}
           </p>
-          <p className={styles.hint}>
-            Lad appen være åben. Slukker skærmen, eller skifter du app, kan telefonen sætte
-            sporingen på pause — den fortsætter, når du åbner appen igen.
-          </p>
+          <p className={styles.hint}>{t('tracking.keepOpen')}</p>
           <Button type="button" variant="danger" onClick={gps.stop}>
-            Stop sporing
+            {t('tracking.stop')}
           </Button>
         </>
       ) : (
         <Button type="button" onClick={gps.start}>
-          Start GPS-sporing
+          {t('tracking.start')}
         </Button>
       )}
 
@@ -69,16 +69,16 @@ export function TrackingPanel({
           disabled={checkIn.pending}
           onClick={() => void checkIn.checkInHere()}
         >
-          {checkIn.pending ? 'Finder position…' : 'Check ind her'}
+          {checkIn.pending ? t('tracking.findingPosition') : t('tracking.checkInHere')}
         </Button>
         <Button type="button" variant="secondary" onClick={() => setSearching((s) => !s)}>
-          {searching ? 'Luk søgning' : 'Check ind et andet sted'}
+          {searching ? t('tracking.closeSearch') : t('tracking.checkInElsewhere')}
         </Button>
       </div>
 
       {searching && (
         <PlaceSearchInput
-          label="Hvor er du?"
+          label={t('tracking.whereAreYou')}
           onSelect={(place) => {
             setSearching(false)
             void checkIn.checkInAt(place)
@@ -86,7 +86,7 @@ export function TrackingPanel({
         />
       )}
 
-      {error && <p className={styles.error}>{error}</p>}
+      {error && <p className={styles.error}>{t(error.key, error.params)}</p>}
 
       <CheckInList tripId={context.tripId} userUid={context.userUid} checkIns={checkIns} />
 

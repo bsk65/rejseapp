@@ -136,7 +136,7 @@ export function TripDetailPage() {
             <PhotoGallery tripId={trip.id} photos={unsortedPhotos} />
           </div>
         )}
-        {staysError && <p className={styles.error}>{staysError}</p>}
+        {staysError && <p className={styles.error}>{t(staysError)}</p>}
         <DaysList
           tripId={trip.id}
           memberUids={trip.memberUids}
