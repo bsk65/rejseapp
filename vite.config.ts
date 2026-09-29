@@ -25,9 +25,9 @@ export default defineConfig({
         // registerServiceWorker.ts sker aldrig.
         skipWaiting: true,
         clientsClaim: true,
-        // Privatlivspolitikken er en selvstændig side — må ikke erstattes af
-        // appen (index.html) ved navigation.
-        navigateFallbackDenylist: [/^\/privatliv\.html/],
+        // Privatlivspolitikken (dansk og engelsk) er selvstændige sider — må
+        // ikke erstattes af appen (index.html) ved navigation.
+        navigateFallbackDenylist: [/^\/privatliv\.html/, /^\/privacy\.html/],
       },
       manifest: {
         name: 'Rejseappen',

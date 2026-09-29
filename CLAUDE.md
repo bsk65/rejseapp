@@ -21,6 +21,19 @@ Gælder hele projektet, ikke kun ved aflevering.
 - **Ingen inline `style="..."`** i JSX/HTML, undtagen hvor et element bevidst starter som `display:none` og JS viser det igen. Al styling er CSS Modules (`Komponent.module.css`) samme sted som komponenten.
 - **Commit efter hvert færdigt trin** med beskrivende beskeder.
 
+## Sprog (dansk/engelsk)
+
+Hele appen findes på dansk og engelsk (knap "English"/"Dansk" øverst på forsiden, rejsesiden, login og privatlivs-dialogen). **Stående regel:** al ny brugervendt tekst skal i både `da` og `en` — aldrig hardcodes i JSX/TS, heller ikke midlertidigt.
+
+- Teksterne ligger i `src/shared/i18n/texts/<område>.ts` (`common`, `auth`, `trips`, `days`, `segments`, `stays`, `tracking`, `summary`), oprettet med `defineTexts({ da, en })` — TypeScript fejler, hvis en nøgle mangler på det ene sprog, og en test tjekker, at `{pladsholdere}` er ens. Nyt område tilføjes i `texts/index.ts`.
+- I komponenter: `const { t, locale } = useT()` og `t('område.nøgle', { param })`. Komponenten gentegnes selv ved sprogskift (`useSyncExternalStore`). `t` er samme funktion pr. sprog, så den kan stå i en effekt-afhængighedsliste.
+- **Datoer og tal** formateres med `locale` (`formatDayDate(dato, locale)`, `formatKm(km, locale)`, `toLocaleString(locale, …)`) — aldrig hardcodet `'da-DK'` i UI.
+- **Fejl og beskeder i hooks** gemmes som tekst-nøgle (`TextKey`) eller `Message` (`{ key, params }` fra `shared/i18n/message.ts`) — ikke som færdig tekst — så de vises på det aktuelle sprog, også efter et skift. Fejl, der skal vises til brugeren, kastes som `TextError(key, params)`; `errorMessage(err, fallbackKey)` omsætter en fanget fejl til en `Message`.
+- **Rene funktioner**, der danner tekst (`describeSegment`, `formatCountdown`), tager `t: Translate` som parameter; tests bruger `translatorFor('da')`.
+- Sproget gemmes i localStorage `rejseappen_lang` (kun på enheden, standard dansk) og sætter `<html lang>`. Nominatim-stedsøgning bruger samme sprog (`accept-language`), så stednavne kommer på det valgte sprog.
+- Cloud Function'ens egne fejlbeskeder er på dansk og vises ikke direkte — `api/flightLookup.ts` oversætter ud fra fejlkoden.
+- Brugerens egne data (rejsenavne, noter, stednavne) oversættes ikke.
+
 ## Datalag-mønster
 
 Hver feature med Firestore-data har en `repository.ts` med rene, testbare funktioner (én pr. operation), f.eks. `createTrip(data)`, `subscribeToTrips(uid, callback)`. Hooks (`useTrips.ts`) wrapper repository-funktionerne i React state/effects. Komponenter kalder kun hooks.
@@ -64,9 +77,9 @@ React + TypeScript + Vite. Firebase (Auth, Firestore, Storage, Cloud Functions).
 
 ## Privatlivspolitik
 
-- Politikken er en statisk side, `public/privatliv.html` (læsbar uden login; service workeren må ikke erstatte den med appen — se `navigateFallbackDenylist` i vite.config.ts).
+- Politikken er en statisk side, `public/privatliv.html`, med en engelsk oversættelse i `public/privacy.html` (begge læsbare uden login; service workeren må ikke erstatte dem med appen — se `navigateFallbackDenylist` i vite.config.ts). Den engelske siger, at den danske gælder ved uoverensstemmelse. Appen linker til den på det valgte sprog (`usePrivacyUrl`).
 - Accept gemmes på brugerens profil `users/{uid}` som `privacyAcceptedVersion` + `privacyAcceptedAt` (`features/auth/repository.ts`). Ved oprettelse kræves et hak; eksisterende brugere uden gældende accept får `PrivacyGate` i stedet for appen (i `RequireAuth`), som kun kan accepteres eller logges ud af. En læsefejl låser ikke brugeren ude.
-- **Ændres politikken væsentligt:** opdatér teksten og "Sidst opdateret" i privatliv.html OG `PRIVACY_VERSION` i `features/auth/privacyVersion.ts` — så bliver alle bedt om at acceptere igen. Samme model som i søsterprojektet "3D bueskydning".
+- **Ændres politikken væsentligt:** opdatér teksten og "Sidst opdateret" i privatliv.html OG privacy.html OG `PRIVACY_VERSION` i `features/auth/privacyVersion.ts` — så bliver alle bedt om at acceptere igen. Samme model som i søsterprojektet "3D bueskydning".
 - Tilføjes nye slags persondata eller nye eksterne tjenester (som AeroDataBox, Nominatim), skal politikken opdateres tilsvarende.
 
 ## Firebase-projekt
