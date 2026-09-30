@@ -18,6 +18,7 @@ import { SummaryView } from '../../summary/components/SummaryView'
 import { formatDateRange } from '../logic/tripDates'
 import { useTrip } from '../hooks/useTrip'
 import { DeleteTripButton } from './DeleteTripButton'
+import { ExtendTripForm } from './ExtendTripForm'
 import { ShareTripDialog } from './ShareTripDialog'
 import { TripMapTab } from './TripMapTab'
 import styles from './TripDetailPage.module.css'
@@ -149,6 +150,7 @@ export function TripDetailPage() {
             loading={daysLoading}
             highlightedDayId={highlightedDayId}
           />
+          {!daysLoading && <ExtendTripForm trip={trip} days={days} userUid={user.uid} />}
         </div>
 
         <div className={styles.tabPanel} hidden={activeTab !== 'billetter'}>

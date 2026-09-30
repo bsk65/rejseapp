@@ -7,12 +7,14 @@ import { TextField } from '../../../shared/ui/TextField'
 import type { Place } from '../../../shared/types/place'
 import { useCreateDays } from '../../days/hooks/useCreateDays'
 import { useCreateTrip } from '../hooks/useCreateTrip'
-import { computeEndDate, countTripDays, parseDayCount } from '../logic/tripDates'
+import {
+  MAX_TRIP_DAYS as MAX_DAYS,
+  computeEndDate,
+  countTripDays,
+  parseDayCount,
+} from '../logic/tripDates'
 import { placeLabel } from '../../../shared/utils/placeLabel'
 import styles from './CreateTripForm.module.css'
-
-/** Øvre grænse — dage oprettes i én Firestore-batch (maks. 500 skrivninger). */
-const MAX_DAYS = 365
 
 export function CreateTripForm({
   ownerUid,

@@ -1,5 +1,8 @@
 import { addDaysToIsoDate } from '../../../shared/utils/date'
 
+/** Øvre grænse for en rejses længde — dage oprettes i én Firestore-batch (maks. 500 skrivninger). */
+export const MAX_TRIP_DAYS = 365
+
 export function computeEndDate(startDate: string, days: number): string {
   return addDaysToIsoDate(startDate, Math.max(days - 1, 0))
 }

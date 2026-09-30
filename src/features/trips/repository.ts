@@ -17,6 +17,7 @@ import {
 } from 'firebase/firestore'
 import { deleteObject, ref } from 'firebase/storage'
 import { db, storage } from '../../firebase/config'
+import type { TripExtension } from './logic/extendTrip'
 import type { NewTripInput, SharedCategories, Trip, TripStatus } from './types'
 
 const tripsCollection = collection(db, 'trips')
@@ -129,6 +130,29 @@ export async function updateTripMembers(
     snapshot.docs.forEach((segDoc) => batch.update(segDoc.ref, { memberUids })),
   )
 
+  await batch.commit()
+}
+
+/**
+ * Forlænger rejsen (se planTripExtension): ny startdato/antal dage på rejsen,
+ * nye dagnumre på eksisterende dage og de nye dage — i én skrivning, så
+ * rejsefæller aldrig ser en halvt omnummereret rejse.
+ */
+export async function extendTrip(
+  tripId: string,
+  creatorUid: string,
+  memberUids: string[],
+  plan: TripExtension,
+): Promise<void> {
+  const daysCollection = collection(db, 'trips', tripId, 'days')
+  const batch = writeBatch(db)
+  batch.update(doc(db, 'trips', tripId), { startDate: plan.startDate, days: plan.days })
+  plan.renumbered.forEach(({ id, dayNumber }) =>
+    batch.update(doc(daysCollection, id), { dayNumber }),
+  )
+  plan.added.forEach(({ dayNumber, date }) =>
+    batch.set(doc(daysCollection), { dayNumber, date, ownerUid: creatorUid, memberUids }),
+  )
   await batch.commit()
 }
 
