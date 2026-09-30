@@ -1,3 +1,4 @@
+import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { formatDayDate } from '../../../shared/utils/date'
@@ -13,6 +14,7 @@ import { useDayPlace } from '../hooks/useDayPlace'
 import { effectiveFromPlace } from '../logic/followPreviousDay'
 import type { Day } from '../types'
 import { DaySummary } from './DaySummary'
+import { DeleteDayButton } from './DeleteDayButton'
 import styles from './DayRow.module.css'
 
 /**
@@ -33,6 +35,8 @@ export function DayRow({
   expanded,
   isToday,
   onToggle,
+  onDelete,
+  deleteError,
 }: {
   tripId: string
   memberUids: string[]
@@ -49,6 +53,9 @@ export function DayRow({
   expanded: boolean
   isToday: boolean
   onToggle: () => void
+  /** Kun sat for rejsens første/sidste dag, og kun for ejeren. */
+  onDelete?: () => Promise<boolean>
+  deleteError: TextKey | null
 }) {
   const { t, locale } = useT()
   const { setFromPlace, setToPlace } = useDayPlace()
@@ -123,6 +130,16 @@ export function DayRow({
             memberUids={memberUids}
             segments={segments}
           />
+
+          {onDelete && (
+            <DeleteDayButton
+              day={day}
+              segmentCount={segments.length}
+              photoCount={photos.length}
+              error={deleteError}
+              onDelete={onDelete}
+            />
+          )}
         </div>
       )}
     </li>

@@ -18,6 +18,7 @@ import {
 import { deleteObject, ref } from 'firebase/storage'
 import { db, storage } from '../../firebase/config'
 import type { TripExtension } from './logic/extendTrip'
+import type { DayRemoval } from './logic/removeEndDay'
 import type { NewTripInput, SharedCategories, Trip, TripStatus } from './types'
 
 const tripsCollection = collection(db, 'trips')
@@ -192,13 +193,45 @@ export async function deleteTripContent(tripId: string, ownerUid: string): Promi
     await batch.commit()
   }
 
-  // Storage lader kun uploaderen slette — rejsefællers boardingkort efterlades.
+  await deleteBoardingPassFiles(segmentDocs)
+  await deleteDoc(doc(db, 'trips', tripId))
+}
+
+/** Storage lader kun uploaderen slette — rejsefællers boardingkort efterlades. */
+async function deleteBoardingPassFiles(segmentDocs: QueryDocumentSnapshot<DocumentData>[]) {
   const boardingPaths = segmentDocs.flatMap((segDoc) =>
     ((segDoc.data().boardingPasses ?? []) as { storagePath: string }[]).map((p) => p.storagePath),
   )
   await Promise.all(
     boardingPaths.map((path) => deleteObject(ref(storage, path)).catch(() => undefined)),
   )
+}
 
-  await deleteDoc(doc(db, 'trips', tripId))
+/**
+ * Fjerner rejsens første eller sidste dag (se planDayRemoval) med dens
+ * transport. Rejsens datoer, dagnumre og sletningen skrives i én batch.
+ * Billeder beholder deres dayId og vises derefter under "Billeder uden dag".
+ */
+export async function removeTripDay(
+  tripId: string,
+  memberUid: string,
+  dayId: string,
+  plan: DayRemoval,
+): Promise<void> {
+  const daysCollection = collection(db, 'trips', tripId, 'days')
+  const dayRef = doc(daysCollection, dayId)
+  const segmentsSnapshot = await getDocs(
+    query(collection(dayRef, 'segments'), where('memberUids', 'array-contains', memberUid)),
+  )
+
+  const batch = writeBatch(db)
+  segmentsSnapshot.docs.forEach((segDoc) => batch.delete(segDoc.ref))
+  batch.delete(dayRef)
+  batch.update(doc(db, 'trips', tripId), { startDate: plan.startDate, days: plan.days })
+  plan.renumbered.forEach(({ id, dayNumber }) =>
+    batch.update(doc(daysCollection, id), { dayNumber }),
+  )
+  await batch.commit()
+
+  await deleteBoardingPassFiles(segmentsSnapshot.docs)
 }

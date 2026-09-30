@@ -1,3 +1,4 @@
+import type { TextKey } from '../../../shared/i18n/translator'
 import { useNow } from '../../../shared/hooks/useNow'
 import { localIsoDate } from '../../../shared/utils/date'
 import type { Photo } from '../../photos/types'
@@ -17,6 +18,8 @@ export function DaysList({
   photos,
   loading,
   highlightedDayId,
+  onDeleteDay,
+  deleteError,
 }: {
   tripId: string
   memberUids: string[]
@@ -26,6 +29,9 @@ export function DaysList({
   photos: Photo[]
   loading: boolean
   highlightedDayId: string | null
+  /** Sættes kun for rejsens ejer — første og sidste dag får så "Slet dag". */
+  onDeleteDay?: (day: Day) => Promise<boolean>
+  deleteError: TextKey | null
 }) {
   const today = localIsoDate(useNow().getTime())
   const { t } = useT()
@@ -64,6 +70,12 @@ export function DaysList({
             expanded={isExpanded(day.id)}
             isToday={day.date === today}
             onToggle={() => toggle(day.id)}
+            onDelete={
+              onDeleteDay && days.length > 1 && (index === 0 || index === days.length - 1)
+                ? () => onDeleteDay(day)
+                : undefined
+            }
+            deleteError={deleteError}
           />
         ))}
       </ul>

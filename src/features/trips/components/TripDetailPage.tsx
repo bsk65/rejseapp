@@ -16,6 +16,7 @@ import { TicketsView } from '../../segments/components/TicketsView'
 import { useStays } from '../../stays/hooks/useStays'
 import { SummaryView } from '../../summary/components/SummaryView'
 import { formatDateRange } from '../logic/tripDates'
+import { useRemoveTripDay } from '../hooks/useRemoveTripDay'
 import { useTrip } from '../hooks/useTrip'
 import { DeleteTripButton } from './DeleteTripButton'
 import { ExtendTripForm } from './ExtendTripForm'
@@ -47,6 +48,7 @@ export function TripDetailPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [highlightedDayId, setHighlightedDayId] = useState<string | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const { removeDay, error: removeDayError } = useRemoveTripDay(trip, days, user?.uid)
 
   // Valgt fane ligger i URL'en (?fane=...), så den overlever en genindlæsning.
   const tabParam = searchParams.get('fane')
@@ -79,7 +81,9 @@ export function TripDetailPage() {
   }
 
   const isOwner = user.uid === trip.ownerUid
-  const unsortedPhotos = photos.filter((p) => !p.dayId)
+  // Også billeder fra en dag, der er slettet (se removeTripDay).
+  const dayIds = new Set(days.map((day) => day.id))
+  const unsortedPhotos = photos.filter((p) => !p.dayId || (!daysLoading && !dayIds.has(p.dayId)))
   const tabs: TabOption<TripTab>[] = TABS.map((tab) => ({ id: tab.id, label: t(tab.labelKey) }))
 
   return (
@@ -149,6 +153,8 @@ export function TripDetailPage() {
             photos={photos}
             loading={daysLoading}
             highlightedDayId={highlightedDayId}
+            onDeleteDay={isOwner ? removeDay : undefined}
+            deleteError={removeDayError}
           />
           {!daysLoading && <ExtendTripForm trip={trip} days={days} userUid={user.uid} />}
         </div>
