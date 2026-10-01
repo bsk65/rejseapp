@@ -33,10 +33,14 @@ export function useExpandedDays(days: Day[], highlightedDayId: string | null, to
   }
 
   const allExpanded = days.length > 0 && days.every((day) => expanded.has(day.id))
+  const noneExpanded = !days.some((day) => expanded.has(day.id))
 
-  function toggleAll() {
-    setExpanded(allExpanded ? new Set() : new Set(days.map((day) => day.id)))
+  return {
+    isExpanded: (dayId: string) => expanded.has(dayId),
+    toggle,
+    allExpanded,
+    noneExpanded,
+    expandAll: () => setExpanded(new Set(days.map((day) => day.id))),
+    collapseAll: () => setExpanded(new Set()),
   }
-
-  return { isExpanded: (dayId: string) => expanded.has(dayId), toggle, allExpanded, toggleAll }
 }

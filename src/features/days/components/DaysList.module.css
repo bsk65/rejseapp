@@ -4,8 +4,20 @@
   gap: 6px;
 }
 
-.toggleAll {
-  align-self: flex-end;
+/* "Fold alle ud" til venstre, "Fold alle sammen" til højre. */
+.foldButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.foldButton:disabled {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: default;
+}
+
+.foldButton {
   min-height: 36px;
   padding: 0 4px;
   border: none;

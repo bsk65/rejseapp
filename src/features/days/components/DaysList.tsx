@@ -35,7 +35,7 @@ export function DaysList({
 }) {
   const today = localIsoDate(useNow().getTime())
   const { t } = useT()
-  const { isExpanded, toggle, allExpanded, toggleAll } = useExpandedDays(
+  const { isExpanded, toggle, allExpanded, noneExpanded, expandAll, collapseAll } = useExpandedDays(
     days,
     highlightedDayId,
     today,
@@ -51,9 +51,24 @@ export function DaysList({
 
   return (
     <div className={styles.wrapper}>
-      <button type="button" className={styles.toggleAll} onClick={toggleAll}>
-        {allExpanded ? t('days.collapseAll') : t('days.expandAll')}
-      </button>
+      <div className={styles.foldButtons}>
+        <button
+          type="button"
+          className={styles.foldButton}
+          onClick={expandAll}
+          disabled={allExpanded}
+        >
+          {t('days.expandAll')}
+        </button>
+        <button
+          type="button"
+          className={styles.foldButton}
+          onClick={collapseAll}
+          disabled={noneExpanded}
+        >
+          {t('days.collapseAll')}
+        </button>
+      </div>
       <ul className={styles.list}>
         {days.map((day, index) => (
           <DayRow
