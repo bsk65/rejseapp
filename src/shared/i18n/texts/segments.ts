@@ -10,6 +10,10 @@ export const segmentsTexts = defineTexts({
     modeFaerge: 'Færge',
     modeGang: 'Gang',
     addMode: 'Tilføj {mode}',
+    addLeg: 'Tilføj transport',
+    addAnotherLeg: 'Tilføj endnu en tur',
+    addLegHint:
+      'En dag kan have flere ture, f.eks. ud og hjem igen. Udfyld Fra og Til, så turen kommer med på kortet og i Afspil.',
     departsAt: 'afgang {time}',
     arrivesAt: 'ankomst {time}',
     missingDetails: 'Mangler detaljer — tryk for at udfylde',
@@ -98,6 +102,10 @@ export const segmentsTexts = defineTexts({
     modeFaerge: 'Ferry',
     modeGang: 'Walk',
     addMode: 'Add {mode}',
+    addLeg: 'Add transport',
+    addAnotherLeg: 'Add another leg',
+    addLegHint:
+      'A day can have several legs, e.g. out and back again. Fill in From and To so the leg shows on the map and in Play.',
     departsAt: 'departs {time}',
     arrivesAt: 'arrives {time}',
     missingDetails: 'Details missing — tap to fill in',

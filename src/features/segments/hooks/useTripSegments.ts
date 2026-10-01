@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Day } from '../../days/types'
 import type { TicketEntry } from '../logic/tickets'
 import { subscribeToSegments } from '../repository'
@@ -25,13 +25,18 @@ export function useTripSegments(tripId: string, days: Day[], memberUid: string) 
     return () => unsubscribes.forEach((unsubscribe) => unsubscribe())
   }, [tripId, dayIdsKey, memberUid])
 
-  const entries: TicketEntry[] = days.flatMap((day) =>
-    (segmentsByDay[day.id] ?? []).map((segment) => ({
-      segment,
-      dayId: day.id,
-      dayNumber: day.dayNumber,
-      dayDate: day.date,
-    })),
+  // Memoiseret, så f.eks. afspilningen ikke regnes forfra ved hver gentegning.
+  const entries: TicketEntry[] = useMemo(
+    () =>
+      days.flatMap((day) =>
+        (segmentsByDay[day.id] ?? []).map((segment) => ({
+          segment,
+          dayId: day.id,
+          dayNumber: day.dayNumber,
+          dayDate: day.date,
+        })),
+      ),
+    [days, segmentsByDay],
   )
 
   return { entries }

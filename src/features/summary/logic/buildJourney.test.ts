@@ -70,6 +70,23 @@ describe('buildJourney', () => {
     ])
   })
 
+  it('includes the day’s legs between its from and to, in order', () => {
+    const bonn = { name: 'Bonn', lat: 50.73, lng: 7.1, placeId: 'bonn' }
+    const legs = [
+      { dayId: 'd1', dayNumber: 1, mode: 'tog' as const, from: rome, to: bonn },
+      { dayId: 'd1', dayNumber: 1, mode: 'tog' as const, from: bonn, to: rome },
+    ]
+    const stops = buildJourney(
+      [day(1, '2026-10-04', { fromPlace: rome, toPlace: rome })],
+      [],
+      [],
+      legs,
+    )
+    expect(stops.map((s) => s.label)).toEqual(['Rom', 'Bonn', 'Rom'])
+    expect(stops[0].time).toBeLessThan(stops[1].time)
+    expect(stops[1].time).toBeLessThan(stops[2].time)
+  })
+
   it('skips planned places on a day that has a track', () => {
     const stops = buildJourney(
       [day(1, '2026-10-04', { fromPlace: odense, toPlace: rome })],

@@ -15,6 +15,9 @@ const ROUTE_SOURCE_ID = 'trip-route'
 const TRACK_SOURCE_ID = 'trip-track'
 const TRACK_POINTS_SOURCE_ID = 'trip-track-points'
 const HIGHLIGHT_SOURCE_ID = 'trip-track-highlight'
+const LEGS_SOURCE_ID = 'trip-legs'
+const LEG_ENDS_SOURCE_ID = 'trip-leg-ends'
+const LEG_COLOR = '#818cf8'
 const HIGHLIGHT_COLOR = '#facc15'
 const TRACK_COLOR = '#22c55e'
 const PHOTO_COLOR = '#f59e0b'
@@ -58,6 +61,7 @@ export function TripMap({
   stayMarkers = [],
   onSelectStay,
   trackLines = [],
+  legLines = [],
   checkInMarkers = [],
   focus,
   onFocusChange,
@@ -70,6 +74,8 @@ export function TripMap({
   onSelectStay?: (stayId: string) => void
   /** Én linje pr. person, der er blevet GPS-sporet. */
   trackLines?: LatLng[][]
+  /** Dagenes ture (transport) som Fra→Til-linjer. */
+  legLines?: LatLng[][]
   checkInMarkers?: LatLng[]
   focus: MapFocus
   onFocusChange: (focus: MapFocus) => void
@@ -87,8 +93,13 @@ export function TripMap({
 
   const trackPoints = [...trackLines.flat(), ...checkInMarkers]
   const hasTrack = trackPoints.length > 0
+  const legPoints = legLines.flat()
   const hasContent =
-    destinations.length > 0 || photoMarkers.length > 0 || stayMarkers.length > 0 || hasTrack
+    destinations.length > 0 ||
+    photoMarkers.length > 0 ||
+    stayMarkers.length > 0 ||
+    legPoints.length > 0 ||
+    hasTrack
 
   // Kortet oprettes først når der er noget at vise (før det findes der ingen
   // container) — derfor afhænger effekten af hasContent og ikke bare [].
@@ -172,6 +183,16 @@ export function TripMap({
         'line-width': 2,
         'line-dasharray': [2, 2],
       })
+      setLineLayer(map, LEGS_SOURCE_ID, legLines, {
+        'line-color': LEG_COLOR,
+        'line-width': 3,
+      })
+      setCircleLayer(map, LEG_ENDS_SOURCE_ID, legPoints, {
+        'circle-color': LEG_COLOR,
+        'circle-radius': 4,
+        'circle-stroke-color': '#0f172a',
+        'circle-stroke-width': 1.5,
+      })
       setLineLayer(map, TRACK_SOURCE_ID, trackLines, {
         'line-color': TRACK_COLOR,
         'line-width': 3,
@@ -193,7 +214,7 @@ export function TripMap({
           ? focus.points
           : focus.kind === 'tracks' && trackPoints.length > 0
             ? trackPoints
-            : [...destinations, ...photoMarkers, ...stayMarkers, ...trackPoints]
+            : [...destinations, ...photoMarkers, ...stayMarkers, ...legPoints, ...trackPoints]
       const focusKey = focus.kind === 'selected' ? focus.key : focus.kind
       const fitKey = `${focusKey}:${JSON.stringify(fitPoints.map((p) => [p.lat, p.lng]))}`
       pendingFitRef.current = {

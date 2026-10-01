@@ -3,6 +3,8 @@ import type { LatLng, Place } from '../../../shared/types/place'
 import { resolveDayColor } from '../../../shared/utils/dayColors'
 import { placeLabel } from '../../../shared/utils/placeLabel'
 import type { Day } from '../../days/types'
+import { useTripSegments } from '../../segments/hooks/useTripSegments'
+import { buildLegs } from '../../segments/logic/legs'
 import type { Photo } from '../../photos/types'
 import type { Stay } from '../../stays/types'
 import { TrackingPanel } from '../../tracking/components/TrackingPanel'
@@ -41,6 +43,9 @@ export function TripMapTab({
     () => trackPoints.filter((p) => p.source === 'manuel'),
     [trackPoints],
   )
+  // Dagenes ture (transport med Fra og Til) tegnes som linjer mellem stederne.
+  const { entries } = useTripSegments(trip.id, days, userUid)
+  const legLines = useMemo(() => buildLegs(entries).map((leg) => [leg.from, leg.to]), [entries])
   const [focus, setFocus] = useState<MapFocus>({ kind: 'all' })
   const mapAnchorRef = useRef<HTMLDivElement>(null)
   const selectedImportId = focus.kind === 'selected' ? focus.key : null
@@ -113,6 +118,7 @@ export function TripMapTab({
           stayMarkers={stayMarkers}
           onSelectStay={handleSelectStay}
           trackLines={trackLines}
+          legLines={legLines}
           checkInMarkers={checkInMarkers}
           focus={focus}
           onFocusChange={setFocus}

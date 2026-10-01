@@ -1,5 +1,6 @@
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
+import { dayRoute, type Leg } from '../../segments/logic/legs'
 import { isRouteSource, type TrackPoint } from '../../tracking/types'
 import { localIsoDate } from '../../../shared/utils/date'
 import type { JourneyStop } from '../types'
@@ -37,13 +38,14 @@ export function pickOneTrackerPerDay(points: TrackPoint[]): TrackPoint[] {
 /**
  * Samler rejsen til én tidsordnet række af stop til afspilning: spor,
  * check-ins og billeder med position. Dage uden noget af det bidrager i
- * stedet med deres planlagte Fra/Til-steder, så en rejse, der kun er
- * planlagt, også kan afspilles.
+ * stedet med deres planlagte rute — dagens Fra, dagens ture (`legs`) og
+ * dagens Til — så en rejse, der kun er planlagt, også kan afspilles.
  */
 export function buildJourney(
   days: Day[],
   trackPoints: TrackPoint[],
   photos: Photo[],
+  legs: Leg[] = [],
 ): JourneyStop[] {
   const dayByDate = new Map(days.map((day) => [day.date, day]))
   const dayNumberAt = (time: number) => dayByDate.get(localIsoDate(time))?.dayNumber
@@ -91,13 +93,19 @@ export function buildJourney(
   const datesWithStops = new Set(stops.map((stop) => localIsoDate(stop.time)))
   days.forEach((day) => {
     if (datesWithStops.has(day.date)) return
-    const places = [day.fromPlace, day.toPlace].filter((p) => p !== undefined)
-    if (places.length === 2 && places[0].placeId === places[1].placeId) places.pop()
-    places.forEach((place, index) => {
+    const route = dayRoute(
+      day.fromPlace,
+      legs.filter((leg) => leg.dayId === day.id),
+      day.toPlace,
+    )
+    // Fordelt jævnt fra kl. 9 til 18 — kun rækkefølgen betyder noget for afspilningen.
+    const start = timeOnDate(day.date, '09:00:00')
+    const step = route.length > 1 ? (9 * 3_600_000) / (route.length - 1) : 0
+    route.forEach((place, index) => {
       stops.push({
         lat: place.lat,
         lng: place.lng,
-        time: timeOnDate(day.date, index === 0 ? '09:00:00' : '18:00:00'),
+        time: start + index * step,
         kind: 'sted',
         dayNumber: day.dayNumber,
         label: place.name,

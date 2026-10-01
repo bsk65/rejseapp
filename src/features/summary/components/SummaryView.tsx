@@ -3,6 +3,8 @@ import { useT } from '../../../shared/i18n/useT'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import type { Stay } from '../../stays/types'
+import { useTripSegments } from '../../segments/hooks/useTripSegments'
+import { buildLegs } from '../../segments/logic/legs'
 import { useTrack } from '../../tracking/hooks/useTrack'
 import { buildJourney } from '../logic/buildJourney'
 import { buildTimeline } from '../logic/timeline'
@@ -28,7 +30,12 @@ export function SummaryView({
 }) {
   const { t, locale } = useT()
   const { points, error } = useTrack(tripId, userUid)
-  const stops = useMemo(() => buildJourney(days, points, photos), [days, points, photos])
+  const { entries } = useTripSegments(tripId, days, userUid)
+  const legs = useMemo(() => buildLegs(entries), [entries])
+  const stops = useMemo(
+    () => buildJourney(days, points, photos, legs),
+    [days, points, photos, legs],
+  )
   const totalKm = useMemo(() => {
     const { cumulativeKm } = buildTimeline(stops)
     return cumulativeKm[cumulativeKm.length - 1]

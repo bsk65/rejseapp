@@ -45,6 +45,12 @@ export function DaySegments({
         />
       )}
 
+      <div className={styles.addHeading}>
+        <p className={styles.addTitle}>
+          {segments.length > 0 ? t('segments.addAnotherLeg') : t('segments.addLeg')}
+        </p>
+        <p className={styles.addHint}>{t('segments.addLegHint')}</p>
+      </div>
       <SegmentModeButtons
         disabled={pending}
         onAdd={(mode) => void addSegment(tripId, dayId, user.uid, memberUids, mode)}
