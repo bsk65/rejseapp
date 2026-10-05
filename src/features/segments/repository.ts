@@ -119,10 +119,21 @@ export async function uploadBoardingPassImage(
   tripId: string,
   ownerUid: string,
   file: File,
+  prefix: 'boardingkort' | 'billet' = 'boardingkort',
 ): Promise<string> {
-  const storagePath = `trips/${tripId}/${ownerUid}/boardingkort-${crypto.randomUUID()}`
+  const storagePath = `trips/${tripId}/${ownerUid}/${prefix}-${crypto.randomUUID()}`
   await uploadBytes(ref(storage, storagePath), file, { contentType: file.type || 'image/jpeg' })
   return storagePath
+}
+
+/** Gemmer segmentets nye liste af boardingkort/billetter (efter en upload). */
+export async function saveBoardingPasses(
+  tripId: string,
+  dayId: string,
+  segmentId: string,
+  passes: BoardingPassImage[],
+): Promise<void> {
+  await updateDoc(doc(segmentsCollection(tripId, dayId), segmentId), { boardingPasses: passes })
 }
 
 /** Fjerner ét boardingkort fra flyet (og filen, hvis man selv har gemt den). */

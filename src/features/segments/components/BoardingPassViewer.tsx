@@ -38,9 +38,15 @@ export function BoardingPassViewer({
       <div className={styles.content}>
         <p className={styles.name}>{formatPassengerName(pass.passengerName)}</p>
         {url ? (
-          <img src={url} alt={t('segments.passAlt')} className={styles.image} />
+          <img
+            src={url}
+            alt={pass.kind === 'billet' ? t('segments.ticketAlt') : t('segments.passAlt')}
+            className={styles.image}
+          />
         ) : (
-          <p className={styles.loading}>{t('segments.loadingPass')}</p>
+          <p className={styles.loading}>
+            {pass.kind === 'billet' ? t('segments.loadingTicket') : t('segments.loadingPass')}
+          </p>
         )}
         <p className={styles.hint}>{t('segments.brightnessHint')}</p>
       </div>

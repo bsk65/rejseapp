@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
+import { usePeople } from '../../friends/hooks/usePeople'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { TextField } from '../../../shared/ui/TextField'
 import { useDeleteSegment } from '../hooks/useDeleteSegment'
-import { useRemoveBoardingPass } from '../hooks/useRemoveBoardingPass'
+import { useBoardingPasses } from '../hooks/useBoardingPasses'
 import { BoardingPassButtons } from './BoardingPassButtons'
 import { FlightLookupButton } from './FlightLookupButton'
+import { TicketUpload } from './TicketUpload'
 import { TravelersPicker } from './TravelersPicker'
 import { travelersOf } from '../logic/travelers'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
@@ -57,7 +59,14 @@ export function SegmentDetailForm({
   })
   const { saveSegment, pending } = useUpdateSegment()
   const { removeSegment, pending: deleting } = useDeleteSegment()
-  const { passes, remove: removePass } = useRemoveBoardingPass(tripId, dayId, segment)
+  const { selfUid, nameOf } = usePeople()
+  const {
+    passes,
+    remove: removePass,
+    addTicket,
+    uploading,
+    uploadFailed,
+  } = useBoardingPasses(tripId, dayId, segment)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   async function handleDelete() {
@@ -68,6 +77,9 @@ export function SegmentDetailForm({
   const showsCarrier = segment.mode !== 'bil' && segment.mode !== 'gang'
   const showsTerminal = segment.mode === 'fly'
   const showsSeat = segment.mode === 'tog' || segment.mode === 'fly'
+  // Fly får boardingkort via "Scan boardingkort"; andre billetter uploades her.
+  const showsTicketUpload =
+    segment.mode === 'tog' || segment.mode === 'bus' || segment.mode === 'færge'
   // Dato til flyopslag: afgangsdatoen, hvis den er udfyldt, ellers dagens dato.
   const lookupDate = details.departureTime?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? dayDate
 
@@ -88,6 +100,13 @@ export function SegmentDetailForm({
       <p className={styles.title}>{t('segments.detailsTitle', { mode: modeName })}</p>
 
       <BoardingPassButtons passes={passes} onRemove={removePass} />
+      {showsTicketUpload && (
+        <TicketUpload
+          uploading={uploading}
+          failed={uploadFailed}
+          onFile={(file) => addTicket(file, nameOf(selfUid), selfUid)}
+        />
+      )}
 
       <TravelersPicker
         travelers={details.travelerUids ?? travelersOf(segment)}

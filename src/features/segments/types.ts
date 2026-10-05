@@ -8,6 +8,10 @@ export type BoardingPassImage = {
   passengerName: string
   /** Hvem der gemte det (kun ejeren kan slette selve filen i Storage). */
   ownerUid: string
+  /** 'billet' = uploadet billet (tog, bus, færge); mangler = scannet boardingkort. */
+  kind?: 'billet'
+  /** Filtypen, f.eks. "application/pdf" — mangler på ældre boardingkort (altid billeder). */
+  contentType?: string
 }
 
 export type TransportMode = 'fly' | 'tog' | 'bil' | 'bus' | 'færge' | 'gang'
