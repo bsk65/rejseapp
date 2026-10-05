@@ -15,6 +15,7 @@ import {
 } from 'firebase/firestore'
 import { deleteObject, ref, uploadBytes } from 'firebase/storage'
 import { db, storage } from '../../firebase/config'
+import { removeOfflineFile } from '../../shared/api/offlineFiles'
 import type {
   BoardingPassImage,
   Segment,
@@ -108,6 +109,7 @@ export async function deleteSegment(
 
 /** Storage tillader kun ejeren at slette — en rejsefælles fil efterlades bare. */
 export function deleteStorageFile(storagePath: string): Promise<void> {
+  void removeOfflineFile(storagePath).catch(() => undefined)
   return deleteObject(ref(storage, storagePath)).catch(() => undefined)
 }
 

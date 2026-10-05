@@ -1,6 +1,10 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from 'firebase/firestore'
 import { getFunctions } from 'firebase/functions'
 import { getStorage } from 'firebase/storage'
 
@@ -28,7 +32,12 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
-export const db = getFirestore(app)
+// Rejsedata gemmes også på enheden (IndexedDB), så appen kan vises uden
+// forbindelse — på en rejse er det ofte netop dér, man har brug for den.
+// Ændringer lavet offline sendes, når forbindelsen er tilbage.
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+})
 export const storage = getStorage(app)
 /** Cloud Functions ligger i europe-west1 (se functions/src/index.ts). */
 export const functions = getFunctions(app, 'europe-west1')

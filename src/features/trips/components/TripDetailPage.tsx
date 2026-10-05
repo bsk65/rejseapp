@@ -12,6 +12,7 @@ import { useDays } from '../../days/hooks/useDays'
 import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import { PhotoUploadButton } from '../../photos/components/PhotoUploadButton'
 import { usePhotos } from '../../photos/hooks/usePhotos'
+import { OfflinePasses } from '../../segments/components/OfflinePasses'
 import { TicketsView } from '../../segments/components/TicketsView'
 import { useStays } from '../../stays/hooks/useStays'
 import { SummaryView } from '../../summary/components/SummaryView'
@@ -88,6 +89,7 @@ export function TripDetailPage() {
 
   return (
     <PeopleProvider selfUid={user.uid} memberUids={trip.memberUids}>
+      <OfflinePasses tripId={trip.id} days={days} userUid={user.uid} />
       <div className={styles.page}>
         <div className={styles.topBar}>
           <Link to="/" className={styles.back}>

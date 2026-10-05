@@ -15,8 +15,9 @@ export default defineConfig({
       // Registreres selv i src/shared/pwa/registerServiceWorker.ts (som også
       // genindlæser ved ny version) — intet automatisk indsat registerSW.js.
       injectRegister: false,
-      // Ingen fetch-handler ud over precache af app-shell — Firestores egen
-      // offline-persistens (IndexedDB) håndterer data. Ingen stale-data-cache.
+      // Ingen fetch-handler ud over precache af app-shell — Firestores
+      // persistentLocalCache (src/firebase/config.ts) håndterer data offline, og
+      // boardingkort/billetter gemmes af shared/api/offlineFiles.ts.
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         // En ny version skal tage over med det samme. Uden disse venter den nye

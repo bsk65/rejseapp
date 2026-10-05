@@ -206,3 +206,12 @@ Appen skal være kørende og brugbar efter hvert trin.
 
 - **Arkiv:** forsiden har fanerne **Rejser** (i gang/kommende, nærmeste først) og **Arkiv** (overståede, seneste først). En rejse arkiveres automatisk dagen efter sidste rejsedag (`splitTripsByArchive` i `trips/logic/tripArchive.ts`, ud fra `startDate` + `days`) — intet gemmes, og `status`-feltet bruges ikke til det.
 - **Slet rejse** (kun ejeren, nederst på fanen Dage, med bekræftelse): `useDeleteTrip` sletter billeder (`deleteTripPhotos`) og spor (`deleteTripTrack`) i batches af 20 (slette-reglen bruger `get()` for andres dokumenter), derefter dage/segmenter/overnatninger og **til sidst** selve rejse-dokumentet, så en afbrudt sletning kan gentages. Storage-filer (billeder, boardingkort) slettes kun for ejerens egne — rejsefællers filer efterlades, da Storage-reglen kun lader uploaderen slette (se ovenfor om Storage).
+
+## Offline (uden forbindelse)
+
+Appen skal kunne åbnes og vise rejsen uden net (på rejsen er det ofte dér, man står):
+- **App-filer:** precaches af service workeren (vite-plugin-pwa).
+- **Data:** Firestore kører med `persistentLocalCache` (IndexedDB) i `src/firebase/config.ts` — alt, man har set online, kan vises offline. Kun rejser åbnet online efter denne ændring er gemt.
+- **Privatlivs-accept** huskes også i localStorage (`usePrivacyConsent`) — ellers venter `RequireAuth` for evigt på serveren offline (tom skærm).
+- **Boardingkort/billetter:** `OfflinePasses` på rejsesiden gemmer kopier i Cache Storage (`shared/api/offlineFiles.ts`, nøgle = storagePath); `useStorageUrl` bruger kopien først. Billeder i galleriet og kortfliser er IKKE offline.
+- Skrivninger offline sendes, når nettet er tilbage, men formularer der `await`er en skrivning bliver hængende "gemmer…" indtil da.
