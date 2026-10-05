@@ -127,6 +127,7 @@ export function TicketsView({
 
       {editingTicket && (
         <SegmentDetailForm
+          key={editingTicket.segment.id}
           tripId={tripId}
           dayId={editingTicket.dayId}
           dayDate={editingTicket.dayDate}

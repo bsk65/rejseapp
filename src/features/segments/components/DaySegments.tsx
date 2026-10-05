@@ -37,6 +37,7 @@ export function DaySegments({
 
       {selectedSegment && (
         <SegmentDetailForm
+          key={selectedSegment.id}
           tripId={tripId}
           dayId={dayId}
           dayDate={dayDate}
