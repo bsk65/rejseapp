@@ -25,3 +25,10 @@
 .error {
   color: var(--color-danger);
 }
+
+/* Formularen har selv secondary-knappens baggrund — så knappen tegnes med kant. */
+.wrapper .button {
+  border: 1px solid var(--color-accent);
+  background: transparent;
+  color: var(--color-accent);
+}

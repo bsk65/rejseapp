@@ -35,6 +35,7 @@ export function TicketUpload({
       <Button
         type="button"
         variant="secondary"
+        className={styles.button}
         disabled={uploading}
         onClick={() => inputRef.current?.click()}
       >
