@@ -15,7 +15,7 @@ import {
   itemTime,
   type TimelineItem,
 } from '../logic/ticketTimeline'
-import { buildTickets, formatCountdown, TICKET_MODES, type Ticket } from '../logic/tickets'
+import { buildTickets, formatCountdown, TICKET_MODES } from '../logic/tickets'
 import { BoardingPassButtons } from './BoardingPassButtons'
 import { BoardingPassScan } from './BoardingPassScan'
 import { SegmentDetailForm } from './SegmentDetailForm'
@@ -42,8 +42,9 @@ export function TicketsView({
   const { shared } = usePeople()
   const [filter, setFilter] = useState<TicketFilter>('alle')
   const [onlyMine, setOnlyMine] = useState(false)
-  const [editingTicket, setEditingTicket] = useState<Ticket | null>(null)
-  const [editingStay, setEditingStay] = useState<Stay | null>(null)
+  // Formularen åbner lige under det punkt, man trykkede på (key fra tidslinjen).
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const close = () => setEditingKey(null)
 
   const allTickets = buildTickets(entries, 'alle')
   const shownEntries = onlyMine
@@ -64,20 +65,44 @@ export function TicketsView({
   const dayNumberOf = (date: string) => days.find((day) => day.date === date)?.dayNumber
 
   function renderItem(item: TimelineItem) {
+    const editing = editingKey === item.key
     if (item.kind === 'ticket') {
+      const { ticket } = item
       return (
         <div className={styles.ticketWithPasses}>
-          <TicketCard ticket={item.ticket} onSelect={() => setEditingTicket(item.ticket)} />
-          <BoardingPassButtons passes={item.ticket.segment.boardingPasses} />
+          <TicketCard ticket={ticket} onSelect={() => setEditingKey(item.key)} />
+          <BoardingPassButtons passes={ticket.segment.boardingPasses} />
+          {editing && (
+            <SegmentDetailForm
+              key={ticket.segment.id}
+              tripId={tripId}
+              dayId={ticket.dayId}
+              dayDate={ticket.dayDate}
+              segment={ticket.segment}
+              onClose={close}
+            />
+          )}
         </div>
       )
     }
     return (
-      <StayMomentCard
-        moment={item.moment}
-        dayNumber={dayNumberOf(item.moment.date)}
-        onSelect={() => setEditingStay(item.moment.stay)}
-      />
+      <>
+        <StayMomentCard
+          moment={item.moment}
+          dayNumber={dayNumberOf(item.moment.date)}
+          onSelect={() => setEditingKey(item.key)}
+        />
+        {editing && (
+          <StayForm
+            key={item.moment.stay.id}
+            tripId={tripId}
+            userUid={userUid}
+            memberUids={memberUids}
+            stay={item.moment.stay}
+            onClose={close}
+          />
+        )}
+      </>
     )
   }
 
@@ -125,27 +150,6 @@ export function TicketsView({
         onChange={setFilter}
       />
 
-      {editingTicket && (
-        <SegmentDetailForm
-          key={editingTicket.segment.id}
-          tripId={tripId}
-          dayId={editingTicket.dayId}
-          dayDate={editingTicket.dayDate}
-          segment={editingTicket.segment}
-          onClose={() => setEditingTicket(null)}
-        />
-      )}
-      {editingStay && (
-        <StayForm
-          key={editingStay.id}
-          tripId={tripId}
-          userUid={userUid}
-          memberUids={memberUids}
-          stay={editingStay}
-          onClose={() => setEditingStay(null)}
-        />
-      )}
-
       {next && nextTime && (
         <section className={styles.next}>
           <p className={styles.nextLabel}>
@@ -164,7 +168,7 @@ export function TicketsView({
               <li
                 key={item.key}
                 className={styles.item}
-                data-past={Boolean(time && new Date(time) < now)}
+                data-past={Boolean(time && new Date(time) < now) && editingKey !== item.key}
               >
                 {renderItem(item)}
               </li>
