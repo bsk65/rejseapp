@@ -9,6 +9,7 @@ import {
   serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
   type DocumentData,
   type QueryDocumentSnapshot,
   type Unsubscribe,
@@ -159,4 +160,26 @@ export async function updateSegment(
   patch: Partial<SegmentDetails>,
 ): Promise<void> {
   await updateDoc(doc(segmentsCollection(tripId, dayId), segmentId), stripUndefined(patch))
+}
+
+/**
+ * Flytter segmentet til en anden dag (afgangsdatoen er ændret). Segmenter ligger
+ * under dagen, så det gøres som kopi + sletning i én batch med samme id.
+ * Boardingkort-filerne ligger ikke under dagen og skal ikke flyttes.
+ */
+export async function moveSegment(
+  tripId: string,
+  fromDayId: string,
+  toDayId: string,
+  segment: Segment,
+  patch: Partial<SegmentDetails>,
+): Promise<void> {
+  const { id, ...data } = segment
+  const batch = writeBatch(db)
+  batch.set(doc(segmentsCollection(tripId, toDayId), id), {
+    ...stripUndefined({ ...data, ...patch }),
+    createdAt: serverTimestamp(),
+  })
+  batch.delete(doc(segmentsCollection(tripId, fromDayId), id))
+  await batch.commit()
 }

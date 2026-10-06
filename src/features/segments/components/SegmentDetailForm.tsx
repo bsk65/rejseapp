@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
+import { useDays } from '../../days/hooks/useDays'
 import { usePeople } from '../../friends/hooks/usePeople'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
@@ -11,6 +12,7 @@ import { BoardingPassButtons } from './BoardingPassButtons'
 import { FlightLookupButton } from './FlightLookupButton'
 import { TicketUpload } from './TicketUpload'
 import { TravelersPicker } from './TravelersPicker'
+import { dayIdForDeparture } from '../logic/segmentDay'
 import { travelersOf } from '../logic/travelers'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
 import { withAirlineCode } from '../logic/airlineCodes'
@@ -57,9 +59,10 @@ export function SegmentDetailForm({
     freeText: segment.freeText,
     travelerUids: travelersOf(segment),
   })
-  const { saveSegment, pending } = useUpdateSegment()
+  const { saveSegment, saveAndMoveSegment, pending } = useUpdateSegment()
   const { removeSegment, pending: deleting } = useDeleteSegment()
   const { selfUid, nameOf } = usePeople()
+  const { days } = useDays(tripId, selfUid)
   const {
     passes,
     remove: removePass,
@@ -91,7 +94,11 @@ export function SegmentDetailForm({
     // Et fly-nummer uden selskabskode ("1762") gemmes med koden foran ("AF1762").
     const number =
       segment.mode === 'fly' ? withAirlineCode(details.number, details.carrier) : details.number
-    await saveSegment(tripId, dayId, segment.id, { ...details, number })
+    const patch = { ...details, number }
+    // Er afgangsdatoen ændret til en anden af rejsens dage, flyttes segmentet dertil.
+    const targetDayId = dayIdForDeparture(details.departureTime, days, dayId)
+    if (targetDayId === dayId) await saveSegment(tripId, dayId, segment.id, patch)
+    else await saveAndMoveSegment(tripId, dayId, targetDayId, segment, patch)
     onClose()
   }
 
