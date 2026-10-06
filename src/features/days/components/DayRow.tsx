@@ -58,7 +58,7 @@ export function DayRow({
   deleteError: TextKey | null
 }) {
   const { t, locale } = useT()
-  const { setFromPlace, setToPlace } = useDayPlace()
+  const { setFromPlace, setToPlace, clearPlace } = useDayPlace()
   const { segments } = useSegments(tripId, day.id, userUid)
   const fromPlace = effectiveFromPlace(day, previousDay)
   const bodyId = `dag-${day.id}-indhold`
@@ -104,11 +104,16 @@ export function DayRow({
               label={t('days.from')}
               place={fromPlace}
               onSelect={(place) => void setFromPlace(tripId, day, place)}
+              // Kun dagens eget "Fra" kan fjernes — et lånt fra dagen før fjernes dér.
+              onClear={day.fromPlace ? () => void clearPlace(tripId, day, 'fromPlace') : undefined}
+              clearLabel={t('days.clearPlace', { label: t('days.from') })}
             />
             <PlaceField
               label={t('days.to')}
               place={day.toPlace}
               onSelect={(place) => void setToPlace(tripId, day, nextDay, place)}
+              onClear={() => void clearPlace(tripId, day, 'toPlace')}
+              clearLabel={t('days.clearPlace', { label: t('days.to') })}
             />
           </div>
 

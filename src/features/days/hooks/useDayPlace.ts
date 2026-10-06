@@ -1,6 +1,6 @@
 import type { Place } from '../../../shared/types/place'
 import { shouldFollowPreviousTo } from '../logic/followPreviousDay'
-import { updateDayPlace, updateToPlaceAndNextFrom } from '../repository'
+import { clearDayPlace, updateDayPlace, updateToPlaceAndNextFrom } from '../repository'
 import type { Day } from '../types'
 
 export function useDayPlace() {
@@ -22,5 +22,10 @@ export function useDayPlace() {
     }
   }
 
-  return { setFromPlace, setToPlace }
+  /** Fjerner kun denne dags felt — næste dags "Fra" bliver stående. */
+  async function clearPlace(tripId: string, day: Day, field: 'fromPlace' | 'toPlace') {
+    await clearDayPlace(tripId, day.id, field)
+  }
+
+  return { setFromPlace, setToPlace, clearPlace }
 }

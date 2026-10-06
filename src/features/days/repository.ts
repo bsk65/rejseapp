@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteField,
   doc,
   onSnapshot,
   orderBy,
@@ -75,6 +76,15 @@ export async function updateDayPlace(
   place: Place,
 ): Promise<void> {
   await updateDoc(doc(daysCollection(tripId), dayId), { [field]: place })
+}
+
+/** Fjerner dagens "Fra" eller "Til". */
+export async function clearDayPlace(
+  tripId: string,
+  dayId: string,
+  field: 'fromPlace' | 'toPlace',
+): Promise<void> {
+  await updateDoc(doc(daysCollection(tripId), dayId), { [field]: deleteField() })
 }
 
 /** Sætter "Til" på én dag og "Fra" på næste dag i samme skrivning. */

@@ -9,3 +9,22 @@
   font-size: 0.9rem;
   cursor: pointer;
 }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clear {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
