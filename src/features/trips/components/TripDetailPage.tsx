@@ -15,6 +15,7 @@ import { usePhotos } from '../../photos/hooks/usePhotos'
 import { OfflinePasses } from '../../segments/components/OfflinePasses'
 import { TicketsView } from '../../segments/components/TicketsView'
 import { useStays } from '../../stays/hooks/useStays'
+import { useReservations } from '../../reservations/hooks/useReservations'
 import { SummaryView } from '../../summary/components/SummaryView'
 import { formatDateRange } from '../logic/tripDates'
 import { useRemoveTripDay } from '../hooks/useRemoveTripDay'
@@ -46,6 +47,7 @@ export function TripDetailPage() {
   const { days, loading: daysLoading } = useDays(tripId, user?.uid)
   const { photos } = usePhotos(tripId, user?.uid)
   const { stays, error: staysError } = useStays(tripId, user?.uid)
+  const { reservations, error: reservationsError } = useReservations(tripId, user?.uid)
   const [searchParams, setSearchParams] = useSearchParams()
   const [highlightedDayId, setHighlightedDayId] = useState<string | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
@@ -146,11 +148,13 @@ export function TripDetailPage() {
             </div>
           )}
           {staysError && <p className={styles.error}>{t(staysError)}</p>}
+          {reservationsError && <p className={styles.error}>{t(reservationsError)}</p>}
           <DaysList
             tripId={trip.id}
             memberUids={trip.memberUids}
             userUid={user.uid}
             stays={stays}
+            reservations={reservations}
             days={days}
             photos={photos}
             loading={daysLoading}
@@ -166,6 +170,7 @@ export function TripDetailPage() {
             tripId={trip.id}
             days={days}
             stays={stays}
+            reservations={reservations}
             userUid={user.uid}
             memberUids={trip.memberUids}
           />

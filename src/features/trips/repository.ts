@@ -94,7 +94,7 @@ export async function updateTripSharedCategories(
 
 /**
  * Opdaterer hvem der er medlem af rejsen. Cascader det nye memberUids ned på
- * alle eksisterende days/segments/stays (denormaliseret adgangsfelt, se CLAUDE.md),
+ * alle eksisterende days/segments/stays/reservations (denormaliseret adgangsfelt, se CLAUDE.md),
  * ellers ville nuværende indhold blive utilgængeligt for de tilføjede/fjernede
  * medlemmer. Client-side batch — antager rejsens samlede days+segments+stays holder
  * sig et godt stykke under Firestores grænse på 500 skrivninger pr. batch.
@@ -114,6 +114,12 @@ export async function updateTripMembers(
       where('memberUids', 'array-contains', ownerUid),
     ),
   )
+  const reservationsSnapshot = await getDocs(
+    query(
+      collection(db, 'trips', tripId, 'reservations'),
+      where('memberUids', 'array-contains', ownerUid),
+    ),
+  )
 
   const segmentsSnapshots = await Promise.all(
     daysSnapshot.docs.map((dayDoc) =>
@@ -127,6 +133,7 @@ export async function updateTripMembers(
   batch.update(doc(db, 'trips', tripId), { memberUids })
   daysSnapshot.docs.forEach((dayDoc) => batch.update(dayDoc.ref, { memberUids }))
   staysSnapshot.docs.forEach((stayDoc) => batch.update(stayDoc.ref, { memberUids }))
+  reservationsSnapshot.docs.forEach((resDoc) => batch.update(resDoc.ref, { memberUids }))
   segmentsSnapshots.forEach((snapshot) =>
     snapshot.docs.forEach((segDoc) => batch.update(segDoc.ref, { memberUids })),
   )
@@ -161,7 +168,7 @@ export async function extendTrip(
 const DELETE_BATCH_SIZE = 400
 
 /**
- * Sletter rejsens dage, segmenter og overnatninger (inkl. ejerens egne
+ * Sletter rejsens dage, segmenter, overnatninger, reservationer (inkl. ejerens egne
  * boardingkort-filer) og til sidst selve rejsen. Billeder og spor slettes
  * først af deres egne features (se useDeleteTrip). Rejse-dokumentet slettes
  * sidst, så en afbrudt sletning kan gentages — reglerne for billeder/spor
@@ -177,6 +184,12 @@ export async function deleteTripContent(tripId: string, ownerUid: string): Promi
       where('memberUids', 'array-contains', ownerUid),
     ),
   )
+  const reservationsSnapshot = await getDocs(
+    query(
+      collection(db, 'trips', tripId, 'reservations'),
+      where('memberUids', 'array-contains', ownerUid),
+    ),
+  )
   const segmentsSnapshots = await Promise.all(
     daysSnapshot.docs.map((dayDoc) =>
       getDocs(
@@ -185,7 +198,12 @@ export async function deleteTripContent(tripId: string, ownerUid: string): Promi
     ),
   )
   const segmentDocs = segmentsSnapshots.flatMap((snapshot) => snapshot.docs)
-  const refs = [...segmentDocs, ...daysSnapshot.docs, ...staysSnapshot.docs].map((d) => d.ref)
+  const refs = [
+    ...segmentDocs,
+    ...daysSnapshot.docs,
+    ...staysSnapshot.docs,
+    ...reservationsSnapshot.docs,
+  ].map((d) => d.ref)
 
   for (let start = 0; start < refs.length; start += DELETE_BATCH_SIZE) {
     const batch = writeBatch(db)

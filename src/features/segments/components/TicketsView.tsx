@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useNow } from '../../../shared/hooks/useNow'
 import { useT } from '../../../shared/i18n/useT'
 import type { Day } from '../../days/types'
+import { ReservationCard } from '../../reservations/components/ReservationCard'
+import { ReservationForm } from '../../reservations/components/ReservationForm'
+import type { Reservation } from '../../reservations/types'
 import { StayForm } from '../../stays/components/StayForm'
 import { StayMomentCard } from '../../stays/components/StayMomentCard'
 import { stayMoments } from '../../stays/logic/stayDates'
@@ -27,12 +30,14 @@ export function TicketsView({
   tripId,
   days,
   stays,
+  reservations,
   userUid,
   memberUids,
 }: {
   tripId: string
   days: Day[]
   stays: Stay[]
+  reservations: Reservation[]
   userUid: string
   memberUids: string[]
 }) {
@@ -50,12 +55,14 @@ export function TicketsView({
   const shownEntries = onlyMine
     ? entries.filter((entry) => isTravelling(entry.segment, userUid))
     : entries
-  const tickets = filter === 'overnatning' ? [] : buildTickets(shownEntries, filter)
+  const tickets =
+    filter === 'overnatning' || filter === 'reservation' ? [] : buildTickets(shownEntries, filter)
   const moments = filter === 'alle' || filter === 'overnatning' ? stayMoments(stays) : []
-  const items = buildTicketTimeline(tickets, moments)
+  const shownReservations = filter === 'alle' || filter === 'reservation' ? reservations : []
+  const items = buildTicketTimeline(tickets, moments, shownReservations)
   // "Næste" er ens egen næste afgang (eller en overnatning) — ikke en rejsefælles fly.
   const next = findNextItem(
-    items.filter((item) => item.kind === 'stay' || isTravelling(item.ticket.segment, userUid)),
+    items.filter((item) => item.kind !== 'ticket' || isTravelling(item.ticket.segment, userUid)),
     now,
   )
   const nextTime = next && itemTime(next)
@@ -83,6 +90,28 @@ export function TicketsView({
             />
           )}
         </div>
+      )
+    }
+    if (item.kind === 'reservation') {
+      const { reservation } = item
+      return (
+        <>
+          <ReservationCard
+            reservation={reservation}
+            dayNumber={dayNumberOf(reservation.date)}
+            onSelect={() => setEditingKey(item.key)}
+          />
+          {editing && (
+            <ReservationForm
+              key={reservation.id}
+              tripId={tripId}
+              userUid={userUid}
+              memberUids={memberUids}
+              reservation={reservation}
+              onClose={close}
+            />
+          )}
+        </>
       )
     }
     return (
@@ -116,7 +145,7 @@ export function TicketsView({
     />
   )
 
-  if (allTickets.length === 0 && stays.length === 0) {
+  if (allTickets.length === 0 && stays.length === 0 && reservations.length === 0) {
     return (
       <div className={styles.view}>
         {scan}
@@ -146,6 +175,7 @@ export function TicketsView({
       <TicketFilters
         modes={presentModes}
         hasStays={stays.length > 0}
+        hasReservations={reservations.length > 0}
         active={filter}
         onChange={setFilter}
       />

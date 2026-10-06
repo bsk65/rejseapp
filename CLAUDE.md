@@ -180,6 +180,14 @@ En overnatning (hotel, Airbnb …) ligger på rejsen — ikke på en dag — for
 - Opdateringer sletter tømte felter med `deleteField()` (i modsætning til segmenter, hvor et tømt felt blot ikke sendes med).
 - `place.area` (by, land) kommer fra stedsøgningen og vises via `placeLabel()` — så to steder med samme navn kan skelnes.
 
+### Andre reservationer (`features/reservations`)
+
+Restaurant, aktivitet (udflugt, dykning …) eller andet: `trips/{tripId}/reservations` med `date` (YYYY-MM-DD) + valgfri `time` — ligger på rejsen ligesom overnatninger, så de altid vises på dagen med deres dato (ingen dayId at holde i sync). `memberUids` denormaliseret og cascade-opdateret i `updateTripMembers`; slettes med rejsen i `deleteTripContent`. Samme regel som `stays`. Tømte felter slettes med `deleteField()` (som overnatninger).
+
+- **Dage:** `DayReservations` viser dagens reservationer + "Tilføj reservation"; ikon og klokkeslæt i dagens resumé.
+- **Billetter & tider:** `ReservationCard` (prikket kant) flettes ind i `buildTicketTimeline`; eget filter "Reservationer".
+- Ikke på kortet endnu.
+
 ## Byggetrin (status)
 
 1. Projekt + Firebase + auth + opret/vis rejse

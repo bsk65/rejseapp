@@ -7,6 +7,9 @@ import { PhotoGallery } from '../../photos/components/PhotoGallery'
 import type { Photo } from '../../photos/types'
 import { DaySegments } from '../../segments/components/DaySegments'
 import { useSegments } from '../../segments/hooks/useSegments'
+import { DayReservations } from '../../reservations/components/DayReservations'
+import { reservationsForDate } from '../../reservations/logic/reservationDates'
+import type { Reservation } from '../../reservations/types'
 import { DayStays } from '../../stays/components/DayStays'
 import { stayEventsForDate } from '../../stays/logic/stayDates'
 import type { Stay } from '../../stays/types'
@@ -27,6 +30,7 @@ export function DayRow({
   memberUids,
   userUid,
   stays,
+  reservations,
   day,
   previousDay,
   nextDay,
@@ -43,6 +47,8 @@ export function DayRow({
   userUid: string
   /** Alle rejsens overnatninger — dagen viser selv dem, der berører den. */
   stays: Stay[]
+  /** Alle rejsens reservationer — dagen viser selv dem med dens dato. */
+  reservations: Reservation[]
   day: Day
   /** Bruges til at foreslå "Fra" = dagen før's "Til". */
   previousDay: Day | undefined
@@ -92,6 +98,7 @@ export function DayRow({
             to={day.toPlace}
             segments={segments}
             stayEvents={stayEventsForDate(stays, day.date)}
+            reservations={reservationsForDate(reservations, day.date)}
             photoCount={photos.length}
           />
         )}
@@ -126,6 +133,14 @@ export function DayRow({
             date={day.date}
             stays={stays}
             setAsDayTo={(place) => setToPlace(tripId, day, nextDay, place)}
+          />
+
+          <DayReservations
+            tripId={tripId}
+            userUid={userUid}
+            memberUids={memberUids}
+            date={day.date}
+            reservations={reservations}
           />
 
           <DaySegments

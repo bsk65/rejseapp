@@ -2,6 +2,7 @@ import type { TextKey } from '../../../shared/i18n/translator'
 import { useNow } from '../../../shared/hooks/useNow'
 import { localIsoDate } from '../../../shared/utils/date'
 import type { Photo } from '../../photos/types'
+import type { Reservation } from '../../reservations/types'
 import type { Stay } from '../../stays/types'
 import { useExpandedDays } from '../hooks/useExpandedDays'
 import type { Day } from '../types'
@@ -14,6 +15,7 @@ export function DaysList({
   memberUids,
   userUid,
   stays,
+  reservations,
   days,
   photos,
   loading,
@@ -25,6 +27,7 @@ export function DaysList({
   memberUids: string[]
   userUid: string
   stays: Stay[]
+  reservations: Reservation[]
   days: Day[]
   photos: Photo[]
   loading: boolean
@@ -77,6 +80,7 @@ export function DaysList({
             memberUids={memberUids}
             userUid={userUid}
             stays={stays}
+            reservations={reservations}
             day={day}
             previousDay={days[index - 1]}
             nextDay={days[index + 1]}

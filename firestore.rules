@@ -78,6 +78,12 @@ service cloud.firestore {
         allow create: if isMember(request.resource.data.memberUids);
       }
 
+      // Andre reservationer (restaurant, aktivitet …): samme model som overnatninger.
+      match /reservations/{reservationId} {
+        allow read, update, delete: if isMember(resource.data.memberUids);
+        allow create: if isMember(request.resource.data.memberUids);
+      }
+
       // Billeder og sporingspunkter har hver deres eget adgangsfelt
       // (photoViewerUids / trackViewerUids) i stedet for memberUids — styret
       // af trippens sharedCategories og indeholder altid mindst trippens ejer
