@@ -4,7 +4,7 @@
  * alle brugere (nye som eksisterende) bliver bedt om at acceptere igen
  * (PrivacyGate i RequireAuth). Samme model som i søsterprojektet "3D bueskydning".
  */
-export const PRIVACY_VERSION = '2026-09-28'
+export const PRIVACY_VERSION = '2026-10-08'
 
 export const PRIVACY_URL = '/privatliv.html'
 
