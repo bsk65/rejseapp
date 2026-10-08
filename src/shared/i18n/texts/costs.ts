@@ -3,7 +3,7 @@ import { defineTexts } from '../translate'
 /** Priser på bookinger og oversigten "Rejsens pris". */
 export const costsTexts = defineTexts({
   da: {
-    price: 'Pris (i alt for bookingen)',
+    price: 'Pris',
     amountPlaceholder: 'Beløb',
     currency: 'Valuta',
     approxDkk: '≈ {amount} med dagens kurs',
@@ -34,7 +34,7 @@ export const costsTexts = defineTexts({
     perPerson: '{count} × {amount}',
   },
   en: {
-    price: 'Price (total for the booking)',
+    price: 'Price',
     amountPlaceholder: 'Amount',
     currency: 'Currency',
     approxDkk: '≈ {amount} at today’s rate',
