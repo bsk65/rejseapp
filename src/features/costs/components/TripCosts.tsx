@@ -40,9 +40,13 @@ export function TripCosts({
   const kr = (amount: number) => formatMoney(amount, 'DKK', locale)
 
   function itemAmount(item: CostItem) {
-    if (item.price.currency === 'DKK') return kr(item.price.amount)
-    const original = formatMoney(item.price.amount, item.price.currency, locale)
+    const one = formatMoney(item.price.amount, item.price.currency, locale)
+    const original =
+      item.quantity > 1 ? t('costs.perPerson', { count: item.quantity, amount: one }) : one
     if (item.dkk === undefined) return original
+    if (item.price.currency === 'DKK') {
+      return item.quantity > 1 ? `${original} = ${kr(item.dkk)}` : original
+    }
     const rateNote = item.todayRate ? ` (${t('costs.todayRate')})` : ''
     return `${original} ≈ ${kr(item.dkk)}${rateNote}`
   }

@@ -31,6 +31,8 @@ export type CostSource = {
   price?: Price
   /** Andre rejser, som prisen også dækker (navne), f.eks. hjemrejsens flyvninger. */
   includes?: string[]
+  /** Pris pr. person: ganges med dette antal (antal rejsende). */
+  quantity?: number
 }
 
 export type CostItem = {
@@ -43,6 +45,8 @@ export type CostItem = {
   /** Omregnet med dagens kurs nu, fordi der ikke blev gemt en kurs med prisen. */
   todayRate: boolean
   includes?: string[]
+  /** Over 1: beløbet er pr. person, og dkk er allerede ganget op. */
+  quantity: number
 }
 
 export type CostGroup = { category: CostCategory; items: CostItem[]; totalDkk: number }

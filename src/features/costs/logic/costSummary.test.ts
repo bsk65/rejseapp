@@ -81,6 +81,22 @@ describe('buildCostSummary', () => {
   })
 })
 
+describe('buildCostSummary per person', () => {
+  it('multiplies a per-person price by the number of travellers', () => {
+    const summary = buildCostSummary([
+      {
+        key: 'fly',
+        category: 'transport',
+        label: 'TK1786',
+        price: { amount: 300, currency: 'EUR', dkk: 2238.81 },
+        quantity: 2,
+      },
+    ])
+    expect(summary.groups[0]?.items[0]).toMatchObject({ dkk: 4477.62, quantity: 2 })
+    expect(summary.totalDkk).toBe(4477.62)
+  })
+})
+
 describe('needsRates', () => {
   it('is true only when a price lacks its conversion', () => {
     expect(needsRates(sources)).toBe(true)

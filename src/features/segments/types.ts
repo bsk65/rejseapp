@@ -15,6 +15,9 @@ export type BoardingPassImage = {
   contentType?: string
 }
 
+/** Gælder prisen for alle rejsende tilsammen eller for hver person? */
+export type PriceFor = 'alle' | 'person'
+
 export type TransportMode = 'fly' | 'tog' | 'bil' | 'bus' | 'færge' | 'gang'
 export type SegmentStatus = 'planlagt' | 'bekræftet'
 
@@ -39,6 +42,11 @@ export type Segment = {
    * samlet billet for alle flyvninger ud og hjem. De tælles så ikke som "uden pris".
    */
   priceCovers?: string[]
+  /**
+   * Er prisen for alle rejsende tilsammen ('alle') eller pr. person ('person', ganges
+   * med antal rejsende i oversigten)? Mangler = samlet (én rejsende, ældre priser).
+   */
+  priceFor?: PriceFor
   boardingPasses?: BoardingPassImage[]
   /**
    * Hvem der rejser med (rejsefællers uid'er). Mangler den, er det den, der

@@ -13,6 +13,7 @@ import { useBoardingPasses } from '../hooks/useBoardingPasses'
 import { BoardingPassButtons } from './BoardingPassButtons'
 import { FlightLookupButton } from './FlightLookupButton'
 import { PriceCoversPicker } from './PriceCoversPicker'
+import { PriceForChoice } from './PriceForChoice'
 import { TicketUpload } from './TicketUpload'
 import { TravelersPicker } from './TravelersPicker'
 import { dayIdForDeparture } from '../logic/segmentDay'
@@ -62,6 +63,7 @@ export function SegmentDetailForm({
     freeText: segment.freeText,
     price: segment.price,
     priceCovers: segment.priceCovers,
+    priceFor: segment.priceFor,
     travelerUids: travelersOf(segment),
   })
   const { saveSegment, saveAndMoveSegment, pending } = useUpdateSegment()
@@ -96,15 +98,20 @@ export function SegmentDetailForm({
     setDetails((prev) => ({ ...prev, [field]: value }))
   }
 
+  const travelerCount = (details.travelerUids ?? travelersOf(segment)).length
+  // Flere rejsende: man skal tage stilling til, om prisen er samlet eller pr. person.
+  const asksPriceFor = !!details.price && travelerCount > 1
+
   async function handleSave() {
-    if (priceInvalid) return
+    if (priceInvalid || (asksPriceFor && !details.priceFor)) return
     // Et fly-nummer uden selskabskode ("1762") gemmes med koden foran ("AF1762").
     const number =
       segment.mode === 'fly' ? withAirlineCode(details.number, details.carrier) : details.number
     const price = await priceForSave(details.price, segment.price)
     // Uden pris dækker segmentet heller ikke andre.
     const priceCovers = price && details.priceCovers?.length ? details.priceCovers : undefined
-    const patch = { ...details, number, price, priceCovers }
+    const priceFor = price && travelerCount > 1 ? details.priceFor : undefined
+    const patch = { ...details, number, price, priceCovers, priceFor }
     // Er afgangsdatoen ændret til en anden af rejsens dage, flyttes segmentet dertil.
     const targetDayId = dayIdForDeparture(details.departureTime, days, dayId)
     if (targetDayId === dayId) await saveSegment(tripId, dayId, segment.id, patch)
@@ -204,6 +211,13 @@ export function SegmentDetailForm({
         onChange={(price) => set('price', price)}
         onInvalidChange={setPriceInvalid}
       />
+      {asksPriceFor && (
+        <PriceForChoice
+          travelerCount={travelerCount}
+          value={details.priceFor}
+          onChange={(priceFor) => set('priceFor', priceFor)}
+        />
+      )}
       {details.price && (
         <PriceCoversPicker
           tripId={tripId}

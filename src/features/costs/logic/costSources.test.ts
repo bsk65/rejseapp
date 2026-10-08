@@ -90,6 +90,21 @@ describe('costSources', () => {
     expect(sources.map((s) => s.key)).toEqual(['segment-a', 'segment-b'])
   })
 
+  it('counts a per-person price once per traveller, a shared price once', () => {
+    const price = { amount: 6000, currency: 'DKK', dkk: 6000 }
+    const [perPerson, shared] = costSources(
+      [
+        entry(segment('a', { price, priceFor: 'person', travelerUids: ['u1', 'u2'] })),
+        entry(segment('b', { price, priceFor: 'alle', travelerUids: ['u1', 'u2'] })),
+      ],
+      [],
+      [],
+      t,
+    )
+    expect(perPerson?.quantity).toBe(2)
+    expect(shared?.quantity).toBeUndefined()
+  })
+
   it('maps stays and reservation kinds to their categories', () => {
     const stay: Stay = {
       id: 'h1',

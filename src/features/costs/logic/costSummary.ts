@@ -21,14 +21,17 @@ function toItem(
   const { price } = source
   const saved = price.dkk
   const live = saved === undefined && rates ? toDkk(price.amount, price.currency, rates) : undefined
+  const quantity = source.quantity ?? 1
+  const one = saved ?? live
   return {
     key: source.key,
     label: source.label,
     date: source.date,
     price,
-    dkk: saved ?? live,
+    dkk: one === undefined ? undefined : roundOre(one * quantity),
     todayRate: live !== undefined,
     includes: source.includes,
+    quantity,
   }
 }
 

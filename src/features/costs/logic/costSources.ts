@@ -2,6 +2,7 @@ import type { Translate } from '../../../shared/i18n/translator'
 import type { Reservation, ReservationKind } from '../../reservations/types'
 import { describeSegment } from '../../segments/logic/describeSegment'
 import { departureDate } from '../../segments/logic/priceCovers'
+import { travelersOf } from '../../segments/logic/travelers'
 import type { TicketEntry } from '../../segments/logic/tickets'
 import type { Stay } from '../../stays/types'
 import type { CostCategory, CostSource } from '../types'
@@ -51,6 +52,7 @@ function transportSources(entries: TicketEntry[], t: Translate): CostSource[] {
         date: departureDate(entry),
         price: segment.price,
         includes: includes.length > 0 ? includes : undefined,
+        quantity: segment.priceFor === 'person' ? travelersOf(segment).length : undefined,
       }
     })
 }

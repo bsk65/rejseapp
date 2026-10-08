@@ -27,6 +27,11 @@ export const costsTexts = defineTexts({
     coversLegend: 'Prisen dækker også',
     coversHint: 'Sæt flueben ved de andre rejser, der er med i samme billet/pris.',
     includes: 'inkl. {list}',
+    priceForLegend: 'Hvem gælder prisen for?',
+    priceForAll: 'Samlet for alle {count} rejsende',
+    priceForPerson: 'Pr. person (tælles {count} gange)',
+    priceForRequired: 'Vælg, om prisen er samlet eller pr. person.',
+    perPerson: '{count} × {amount}',
   },
   en: {
     price: 'Price (total for the booking)',
@@ -53,5 +58,10 @@ export const costsTexts = defineTexts({
     coversLegend: 'The price also covers',
     coversHint: 'Tick the other journeys that are part of the same ticket/price.',
     includes: 'incl. {list}',
+    priceForLegend: 'Who does the price cover?',
+    priceForAll: 'All {count} travellers together',
+    priceForPerson: 'Per person (counted {count} times)',
+    priceForRequired: 'Choose whether the price is the total or per person.',
+    perPerson: '{count} × {amount}',
   },
 })

@@ -48,6 +48,7 @@ function toSegment(docSnap: QueryDocumentSnapshot<DocumentData>): Segment {
     freeText: data.freeText ?? undefined,
     price: data.price ?? undefined,
     priceCovers: data.priceCovers ?? undefined,
+    priceFor: data.priceFor ?? undefined,
     boardingPasses: data.boardingPasses ?? undefined,
     travelerUids: data.travelerUids ?? undefined,
     ownerUid: data.ownerUid,
@@ -164,7 +165,7 @@ export async function updateSegment(
 ): Promise<void> {
   const data: Record<string, unknown> = stripUndefined(patch)
   // Et tømt prisfelt skal slette prisen — de andre felter udelades bare.
-  for (const key of ['price', 'priceCovers'] as const) {
+  for (const key of ['price', 'priceCovers', 'priceFor'] as const) {
     if (key in patch && patch[key] === undefined) data[key] = deleteField()
   }
   await updateDoc(doc(segmentsCollection(tripId, dayId), segmentId), data)
