@@ -12,6 +12,7 @@ import { useDeleteSegment } from '../hooks/useDeleteSegment'
 import { useBoardingPasses } from '../hooks/useBoardingPasses'
 import { BoardingPassButtons } from './BoardingPassButtons'
 import { FlightLookupButton } from './FlightLookupButton'
+import { PriceCoversPicker } from './PriceCoversPicker'
 import { TicketUpload } from './TicketUpload'
 import { TravelersPicker } from './TravelersPicker'
 import { dayIdForDeparture } from '../logic/segmentDay'
@@ -60,6 +61,7 @@ export function SegmentDetailForm({
     bookingRef: segment.bookingRef,
     freeText: segment.freeText,
     price: segment.price,
+    priceCovers: segment.priceCovers,
     travelerUids: travelersOf(segment),
   })
   const { saveSegment, saveAndMoveSegment, pending } = useUpdateSegment()
@@ -100,7 +102,9 @@ export function SegmentDetailForm({
     const number =
       segment.mode === 'fly' ? withAirlineCode(details.number, details.carrier) : details.number
     const price = await priceForSave(details.price, segment.price)
-    const patch = { ...details, number, price }
+    // Uden pris dækker segmentet heller ikke andre.
+    const priceCovers = price && details.priceCovers?.length ? details.priceCovers : undefined
+    const patch = { ...details, number, price, priceCovers }
     // Er afgangsdatoen ændret til en anden af rejsens dage, flyttes segmentet dertil.
     const targetDayId = dayIdForDeparture(details.departureTime, days, dayId)
     if (targetDayId === dayId) await saveSegment(tripId, dayId, segment.id, patch)
@@ -200,6 +204,16 @@ export function SegmentDetailForm({
         onChange={(price) => set('price', price)}
         onInvalidChange={setPriceInvalid}
       />
+      {details.price && (
+        <PriceCoversPicker
+          tripId={tripId}
+          days={days}
+          selfUid={selfUid}
+          segmentId={segment.id}
+          covered={details.priceCovers ?? []}
+          onChange={(covered) => set('priceCovers', covered)}
+        />
+      )}
 
       <TextField
         label={t('segments.note')}

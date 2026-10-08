@@ -56,6 +56,40 @@ describe('costSources', () => {
     expect(sources.map((s) => s.key)).toEqual(['segment-rental', 'segment-train'])
   })
 
+  it('lists flights covered by another flight’s price under that price, not as missing', () => {
+    const sources = costSources(
+      [
+        entry(
+          segment('ud1', {
+            number: 'TK1784',
+            price: { amount: 12000, currency: 'DKK', dkk: 12000 },
+            priceCovers: ['ud2', 'hjem1', 'own'],
+          }),
+        ),
+        entry(segment('ud2', { number: 'TK56' })),
+        entry(segment('hjem1', { number: 'TK57' })),
+        // Har sin egen pris — tælles selv, ikke som "inkl."
+        entry(segment('own', { number: 'GA1', price: { amount: 900, currency: 'DKK' } })),
+        entry(segment('alone', { number: 'XX1' })),
+      ],
+      [],
+      [],
+      t,
+    )
+    expect(sources.map((s) => s.key)).toEqual(['segment-ud1', 'segment-own', 'segment-alone'])
+    expect(sources[0]?.includes).toEqual(['TK56', 'TK57'])
+  })
+
+  it('does not hide flights when the covering flight has no price', () => {
+    const sources = costSources(
+      [entry(segment('a', { priceCovers: ['b'] })), entry(segment('b', {}))],
+      [],
+      [],
+      t,
+    )
+    expect(sources.map((s) => s.key)).toEqual(['segment-a', 'segment-b'])
+  })
+
   it('maps stays and reservation kinds to their categories', () => {
     const stay: Stay = {
       id: 'h1',

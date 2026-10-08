@@ -29,6 +29,8 @@ export type CostSource = {
   /** YYYY-MM-DD — til sortering og visning. */
   date?: string
   price?: Price
+  /** Andre rejser, som prisen også dækker (navne), f.eks. hjemrejsens flyvninger. */
+  includes?: string[]
 }
 
 export type CostItem = {
@@ -40,6 +42,7 @@ export type CostItem = {
   dkk?: number
   /** Omregnet med dagens kurs nu, fordi der ikke blev gemt en kurs med prisen. */
   todayRate: boolean
+  includes?: string[]
 }
 
 export type CostGroup = { category: CostCategory; items: CostItem[]; totalDkk: number }

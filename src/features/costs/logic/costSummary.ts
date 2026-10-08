@@ -28,6 +28,7 @@ function toItem(
     price,
     dkk: saved ?? live,
     todayRate: live !== undefined,
+    includes: source.includes,
   }
 }
 

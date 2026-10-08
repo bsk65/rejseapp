@@ -69,6 +69,11 @@ export function TripCosts({
                   <li key={item.key} className={styles.item}>
                     <span className={styles.itemLabel}>
                       {item.label}
+                      {item.includes && (
+                        <span className={styles.itemDate}>
+                          {t('costs.includes', { list: item.includes.join(', ') })}
+                        </span>
+                      )}
                       {item.date && (
                         <span className={styles.itemDate}>{formatDayDate(item.date, locale)}</span>
                       )}

@@ -24,6 +24,9 @@ export const costsTexts = defineTexts({
     unconverted: 'Nogle beløb kunne ikke omregnes til kroner og er ikke talt med i totalen.',
     rateNote: 'Fremmed valuta er omregnet til kroner med kursen den dag, prisen blev gemt.',
     todayRate: 'dagens kurs',
+    coversLegend: 'Prisen dækker også',
+    coversHint: 'Sæt flueben ved de andre rejser, der er med i samme billet/pris.',
+    includes: 'inkl. {list}',
   },
   en: {
     price: 'Price (total for the booking)',
@@ -47,5 +50,8 @@ export const costsTexts = defineTexts({
     unconverted: 'Some amounts could not be converted to Danish kroner and are not in the total.',
     rateNote: 'Foreign currency is converted to DKK at the rate on the day the price was saved.',
     todayRate: 'today’s rate',
+    coversLegend: 'The price also covers',
+    coversHint: 'Tick the other journeys that are part of the same ticket/price.',
+    includes: 'incl. {list}',
   },
 })

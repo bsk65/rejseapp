@@ -34,6 +34,11 @@ export type Segment = {
   freeText?: string
   /** Hvad billetten kostede (i alt). */
   price?: Price
+  /**
+   * Andre transport-segmenter (id'er), som prisen også dækker — f.eks. en
+   * samlet billet for alle flyvninger ud og hjem. De tælles så ikke som "uden pris".
+   */
+  priceCovers?: string[]
   boardingPasses?: BoardingPassImage[]
   /**
    * Hvem der rejser med (rejsefællers uid'er). Mangler den, er det den, der

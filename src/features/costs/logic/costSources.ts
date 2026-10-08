@@ -1,6 +1,7 @@
 import type { Translate } from '../../../shared/i18n/translator'
 import type { Reservation, ReservationKind } from '../../reservations/types'
 import { describeSegment } from '../../segments/logic/describeSegment'
+import { departureDate } from '../../segments/logic/priceCovers'
 import type { TicketEntry } from '../../segments/logic/tickets'
 import type { Stay } from '../../stays/types'
 import type { CostCategory, CostSource } from '../types'
@@ -12,32 +13,55 @@ const reservationCategory: Record<ReservationKind, CostCategory> = {
 }
 
 /**
- * Rejsens bookinger som poster i prisoversigten. Bil og gang tæller kun med,
- * hvis de har en pris (lejebil) — ellers ville egen bil og gåture stå som
- * "uden pris".
+ * Transport som poster. Bil og gang tæller kun med, hvis de har en pris
+ * (lejebil) — ellers ville egen bil og gåture stå som "uden pris". En rejse
+ * uden egen pris, som en anden rejses pris dækker (priceCovers), vises under
+ * den pris ("inkl. …") i stedet for som "uden pris".
  */
+function transportSources(entries: TicketEntry[], t: Translate): CostSource[] {
+  const titleOf = new Map(
+    entries.map(({ segment }) => [segment.id, describeSegment(segment, t).title]),
+  )
+  const unpriced = new Set(
+    entries.filter(({ segment }) => !segment.price).map(({ segment }) => segment.id),
+  )
+  const covered = new Set(
+    entries.flatMap(({ segment }) =>
+      segment.price ? (segment.priceCovers ?? []).filter((id) => unpriced.has(id)) : [],
+    ),
+  )
+
+  return entries
+    .filter(({ segment }) => !covered.has(segment.id))
+    .filter(({ segment }) => segment.price || (segment.mode !== 'bil' && segment.mode !== 'gang'))
+    .map((entry): CostSource => {
+      const { segment } = entry
+      const from = segment.departurePlace?.name
+      const to = segment.arrivalPlace?.name
+      const route = from || to ? ` · ${from ?? '?'} → ${to ?? '?'}` : ''
+      const includes = segment.price
+        ? (segment.priceCovers ?? [])
+            .filter((id) => covered.has(id))
+            .map((id) => titleOf.get(id) ?? '')
+        : []
+      return {
+        key: `segment-${segment.id}`,
+        category: 'transport',
+        label: `${titleOf.get(segment.id) ?? ''}${route}`,
+        date: departureDate(entry),
+        price: segment.price,
+        includes: includes.length > 0 ? includes : undefined,
+      }
+    })
+}
+
+/** Rejsens bookinger som poster i prisoversigten. */
 export function costSources(
   entries: TicketEntry[],
   stays: Stay[],
   reservations: Reservation[],
   t: Translate,
 ): CostSource[] {
-  const transport = entries
-    .filter(({ segment }) => segment.price || (segment.mode !== 'bil' && segment.mode !== 'gang'))
-    .map(({ segment, dayDate }): CostSource => {
-      const { title } = describeSegment(segment, t)
-      const from = segment.departurePlace?.name
-      const to = segment.arrivalPlace?.name
-      const route = from || to ? ` · ${from ?? '?'} → ${to ?? '?'}` : ''
-      return {
-        key: `segment-${segment.id}`,
-        category: 'transport',
-        label: `${title}${route}`,
-        date: segment.departureTime?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? dayDate,
-        price: segment.price,
-      }
-    })
-
   const stayItems = stays.map((stay): CostSource => ({
     key: `stay-${stay.id}`,
     category: 'stays',
@@ -54,5 +78,5 @@ export function costSources(
     price: reservation.price,
   }))
 
-  return [...transport, ...stayItems, ...reservationItems]
+  return [...transportSources(entries, t), ...stayItems, ...reservationItems]
 }
