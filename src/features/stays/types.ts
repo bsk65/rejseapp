@@ -1,4 +1,5 @@
 import type { Place } from '../../shared/types/place'
+import type { Price } from '../../shared/types/price'
 
 /** En overnatning (hotel, Airbnb …) — strækker sig over en eller flere nætter. */
 export type Stay = {
@@ -20,6 +21,8 @@ export type Stay = {
   wifi?: string
   hostPhone?: string
   note?: string
+  /** Hvad overnatningen kostede i alt (alle nætter). */
+  price?: Price
   /** Hvem der oprettede overnatningen — kun informativ, ikke sikkerhedsrelevant. */
   ownerUid: string
   /** Denormaliseret fra rejsens memberUids — se CLAUDE.md. */

@@ -1,5 +1,6 @@
 import type { TextKey } from '../../shared/i18n/translator'
 import type { Place } from '../../shared/types/place'
+import type { Price } from '../../shared/types/price'
 
 /** Et gemt billede af et boardingkort. Hver passager har sit eget (rejsefæller på samme fly). */
 export type BoardingPassImage = {
@@ -31,6 +32,8 @@ export type Segment = {
   seat?: string
   bookingRef?: string
   freeText?: string
+  /** Hvad billetten kostede (i alt). */
+  price?: Price
   boardingPasses?: BoardingPassImage[]
   /**
    * Hvem der rejser med (rejsefællers uid'er). Mangler den, er det den, der

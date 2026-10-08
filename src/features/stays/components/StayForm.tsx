@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { priceForSave } from '../../../shared/api/exchangeRates'
 import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
+import { PriceField } from '../../../shared/ui/PriceField'
 import { TextField } from '../../../shared/ui/TextField'
 import type { Place } from '../../../shared/types/place'
 import { useSaveStay } from '../hooks/useSaveStay'
@@ -27,6 +29,7 @@ function detailsOf(stay: Stay): StayDetails {
     wifi: stay.wifi,
     hostPhone: stay.hostPhone,
     note: stay.note,
+    price: stay.price,
   }
 }
 
@@ -62,6 +65,9 @@ export function StayForm({
   )
   const [useAsDayTo, setUseAsDayTo] = useState(true)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [priceInvalid, setPriceInvalid] = useState(false)
+  // Kursopslaget tager et øjeblik — Gem må ikke kunne trykkes to gange imens.
+  const [converting, setConverting] = useState(false)
   const [showPaste, setShowPaste] = useState(false)
   const [validationError, setValidationError] = useState<TextKey | null>(null)
   const { create, update, remove, pending, error } = useSaveStay(tripId)
@@ -87,9 +93,13 @@ export function StayForm({
     const dateError = validateStayDates(details.checkInDate, details.checkOutDate)
     if (!name) return setValidationError('stays.errorName')
     if (dateError) return setValidationError(dateError)
+    if (priceInvalid) return setValidationError('costs.amountInvalid')
     setValidationError(null)
 
-    const toSave = { ...details, name }
+    setConverting(true)
+    const price = await priceForSave(details.price, stay?.price)
+    setConverting(false)
+    const toSave = { ...details, name, price }
     const saved = stay ? await update(stay.id, toSave) : await create(userUid, memberUids, toSave)
     if (!saved) return
     if (!stay && setAsDayTo && useAsDayTo && details.place) await setAsDayTo(details.place)
@@ -179,6 +189,12 @@ export function StayForm({
       </div>
 
       {textField('bookingRef', t('stays.bookingRef'))}
+      <PriceField
+        id="stay-price"
+        price={details.price}
+        onChange={(price) => set('price', price)}
+        onInvalidChange={setPriceInvalid}
+      />
       {textField('accessCode', t('stays.accessCode'))}
       {textField('wifi', t('stays.wifi'))}
       {textField('hostPhone', t('stays.hostPhone'), 'tel')}
@@ -218,7 +234,7 @@ export function StayForm({
           <Button type="button" variant="secondary" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button type="button" disabled={pending} onClick={() => void handleSave()}>
+          <Button type="button" disabled={pending || converting} onClick={() => void handleSave()}>
             {t('common.save')}
           </Button>
         </div>

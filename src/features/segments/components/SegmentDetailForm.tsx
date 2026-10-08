@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { priceForSave } from '../../../shared/api/exchangeRates'
 import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
 import { useDays } from '../../days/hooks/useDays'
 import { usePeople } from '../../friends/hooks/usePeople'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
+import { PriceField } from '../../../shared/ui/PriceField'
 import { TextField } from '../../../shared/ui/TextField'
 import { useDeleteSegment } from '../hooks/useDeleteSegment'
 import { useBoardingPasses } from '../hooks/useBoardingPasses'
@@ -57,6 +59,7 @@ export function SegmentDetailForm({
     seat: segment.seat,
     bookingRef: segment.bookingRef,
     freeText: segment.freeText,
+    price: segment.price,
     travelerUids: travelersOf(segment),
   })
   const { saveSegment, saveAndMoveSegment, pending } = useUpdateSegment()
@@ -71,6 +74,7 @@ export function SegmentDetailForm({
     uploadFailed,
   } = useBoardingPasses(tripId, dayId, segment)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [priceInvalid, setPriceInvalid] = useState(false)
 
   async function handleDelete() {
     await removeSegment(tripId, dayId, segment.id, passes)
@@ -91,10 +95,12 @@ export function SegmentDetailForm({
   }
 
   async function handleSave() {
+    if (priceInvalid) return
     // Et fly-nummer uden selskabskode ("1762") gemmes med koden foran ("AF1762").
     const number =
       segment.mode === 'fly' ? withAirlineCode(details.number, details.carrier) : details.number
-    const patch = { ...details, number }
+    const price = await priceForSave(details.price, segment.price)
+    const patch = { ...details, number, price }
     // Er afgangsdatoen ændret til en anden af rejsens dage, flyttes segmentet dertil.
     const targetDayId = dayIdForDeparture(details.departureTime, days, dayId)
     if (targetDayId === dayId) await saveSegment(tripId, dayId, segment.id, patch)
@@ -187,6 +193,13 @@ export function SegmentDetailForm({
           onChange={(e) => set('bookingRef', e.target.value || undefined)}
         />
       )}
+
+      <PriceField
+        id="segment-price"
+        price={details.price}
+        onChange={(price) => set('price', price)}
+        onInvalidChange={setPriceInvalid}
+      />
 
       <TextField
         label={t('segments.note')}

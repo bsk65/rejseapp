@@ -6,6 +6,7 @@ import { AppQrButton } from '../../../shared/ui/AppQrButton'
 import { LangToggle } from '../../../shared/ui/LangToggle'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
+import { TripCosts } from '../../costs/components/TripCosts'
 import { DaysList } from '../../days/components/DaysList'
 import { PeopleProvider } from '../../friends/components/PeopleProvider'
 import { useDays } from '../../days/hooks/useDays'
@@ -51,6 +52,7 @@ export function TripDetailPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [highlightedDayId, setHighlightedDayId] = useState<string | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showCosts, setShowCosts] = useState(false)
   const { removeDay, error: removeDayError } = useRemoveTripDay(trip, days, user?.uid)
 
   // Valgt fane ligger i URL'en (?fane=...), så den overlever en genindlæsning.
@@ -107,16 +109,38 @@ export function TripDetailPage() {
             <h1 className={styles.title}>{trip.title}</h1>
             <p className={styles.meta}>{formatDateRange(trip.startDate, trip.days)}</p>
           </div>
-          {isOwner && (
+          <div className={styles.headerActions}>
             <button
               type="button"
               className={styles.shareButton}
-              onClick={() => setShowShareDialog(true)}
+              aria-label={t('costs.buttonLabel')}
+              aria-expanded={showCosts}
+              onClick={() => setShowCosts((prev) => !prev)}
             >
-              {t('trips.shareTrip')}
+              <span aria-hidden="true">💰</span> {t('costs.button')}
             </button>
-          )}
+            {isOwner && (
+              <button
+                type="button"
+                className={styles.shareButton}
+                onClick={() => setShowShareDialog(true)}
+              >
+                {t('trips.shareTrip')}
+              </button>
+            )}
+          </div>
         </div>
+
+        {showCosts && (
+          <TripCosts
+            tripId={trip.id}
+            days={days}
+            stays={stays}
+            reservations={reservations}
+            userUid={user.uid}
+            onClose={() => setShowCosts(false)}
+          />
+        )}
 
         {showShareDialog && (
           <ShareTripDialog

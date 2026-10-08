@@ -1,5 +1,6 @@
 import type { TextKey } from '../../shared/i18n/translator'
 import type { Place } from '../../shared/types/place'
+import type { Price } from '../../shared/types/price'
 
 export type ReservationKind = 'restaurant' | 'aktivitet' | 'andet'
 
@@ -20,6 +21,8 @@ export type Reservation = {
   bookingRef?: string
   phone?: string
   note?: string
+  /** Hvad reservationen kostede (i alt). */
+  price?: Price
   /** Hvem der oprettede reservationen — kun informativ, ikke sikkerhedsrelevant. */
   ownerUid: string
   /** Denormaliseret fra rejsens memberUids — se CLAUDE.md. */

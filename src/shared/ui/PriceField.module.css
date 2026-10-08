@@ -1,0 +1,56 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.amount,
+.currency {
+  min-height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.amount {
+  flex: 1;
+  min-width: 0;
+  padding: 0 14px;
+}
+
+.currency {
+  flex: none;
+  padding: 0 10px;
+}
+
+.amount:focus,
+.currency:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.hint {
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-danger);
+}

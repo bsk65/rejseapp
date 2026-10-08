@@ -1,0 +1,51 @@
+import { defineTexts } from '../translate'
+
+/** Priser på bookinger og oversigten "Rejsens pris". */
+export const costsTexts = defineTexts({
+  da: {
+    price: 'Pris (i alt for bookingen)',
+    amountPlaceholder: 'Beløb',
+    currency: 'Valuta',
+    approxDkk: '≈ {amount} med dagens kurs',
+    amountInvalid: 'Skriv beløbet som et tal, f.eks. 1.250,50.',
+    button: 'Pris',
+    buttonLabel: 'Vis rejsens pris',
+    title: 'Rejsens pris',
+    empty:
+      'Ingen bookinger har en pris endnu. Tilføj en pris, når du retter et fly, en overnatning eller en reservation.',
+    categoryTransport: 'Transport',
+    categoryStays: 'Overnatning',
+    categoryRestaurant: 'Restauranter',
+    categoryActivity: 'Aktiviteter',
+    categoryOther: 'Andet',
+    total: 'I alt',
+    missing: '{count} bookinger uden pris er ikke talt med.',
+    missingOne: '1 booking uden pris er ikke talt med.',
+    unconverted: 'Nogle beløb kunne ikke omregnes til kroner og er ikke talt med i totalen.',
+    rateNote: 'Fremmed valuta er omregnet til kroner med kursen den dag, prisen blev gemt.',
+    todayRate: 'dagens kurs',
+  },
+  en: {
+    price: 'Price (total for the booking)',
+    amountPlaceholder: 'Amount',
+    currency: 'Currency',
+    approxDkk: '≈ {amount} at today’s rate',
+    amountInvalid: 'Enter the amount as a number, e.g. 1,250.50.',
+    button: 'Cost',
+    buttonLabel: 'Show the cost of the trip',
+    title: 'Cost of the trip',
+    empty:
+      'No bookings have a price yet. Add a price when you edit a flight, a stay or a reservation.',
+    categoryTransport: 'Transport',
+    categoryStays: 'Accommodation',
+    categoryRestaurant: 'Restaurants',
+    categoryActivity: 'Activities',
+    categoryOther: 'Other',
+    total: 'Total',
+    missing: '{count} bookings without a price are not included.',
+    missingOne: '1 booking without a price is not included.',
+    unconverted: 'Some amounts could not be converted to Danish kroner and are not in the total.',
+    rateNote: 'Foreign currency is converted to DKK at the rate on the day the price was saved.',
+    todayRate: 'today’s rate',
+  },
+})

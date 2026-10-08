@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { priceForSave } from '../../../shared/api/exchangeRates'
 import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
+import { PriceField } from '../../../shared/ui/PriceField'
 import { TextField } from '../../../shared/ui/TextField'
 import { useSaveReservation } from '../hooks/useSaveReservation'
 import {
@@ -27,6 +29,7 @@ function detailsOf(reservation: Reservation): ReservationDetails {
     bookingRef: reservation.bookingRef,
     phone: reservation.phone,
     note: reservation.note,
+    price: reservation.price,
   }
 }
 
@@ -54,6 +57,9 @@ export function ReservationForm({
       : { kind: 'restaurant', name: '', date: initialDate ?? '' },
   )
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [priceInvalid, setPriceInvalid] = useState(false)
+  // Kursopslaget tager et øjeblik — Gem må ikke kunne trykkes to gange imens.
+  const [converting, setConverting] = useState(false)
   const [validationError, setValidationError] = useState<TextKey | null>(null)
   const { create, update, remove, pending, error } = useSaveReservation(tripId)
 
@@ -77,9 +83,13 @@ export function ReservationForm({
     const name = details.name.trim() || details.place?.name || ''
     if (!name) return setValidationError('reservations.errorName')
     if (!details.date) return setValidationError('reservations.errorDate')
+    if (priceInvalid) return setValidationError('costs.amountInvalid')
     setValidationError(null)
 
-    const toSave = { ...details, name }
+    setConverting(true)
+    const price = await priceForSave(details.price, reservation?.price)
+    setConverting(false)
+    const toSave = { ...details, name, price }
     const saved = reservation
       ? await update(reservation.id, toSave)
       : await create(userUid, memberUids, toSave)
@@ -146,6 +156,12 @@ export function ReservationForm({
 
       {textField('bookingRef', t('reservations.bookingRef'))}
       {textField('phone', t('reservations.phone'), 'tel')}
+      <PriceField
+        id="reservation-price"
+        price={details.price}
+        onChange={(price) => set('price', price)}
+        onInvalidChange={setPriceInvalid}
+      />
       {textField('note', t('reservations.note'))}
 
       {shownError && <p className={styles.error}>{t(shownError)}</p>}
@@ -184,7 +200,7 @@ export function ReservationForm({
           <Button type="button" variant="secondary" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button type="button" disabled={pending} onClick={() => void handleSave()}>
+          <Button type="button" disabled={pending || converting} onClick={() => void handleSave()}>
             {t('common.save')}
           </Button>
         </div>

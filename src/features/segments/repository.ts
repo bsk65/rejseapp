@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   onSnapshot,
   orderBy,
@@ -45,6 +46,7 @@ function toSegment(docSnap: QueryDocumentSnapshot<DocumentData>): Segment {
     seat: data.seat ?? undefined,
     bookingRef: data.bookingRef ?? undefined,
     freeText: data.freeText ?? undefined,
+    price: data.price ?? undefined,
     boardingPasses: data.boardingPasses ?? undefined,
     travelerUids: data.travelerUids ?? undefined,
     ownerUid: data.ownerUid,
@@ -159,7 +161,10 @@ export async function updateSegment(
   segmentId: string,
   patch: Partial<SegmentDetails>,
 ): Promise<void> {
-  await updateDoc(doc(segmentsCollection(tripId, dayId), segmentId), stripUndefined(patch))
+  const data: Record<string, unknown> = stripUndefined(patch)
+  // Et tømt prisfelt skal slette prisen — de andre felter udelades bare.
+  if ('price' in patch && patch.price === undefined) data.price = deleteField()
+  await updateDoc(doc(segmentsCollection(tripId, dayId), segmentId), data)
 }
 
 /**

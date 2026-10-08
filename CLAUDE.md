@@ -188,6 +188,14 @@ Restaurant, aktivitet (udflugt, dykning …) eller andet: `trips/{tripId}/reserv
 - **Billetter & tider:** `ReservationCard` (prikket kant) flettes ind i `buildTicketTimeline`; eget filter "Reservationer".
 - Ikke på kortet endnu.
 
+### Priser og "Rejsens pris" (`features/costs`)
+
+- **Pris på bookinger:** transport, overnatninger og reservationer har et valgfrit `price: Price` (`shared/types/price.ts`: `{ amount, currency, dkk?, rateDate? }`), indtastet med `shared/ui/PriceField` (beløb + valuta; sidst valgte valuta huskes i localStorage `rejseappen_currency`). `parseAmount` (shared/utils/money.ts) forstår både "1.234,50" og "1,234.50".
+- **Omregning til DKK** sker, når prisen gemmes (`priceForSave` i `shared/api/exchangeRates.ts`): dagens kurs fra den åbne currency-api (fawazahmed0, via jsDelivr med pages.dev som reserve — ingen nøgle, ingen personoplysninger, kun et filopslag) gemmes som `dkk` + `rateDate`, så totalen ikke flytter sig med kursen. Uændret beløb+valuta genbruger den gamle omregning. Fejler opslaget (offline), gemmes prisen uden `dkk`, og oversigten regner den om med dagens kurs (markeret "dagens kurs").
+- **Tømt prisfelt slettes:** stays/reservations gør det automatisk (`deleteField()`); `updateSegment` har en særregel for `price`, da segmenter ellers bare udelader tomme felter.
+- **"💰 Pris"-knappen** i rejsens header (alle medlemmer) åbner `TripCosts`: poster pr. kategori (transport, overnatning, restauranter, aktiviteter, andet) med subtotal og total i kroner. `costSources` + `buildCostSummary` er rene og testede. Bil/gang uden pris tælles ikke som "uden pris" (egen bil, gåture). Prisen er hele bookingens beløb — ingen fordeling pr. person.
+- Ingen regelændring: reglerne begrænser ikke felterne på segments/stays/reservations.
+
 ## Byggetrin (status)
 
 1. Projekt + Firebase + auth + opret/vis rejse

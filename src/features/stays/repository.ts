@@ -37,6 +37,7 @@ function toStay(docSnap: QueryDocumentSnapshot<DocumentData>): Stay {
     wifi: data.wifi ?? undefined,
     hostPhone: data.hostPhone ?? undefined,
     note: data.note ?? undefined,
+    price: data.price ?? undefined,
     ownerUid: data.ownerUid,
     memberUids: data.memberUids ?? [data.ownerUid],
   }
