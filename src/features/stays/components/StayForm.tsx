@@ -5,6 +5,8 @@ import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { PriceField } from '../../../shared/ui/PriceField'
+import { PriceForChoice } from '../../../shared/ui/PriceForChoice'
+import { TravelersPicker } from '../../segments/components/TravelersPicker'
 import { TextField } from '../../../shared/ui/TextField'
 import type { Place } from '../../../shared/types/place'
 import { useSaveStay } from '../hooks/useSaveStay'
@@ -30,6 +32,9 @@ function detailsOf(stay: Stay): StayDetails {
     hostPhone: stay.hostPhone,
     note: stay.note,
     price: stay.price,
+    priceFor: stay.priceFor,
+    // Ældre uden "hvem er med" gælder alle på rejsen.
+    travelerUids: stay.travelerUids ?? stay.memberUids,
   }
 }
 
@@ -61,11 +66,17 @@ export function StayForm({
   const [details, setDetails] = useState<StayDetails>(() =>
     stay
       ? detailsOf(stay)
-      : { name: '', checkInDate: initialCheckIn ?? '', checkOutDate: initialCheckOut ?? '' },
+      : {
+          ...{ name: '', checkInDate: initialCheckIn ?? '', checkOutDate: initialCheckOut ?? '' },
+          travelerUids: memberUids,
+        },
   )
   const [useAsDayTo, setUseAsDayTo] = useState(true)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [priceInvalid, setPriceInvalid] = useState(false)
+  const travelers = details.travelerUids ?? memberUids
+  // Flere med: man skal tage stilling til, om prisen er samlet eller pr. person.
+  const asksPriceFor = !!details.price && travelers.length > 1
   // Kursopslaget tager et øjeblik — Gem må ikke kunne trykkes to gange imens.
   const [converting, setConverting] = useState(false)
   const [showPaste, setShowPaste] = useState(false)
@@ -94,12 +105,14 @@ export function StayForm({
     if (!name) return setValidationError('stays.errorName')
     if (dateError) return setValidationError(dateError)
     if (priceInvalid) return setValidationError('costs.amountInvalid')
+    if (asksPriceFor && !details.priceFor) return setValidationError('costs.priceForRequired')
     setValidationError(null)
 
     setConverting(true)
     const price = await priceForSave(details.price, stay?.price)
     setConverting(false)
-    const toSave = { ...details, name, price }
+    const priceFor = price && travelers.length > 1 ? details.priceFor : undefined
+    const toSave = { ...details, name, price, priceFor }
     const saved = stay ? await update(stay.id, toSave) : await create(userUid, memberUids, toSave)
     if (!saved) return
     if (!stay && setAsDayTo && useAsDayTo && details.place) await setAsDayTo(details.place)
@@ -189,12 +202,20 @@ export function StayForm({
       </div>
 
       {textField('bookingRef', t('stays.bookingRef'))}
+      <TravelersPicker travelers={travelers} onChange={(next) => set('travelerUids', next)} />
       <PriceField
         id="stay-price"
         price={details.price}
         onChange={(price) => set('price', price)}
         onInvalidChange={setPriceInvalid}
       />
+      {asksPriceFor && (
+        <PriceForChoice
+          travelerCount={travelers.length}
+          value={details.priceFor}
+          onChange={(priceFor) => set('priceFor', priceFor)}
+        />
+      )}
       {textField('accessCode', t('stays.accessCode'))}
       {textField('wifi', t('stays.wifi'))}
       {textField('hostPhone', t('stays.hostPhone'), 'tel')}

@@ -38,6 +38,8 @@ function toStay(docSnap: QueryDocumentSnapshot<DocumentData>): Stay {
     hostPhone: data.hostPhone ?? undefined,
     note: data.note ?? undefined,
     price: data.price ?? undefined,
+    priceFor: data.priceFor ?? undefined,
+    travelerUids: data.travelerUids ?? undefined,
     ownerUid: data.ownerUid,
     memberUids: data.memberUids ?? [data.ownerUid],
   }

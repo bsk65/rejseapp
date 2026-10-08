@@ -77,6 +77,7 @@ describe('buildCostSummary', () => {
       missingCount: 1,
       unconvertedCount: 0,
       hasForeign: false,
+      perPerson: {},
     })
   })
 })
@@ -94,6 +95,37 @@ describe('buildCostSummary per person', () => {
     ])
     expect(summary.groups[0]?.items[0]).toMatchObject({ dkk: 4477.62, quantity: 2 })
     expect(summary.totalDkk).toBe(4477.62)
+  })
+})
+
+describe('buildCostSummary perPerson', () => {
+  it('splits a shared price equally and gives each traveller a per-person price in full', () => {
+    const summary = buildCostSummary([
+      {
+        key: 'fly',
+        category: 'transport',
+        label: 'Fly, pr. person',
+        price: { amount: 6000, currency: 'DKK', dkk: 6000 },
+        quantity: 2,
+        travelers: ['bjarne', 'jens'],
+      },
+      {
+        key: 'hotel',
+        category: 'stays',
+        label: 'Hotel, samlet',
+        price: { amount: 3000, currency: 'DKK', dkk: 3000 },
+        travelers: ['bjarne', 'jens'],
+      },
+      {
+        key: 'dyk',
+        category: 'activity',
+        label: 'Dykning, kun Bjarne',
+        price: { amount: 1000, currency: 'DKK', dkk: 1000 },
+        travelers: ['bjarne'],
+      },
+    ])
+    expect(summary.perPerson).toEqual({ bjarne: 8500, jens: 7500 })
+    expect(summary.totalDkk).toBe(16000)
   })
 })
 

@@ -5,6 +5,8 @@ import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { PriceField } from '../../../shared/ui/PriceField'
+import { PriceForChoice } from '../../../shared/ui/PriceForChoice'
+import { TravelersPicker } from '../../segments/components/TravelersPicker'
 import { TextField } from '../../../shared/ui/TextField'
 import { useSaveReservation } from '../hooks/useSaveReservation'
 import {
@@ -30,6 +32,9 @@ function detailsOf(reservation: Reservation): ReservationDetails {
     phone: reservation.phone,
     note: reservation.note,
     price: reservation.price,
+    priceFor: reservation.priceFor,
+    // Ældre uden "hvem er med" gælder alle på rejsen.
+    travelerUids: reservation.travelerUids ?? reservation.memberUids,
   }
 }
 
@@ -54,10 +59,13 @@ export function ReservationForm({
   const [details, setDetails] = useState<ReservationDetails>(() =>
     reservation
       ? detailsOf(reservation)
-      : { kind: 'restaurant', name: '', date: initialDate ?? '' },
+      : { ...{ kind: 'restaurant', name: '', date: initialDate ?? '' }, travelerUids: memberUids },
   )
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [priceInvalid, setPriceInvalid] = useState(false)
+  const travelers = details.travelerUids ?? memberUids
+  // Flere med: man skal tage stilling til, om prisen er samlet eller pr. person.
+  const asksPriceFor = !!details.price && travelers.length > 1
   // Kursopslaget tager et øjeblik — Gem må ikke kunne trykkes to gange imens.
   const [converting, setConverting] = useState(false)
   const [validationError, setValidationError] = useState<TextKey | null>(null)
@@ -84,12 +92,14 @@ export function ReservationForm({
     if (!name) return setValidationError('reservations.errorName')
     if (!details.date) return setValidationError('reservations.errorDate')
     if (priceInvalid) return setValidationError('costs.amountInvalid')
+    if (asksPriceFor && !details.priceFor) return setValidationError('costs.priceForRequired')
     setValidationError(null)
 
     setConverting(true)
     const price = await priceForSave(details.price, reservation?.price)
     setConverting(false)
-    const toSave = { ...details, name, price }
+    const priceFor = price && travelers.length > 1 ? details.priceFor : undefined
+    const toSave = { ...details, name, price, priceFor }
     const saved = reservation
       ? await update(reservation.id, toSave)
       : await create(userUid, memberUids, toSave)
@@ -156,12 +166,20 @@ export function ReservationForm({
 
       {textField('bookingRef', t('reservations.bookingRef'))}
       {textField('phone', t('reservations.phone'), 'tel')}
+      <TravelersPicker travelers={travelers} onChange={(next) => set('travelerUids', next)} />
       <PriceField
         id="reservation-price"
         price={details.price}
         onChange={(price) => set('price', price)}
         onInvalidChange={setPriceInvalid}
       />
+      {asksPriceFor && (
+        <PriceForChoice
+          travelerCount={travelers.length}
+          value={details.priceFor}
+          onChange={(priceFor) => set('priceFor', priceFor)}
+        />
+      )}
       {textField('note', t('reservations.note'))}
 
       {shownError && <p className={styles.error}>{t(shownError)}</p>}

@@ -5,11 +5,14 @@ import { formatDayDate } from '../../../shared/utils/date'
 import { formatMoney } from '../../../shared/utils/money'
 import type { Day } from '../../days/types'
 import type { Reservation } from '../../reservations/types'
+import { usePeople } from '../../friends/hooks/usePeople'
 import { useTripSegments } from '../../segments/hooks/useTripSegments'
+import { travelersLabel } from '../../segments/logic/travelers'
 import type { Stay } from '../../stays/types'
 import { useTodayRates } from '../hooks/useTodayRates'
 import { costSources } from '../logic/costSources'
 import { buildCostSummary, needsRates } from '../logic/costSummary'
+import { PerPersonCosts } from './PerPersonCosts'
 import { costCategoryIcon, costCategoryLabel, type CostItem } from '../types'
 import styles from './TripCosts.module.css'
 
@@ -38,6 +41,13 @@ export function TripCosts({
   const rates = useTodayRates(needsRates(sources))
   const summary = buildCostSummary(sources, rates)
   const kr = (amount: number) => formatMoney(amount, 'DKK', locale)
+  const { shared, memberUids, selfUid, nameOf } = usePeople()
+  // "Dig" / "Dig, Jens" / "Alle" under hver post — kun på delte rejser.
+  const whoLabel = (travelers: string[]) =>
+    travelersLabel(travelers, memberUids, selfUid, nameOf, {
+      everyone: t('people.everyone'),
+      you: t('people.you'),
+    })
 
   function itemAmount(item: CostItem) {
     const one = formatMoney(item.price.amount, item.price.currency, locale)
@@ -73,6 +83,9 @@ export function TripCosts({
                   <li key={item.key} className={styles.item}>
                     <span className={styles.itemLabel}>
                       {item.label}
+                      {shared && item.travelers.length > 0 && (
+                        <span className={styles.itemDate}>{whoLabel(item.travelers)}</span>
+                      )}
                       {item.includes && (
                         <span className={styles.itemDate}>
                           {t('costs.includes', { list: item.includes.join(', ') })}
@@ -95,6 +108,8 @@ export function TripCosts({
             <span>{t('costs.total')}</span>
             <span>{kr(summary.totalDkk)}</span>
           </div>
+
+          <PerPersonCosts perPerson={summary.perPerson} />
         </>
       )}
 

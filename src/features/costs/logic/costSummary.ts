@@ -32,6 +32,7 @@ function toItem(
     todayRate: live !== undefined,
     includes: source.includes,
     quantity,
+    travelers: source.travelers ?? [],
   }
 }
 
@@ -55,11 +56,21 @@ export function buildCostSummary(sources: CostSource[], rates?: DkkRates): CostS
     return { category, items: groupItems, totalDkk }
   }).filter((group) => group.items.length > 0)
 
+  // Pr. person: "pr. person" er allerede ganget op, så delt ligeligt giver hver sin billet.
+  const perPerson: Record<string, number> = {}
+  for (const { item } of items) {
+    if (item.dkk === undefined || item.travelers.length === 0) continue
+    const share = item.dkk / item.travelers.length
+    for (const uid of item.travelers) perPerson[uid] = (perPerson[uid] ?? 0) + share
+  }
+  for (const uid of Object.keys(perPerson)) perPerson[uid] = roundOre(perPerson[uid] ?? 0)
+
   return {
     groups,
     totalDkk: roundOre(groups.reduce((sum, group) => sum + group.totalDkk, 0)),
     missingCount: sources.length - priced.length,
     unconvertedCount: items.filter((entry) => entry.item.dkk === undefined).length,
     hasForeign: priced.some((source) => source.price.currency !== 'DKK'),
+    perPerson,
   }
 }

@@ -53,8 +53,18 @@ function transportSources(entries: TicketEntry[], t: Translate): CostSource[] {
         price: segment.price,
         includes: includes.length > 0 ? includes : undefined,
         quantity: segment.priceFor === 'person' ? travelersOf(segment).length : undefined,
+        travelers: travelersOf(segment),
       }
     })
+}
+
+/** Hvem en overnatning/reservation gælder — uden "hvem er med" er det alle på rejsen. */
+function peopleOf(booking: Pick<Stay, 'travelerUids' | 'memberUids' | 'priceFor'>) {
+  const travelers = booking.travelerUids ?? booking.memberUids
+  return {
+    travelers,
+    quantity: booking.priceFor === 'person' ? travelers.length : undefined,
+  }
 }
 
 /** Rejsens bookinger som poster i prisoversigten. */
@@ -70,6 +80,7 @@ export function costSources(
     label: stay.name,
     date: stay.checkInDate,
     price: stay.price,
+    ...peopleOf(stay),
   }))
 
   const reservationItems = reservations.map((reservation): CostSource => ({
@@ -78,6 +89,7 @@ export function costSources(
     label: reservation.name,
     date: reservation.date,
     price: reservation.price,
+    ...peopleOf(reservation),
   }))
 
   return [...transportSources(entries, t), ...stayItems, ...reservationItems]

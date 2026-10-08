@@ -33,6 +33,8 @@ export type CostSource = {
   includes?: string[]
   /** Pris pr. person: ganges med dette antal (antal rejsende). */
   quantity?: number
+  /** Hvem der er med (uid'er) — prisen fordeles ligeligt mellem dem. */
+  travelers?: string[]
 }
 
 export type CostItem = {
@@ -47,6 +49,7 @@ export type CostItem = {
   includes?: string[]
   /** Over 1: beløbet er pr. person, og dkk er allerede ganget op. */
   quantity: number
+  travelers: string[]
 }
 
 export type CostGroup = { category: CostCategory; items: CostItem[]; totalDkk: number }
@@ -60,4 +63,6 @@ export type CostSummary = {
   unconvertedCount: number
   /** Er der beløb i fremmed valuta? Så forklares omregningen. */
   hasForeign: boolean
+  /** Hvad rejsen koster hver person (uid → kroner): hver pris delt ligeligt mellem dem, der er med. */
+  perPerson: Record<string, number>
 }

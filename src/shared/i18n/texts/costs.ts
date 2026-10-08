@@ -32,6 +32,9 @@ export const costsTexts = defineTexts({
     priceForPerson: 'Pr. person (tælles {count} gange)',
     priceForRequired: 'Vælg, om prisen er samlet eller pr. person.',
     perPerson: '{count} × {amount}',
+    perPersonTitle: 'Pr. person',
+    perPersonNote:
+      'En samlet pris deles ligeligt mellem dem, der er med; en pris pr. person tælles fuldt for hver.',
   },
   en: {
     price: 'Price',
@@ -63,5 +66,8 @@ export const costsTexts = defineTexts({
     priceForPerson: 'Per person (counted {count} times)',
     priceForRequired: 'Choose whether the price is the total or per person.',
     perPerson: '{count} × {amount}',
+    perPersonTitle: 'Per person',
+    perPersonNote:
+      'A shared price is split equally between those taking part; a per-person price counts in full for each.',
   },
 })

@@ -1,3 +1,6 @@
+/** Gælder prisen for alle rejsende tilsammen ('alle') eller for hver person ('person')? */
+export type PriceFor = 'alle' | 'person'
+
 /**
  * Prisen på en booking (transport, overnatning, reservation). Beløbet gemmes i
  * den valuta, man har betalt i; `dkk` er omregnet med dagens kurs, da prisen

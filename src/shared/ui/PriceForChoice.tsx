@@ -1,5 +1,5 @@
-import { useT } from '../../../shared/i18n/useT'
-import type { PriceFor } from '../types'
+import { useT } from '../i18n/useT'
+import type { PriceFor } from '../types/price'
 import styles from './PriceForChoice.module.css'
 
 /**
@@ -28,7 +28,7 @@ export function PriceForChoice({
         <label key={option.id} className={styles.row}>
           <input
             type="radio"
-            name="segment-price-for"
+            name="price-for"
             checked={value === option.id}
             onChange={() => onChange(option.id)}
           />

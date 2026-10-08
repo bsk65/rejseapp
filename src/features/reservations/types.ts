@@ -1,6 +1,6 @@
 import type { TextKey } from '../../shared/i18n/translator'
 import type { Place } from '../../shared/types/place'
-import type { Price } from '../../shared/types/price'
+import type { Price, PriceFor } from '../../shared/types/price'
 
 export type ReservationKind = 'restaurant' | 'aktivitet' | 'andet'
 
@@ -23,6 +23,10 @@ export type Reservation = {
   note?: string
   /** Hvad reservationen kostede (i alt). */
   price?: Price
+  /** Samlet for alle med eller pr. person — kun relevant, når flere er med. */
+  priceFor?: PriceFor
+  /** Hvem der er med (uid'er). Mangler = alle rejsens medlemmer. */
+  travelerUids?: string[]
   /** Hvem der oprettede reservationen — kun informativ, ikke sikkerhedsrelevant. */
   ownerUid: string
   /** Denormaliseret fra rejsens memberUids — se CLAUDE.md. */

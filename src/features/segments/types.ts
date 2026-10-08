@@ -1,6 +1,6 @@
 import type { TextKey } from '../../shared/i18n/translator'
 import type { Place } from '../../shared/types/place'
-import type { Price } from '../../shared/types/price'
+import type { Price, PriceFor } from '../../shared/types/price'
 
 /** Et gemt billede af et boardingkort. Hver passager har sit eget (rejsefæller på samme fly). */
 export type BoardingPassImage = {
@@ -14,9 +14,6 @@ export type BoardingPassImage = {
   /** Filtypen, f.eks. "application/pdf" — mangler på ældre boardingkort (altid billeder). */
   contentType?: string
 }
-
-/** Gælder prisen for alle rejsende tilsammen eller for hver person? */
-export type PriceFor = 'alle' | 'person'
 
 export type TransportMode = 'fly' | 'tog' | 'bil' | 'bus' | 'færge' | 'gang'
 export type SegmentStatus = 'planlagt' | 'bekræftet'
