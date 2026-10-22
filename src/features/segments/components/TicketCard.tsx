@@ -1,6 +1,7 @@
 import { useT } from '../../../shared/i18n/useT'
 import { clockTime, formatDayDate } from '../../../shared/utils/date'
 import { dayColorIndex } from '../../../shared/utils/dayColors'
+import { describeFlightDuration } from '../logic/flightDuration'
 import type { Ticket } from '../logic/tickets'
 import { transportModeLabel } from '../types'
 import { TransportModeIcon } from './TransportModeIcon'
@@ -12,6 +13,7 @@ export function TicketCard({ ticket, onSelect }: { ticket: Ticket; onSelect: () 
   const { segment } = ticket
   const title = [segment.carrier, segment.number].filter(Boolean).join(' ')
   const arrival = clockTime(segment.arrivalTime)
+  const duration = describeFlightDuration(segment, t)
   const extras = [
     segment.terminal && t('segments.terminalN', { terminal: segment.terminal }),
     segment.seat && t('segments.seatN', { seat: segment.seat }),
@@ -38,6 +40,7 @@ export function TicketCard({ ticket, onSelect }: { ticket: Ticket; onSelect: () 
         {arrival && (
           <span className={styles.muted}> · {t('segments.arrivesAt', { time: arrival })}</span>
         )}
+        {duration && <span className={styles.muted}> · {duration}</span>}
       </p>
 
       <p className={styles.meta}>

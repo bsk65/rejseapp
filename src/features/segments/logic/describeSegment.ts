@@ -1,6 +1,7 @@
 import type { Translate } from '../../../shared/i18n/translator'
 import { clockTime } from '../../../shared/utils/date'
 import { transportModeLabel, type Segment } from '../types'
+import { describeFlightDuration } from './flightDuration'
 
 /** Teksten på et transportkort under en dag: overskrift + én linje detaljer. */
 export type SegmentCardText = { title: string; detail: string }
@@ -17,6 +18,7 @@ export function describeSegment(segment: Segment, t: Translate): SegmentCardText
     from || to ? `${from ?? '?'} → ${to ?? '?'}` : undefined,
     departs && t('segments.departsAt', { time: departs }),
     arrives && t('segments.arrivesAt', { time: arrives }),
+    describeFlightDuration(segment, t),
   ].filter(Boolean)
 
   if (parts.length > 0) return { title, detail: parts.join(' · ') }

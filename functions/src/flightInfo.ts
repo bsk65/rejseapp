@@ -14,6 +14,8 @@ export type FlightEndpoint = {
   lng?: number
   /** Lokal tid som "YYYY-MM-DDTHH:mm". */
   time?: string
+  /** Lufthavnens forskel til UTC på det tidspunkt, f.eks. "+02:00" — giver flyvetiden. */
+  utcOffset?: string
   terminal?: string
 }
 
@@ -49,6 +51,14 @@ type AdbFlight = {
   arrival?: AdbMovement
 }
 
+/** "2026-10-03 07:40+02:00" → "+02:00" ("+0530" → "+05:30", "Z" → "+00:00"). */
+function toUtcOffset(value: string | undefined): string | undefined {
+  const match = value?.match(/\d{2}:\d{2}(?::\d{2})?\s*([+-]\d{2}:?\d{2}|Z)$/)
+  if (!match) return undefined
+  if (match[1] === 'Z') return '+00:00'
+  return match[1].includes(':') ? match[1] : `${match[1].slice(0, 3)}:${match[1].slice(3)}`
+}
+
 /** "2026-10-03 07:40+02:00" → "2026-10-03T07:40" */
 function toLocalDateTime(value: string | undefined): string | undefined {
   const match = value?.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/)
@@ -58,12 +68,14 @@ function toLocalDateTime(value: string | undefined): string | undefined {
 function toEndpoint(movement: AdbMovement | undefined): FlightEndpoint {
   const airport = movement?.airport ?? {}
   const city = airport.municipalityName ?? airport.shortName ?? airport.name ?? 'Ukendt lufthavn'
+  const local = movement?.scheduledTime?.local ?? movement?.scheduledTimeLocal
   return {
     iata: airport.iata,
     name: airport.iata ? `${city} (${airport.iata})` : city,
     lat: airport.location?.lat,
     lng: airport.location?.lon,
-    time: toLocalDateTime(movement?.scheduledTime?.local ?? movement?.scheduledTimeLocal),
+    time: toLocalDateTime(local),
+    utcOffset: toUtcOffset(local),
     terminal: movement?.terminal || undefined,
   }
 }

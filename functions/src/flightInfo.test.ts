@@ -35,6 +35,7 @@ describe('mapAeroDataBoxFlights', () => {
           lat: 55.618,
           lng: 12.656,
           time: '2026-10-03T07:40',
+          utcOffset: '+02:00',
           terminal: '3',
         },
         arrival: {
@@ -43,10 +44,20 @@ describe('mapAeroDataBoxFlights', () => {
           lat: 41.8,
           lng: 12.25,
           time: '2026-10-03T10:05',
+          utcOffset: '+02:00',
           terminal: undefined,
         },
       },
     ])
+  })
+
+  it('reads the UTC offset in its different spellings', () => {
+    const offsetOf = (local: string) =>
+      mapAeroDataBoxFlights([{ departure: { scheduledTime: { local } } }])[0].departure.utcOffset
+    expect(offsetOf('2026-12-28 21:40-05:00')).toBe('-05:00')
+    expect(offsetOf('2026-12-28 21:40+0530')).toBe('+05:30')
+    expect(offsetOf('2026-12-28 21:40Z')).toBe('+00:00')
+    expect(offsetOf('2026-12-28 21:40')).toBeUndefined()
   })
 
   it('returns an empty list for anything that is not a flight list', () => {

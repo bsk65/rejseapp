@@ -43,6 +43,8 @@ function toSegment(docSnap: QueryDocumentSnapshot<DocumentData>): Segment {
     terminal: data.terminal ?? undefined,
     arrivalPlace: data.arrivalPlace ?? undefined,
     arrivalTime: data.arrivalTime ?? undefined,
+    departureUtcOffset: data.departureUtcOffset ?? undefined,
+    arrivalUtcOffset: data.arrivalUtcOffset ?? undefined,
     seat: data.seat ?? undefined,
     bookingRef: data.bookingRef ?? undefined,
     freeText: data.freeText ?? undefined,
@@ -164,8 +166,15 @@ export async function updateSegment(
   patch: Partial<SegmentDetails>,
 ): Promise<void> {
   const data: Record<string, unknown> = stripUndefined(patch)
-  // Et tømt prisfelt skal slette prisen — de andre felter udelades bare.
-  for (const key of ['price', 'priceCovers', 'priceFor'] as const) {
+  // Et tømt prisfelt skal slette prisen, og en ændret lufthavn sletter dens UTC-forskel
+  // — de andre felter udelades bare.
+  for (const key of [
+    'price',
+    'priceCovers',
+    'priceFor',
+    'departureUtcOffset',
+    'arrivalUtcOffset',
+  ] as const) {
     if (key in patch && patch[key] === undefined) data[key] = deleteField()
   }
   await updateDoc(doc(segmentsCollection(tripId, dayId), segmentId), data)

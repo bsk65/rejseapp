@@ -20,6 +20,8 @@ export type FlightEndpoint = {
   lng?: number
   /** Lokal tid "YYYY-MM-DDTHH:mm". */
   time?: string
+  /** F.eks. "+02:00" — lufthavnens forskel til UTC. */
+  utcOffset?: string
   terminal?: string
 }
 

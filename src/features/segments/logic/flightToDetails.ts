@@ -19,9 +19,11 @@ export function flightToSegmentDetails(flight: FlightInfo): Partial<SegmentDetai
     number: flight.number || undefined,
     departurePlace: toPlace(flight.departure),
     departureTime: flight.departure.time,
+    departureUtcOffset: flight.departure.utcOffset,
     terminal: flight.departure.terminal,
     arrivalPlace: toPlace(flight.arrival),
     arrivalTime: flight.arrival.time,
+    arrivalUtcOffset: flight.arrival.utcOffset,
   }
   return Object.fromEntries(
     Object.entries(details).filter(([, value]) => value !== undefined),

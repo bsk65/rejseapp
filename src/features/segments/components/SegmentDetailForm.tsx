@@ -20,6 +20,7 @@ import { dayIdForDeparture } from '../logic/segmentDay'
 import { travelersOf } from '../logic/travelers'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
 import { withAirlineCode } from '../logic/airlineCodes'
+import { describeFlightDuration } from '../logic/flightDuration'
 import { transportModeLabel, type Segment, type SegmentDetails, type SegmentStatus } from '../types'
 import styles from './SegmentDetailForm.module.css'
 
@@ -58,6 +59,8 @@ export function SegmentDetailForm({
     terminal: segment.terminal,
     arrivalPlace: segment.arrivalPlace,
     arrivalTime: segment.arrivalTime,
+    departureUtcOffset: segment.departureUtcOffset,
+    arrivalUtcOffset: segment.arrivalUtcOffset,
     seat: segment.seat,
     bookingRef: segment.bookingRef,
     freeText: segment.freeText,
@@ -97,6 +100,9 @@ export function SegmentDetailForm({
   function set<K extends keyof SegmentDetails>(field: K, value: SegmentDetails[K]) {
     setDetails((prev) => ({ ...prev, [field]: value }))
   }
+
+  // Flyvetiden ud fra flyopslagets tidszoner — opdateres, hvis tiderne rettes.
+  const flightDuration = describeFlightDuration(details, t)
 
   const travelerCount = (details.travelerUids ?? travelersOf(segment)).length
   // Flere rejsende: man skal tage stilling til, om prisen er samlet eller pr. person.
@@ -162,7 +168,10 @@ export function SegmentDetailForm({
       <PlaceField
         label={t('days.from')}
         place={details.departurePlace}
-        onSelect={(place) => set('departurePlace', place)}
+        onSelect={(place) =>
+          // En anden lufthavn har måske en anden tidszone — flyvetiden kendes så ikke længere.
+          setDetails((prev) => ({ ...prev, departurePlace: place, departureUtcOffset: undefined }))
+        }
       />
       <TextField
         label={t('segments.departureTime')}
@@ -181,7 +190,9 @@ export function SegmentDetailForm({
       <PlaceField
         label={t('days.to')}
         place={details.arrivalPlace}
-        onSelect={(place) => set('arrivalPlace', place)}
+        onSelect={(place) =>
+          setDetails((prev) => ({ ...prev, arrivalPlace: place, arrivalUtcOffset: undefined }))
+        }
       />
       <TextField
         label={t('segments.arrivalTime')}
@@ -189,6 +200,7 @@ export function SegmentDetailForm({
         value={details.arrivalTime ?? ''}
         onChange={(e) => set('arrivalTime', e.target.value || undefined)}
       />
+      {flightDuration && <p className={styles.duration}>{flightDuration}</p>}
       {showsSeat && (
         <TextField
           label={segment.mode === 'fly' ? t('segments.seatFly') : t('segments.seatTrain')}

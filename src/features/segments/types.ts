@@ -29,6 +29,12 @@ export type Segment = {
   terminal?: string
   arrivalPlace?: Place
   arrivalTime?: string
+  /**
+   * Forskel til UTC i afgangs-/ankomstlufthavnen (f.eks. "+02:00"), fra flyopslaget.
+   * Bruges kun til at regne flyvetiden ud, se logic/flightDuration.ts.
+   */
+  departureUtcOffset?: string
+  arrivalUtcOffset?: string
   seat?: string
   bookingRef?: string
   freeText?: string
