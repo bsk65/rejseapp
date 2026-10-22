@@ -61,3 +61,15 @@ export function stayMoments(stays: Stay[]): StayMoment[] {
     ]
   })
 }
+
+/**
+ * Dagens overnatning set fra oversigten: stedet man tjekker ud af (om morgenen)
+ * og stedet man sover i om aftenen. Mangler `tonight`, men ikke `leaving`, har
+ * man ingen overnatning den aften endnu.
+ */
+export function dayStayChange(events: DayStayEvent[]): { leaving?: Stay; tonight?: Stay } {
+  return {
+    leaving: events.find((event) => event.kind === 'udtjek')?.stay,
+    tonight: events.find((event) => event.kind !== 'udtjek')?.stay,
+  }
+}

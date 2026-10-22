@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { Stay } from '../types'
-import { nightCount, stayEventsForDate, stayMoments, validateStayDates } from './stayDates'
+import {
+  dayStayChange,
+  nightCount,
+  stayEventsForDate,
+  stayMoments,
+  validateStayDates,
+} from './stayDates'
 
 function stay(
   id: string,
@@ -56,5 +62,31 @@ describe('stayMoments', () => {
       ['indtjek', '2026-09-29', '2026-09-29T15:00'],
       ['udtjek', '2026-10-01', undefined],
     ])
+  })
+})
+
+describe('dayStayChange', () => {
+  const paris = stay('paris', '2026-09-29', '2026-10-01')
+  const rome = stay('rome', '2026-10-01', '2026-10-03')
+
+  it('shows the place you leave and the place you sleep on a changeover day', () => {
+    expect(dayStayChange(stayEventsForDate([rome, paris], '2026-10-01'))).toEqual({
+      leaving: paris,
+      tonight: rome,
+    })
+  })
+
+  it('has no place for tonight when only the check-out is booked', () => {
+    expect(dayStayChange(stayEventsForDate([paris], '2026-10-01'))).toEqual({
+      leaving: paris,
+      tonight: undefined,
+    })
+  })
+
+  it('has nothing to leave in the middle of a stay', () => {
+    expect(dayStayChange(stayEventsForDate([paris], '2026-09-30'))).toEqual({
+      leaving: undefined,
+      tonight: paris,
+    })
   })
 })

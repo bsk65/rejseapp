@@ -4,7 +4,7 @@ import { TransportModeIcon } from '../../segments/components/TransportModeIcon'
 import { reservationKindIcon, type Reservation } from '../../reservations/types'
 import type { Segment } from '../../segments/types'
 import { BedIcon } from '../../stays/components/BedIcon'
-import type { DayStayEvent } from '../../stays/logic/stayDates'
+import { dayStayChange, type DayStayEvent } from '../../stays/logic/stayDates'
 import { clockTime } from '../../../shared/utils/date'
 import { routeLabel } from '../logic/daySummary'
 import styles from './DaySummary.module.css'
@@ -17,6 +17,7 @@ export function DaySummary({
   stayEvents,
   reservations,
   photoCount,
+  isLastDay,
 }: {
   from: Place | undefined
   to: Place | undefined
@@ -25,12 +26,17 @@ export function DaySummary({
   /** Dagens reservationer, allerede sorteret. */
   reservations: Reservation[]
   photoCount: number
+  /** Rejsens sidste dag: man tjekker ud og tager hjem, så der mangler ingen overnatning. */
+  isLastDay: boolean
 }) {
   const { t } = useT()
   const route = routeLabel(from, to)
-  // Natten til næste dag er den, der er relevant at se — ikke udtjekningen.
-  const sleep = stayEvents.find((event) => event.kind !== 'udtjek')
-  const hasDetails = segments.length > 0 || reservations.length > 0 || sleep || photoCount > 0
+  // Stedet man tjekker ud af → stedet man sover i aften. Pilen uden noget efter
+  // betyder, at aftenens overnatning mangler.
+  const { leaving, tonight } = dayStayChange(stayEvents)
+  const missingTonight = !!leaving && !tonight && !isLastDay
+  const hasDetails =
+    segments.length > 0 || reservations.length > 0 || leaving || tonight || photoCount > 0
 
   return (
     <div className={styles.summary}>
@@ -51,10 +57,21 @@ export function DaySummary({
               {reservation.time}
             </span>
           ))}
-          {sleep && (
-            <span className={styles.chip}>
+          {(leaving || tonight) && (
+            <span className={styles.chip} data-missing={missingTonight}>
               <BedIcon />
-              <span className={styles.stayName}>{sleep.stay.name}</span>
+              {leaving && <span className={styles.leavingName}>{leaving.name}</span>}
+              {leaving && (tonight || !isLastDay) && (
+                <span
+                  className={styles.arrow}
+                  role="img"
+                  aria-label={missingTonight ? t('days.noStayTonight') : t('days.movesTo')}
+                  title={missingTonight ? t('days.noStayTonight') : undefined}
+                >
+                  →
+                </span>
+              )}
+              {tonight && <span className={styles.stayName}>{tonight.name}</span>}
             </span>
           )}
           {photoCount > 0 && <span className={styles.chip}>📷 {photoCount}</span>}

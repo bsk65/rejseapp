@@ -100,6 +100,7 @@ export function DayRow({
             stayEvents={stayEventsForDate(stays, day.date)}
             reservations={reservationsForDate(reservations, day.date)}
             photoCount={photos.length}
+            isLastDay={!nextDay}
           />
         )}
       </button>
