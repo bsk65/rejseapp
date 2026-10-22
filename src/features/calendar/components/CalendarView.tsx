@@ -131,9 +131,9 @@ export function CalendarView({
           <button
             type="button"
             className={styles.toolButton}
-            onClick={() => zoom(1)}
-            disabled={zoomIndex === ZOOM_LEVELS.length - 1}
-            aria-label={t('calendar.zoomOut')}
+            onClick={() => zoom(-1)}
+            disabled={zoomIndex === 0}
+            aria-label={t('calendar.fewerDays')}
           >
             −
           </button>
@@ -143,9 +143,9 @@ export function CalendarView({
           <button
             type="button"
             className={styles.toolButton}
-            onClick={() => zoom(-1)}
-            disabled={zoomIndex === 0}
-            aria-label={t('calendar.zoomIn')}
+            onClick={() => zoom(1)}
+            disabled={zoomIndex === ZOOM_LEVELS.length - 1}
+            aria-label={t('calendar.moreDays')}
           >
             +
           </button>

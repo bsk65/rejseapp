@@ -172,7 +172,7 @@ Billeder har deres eget adgangsfelt, `photoViewerUids`, i stedet for det alminde
 ### Kalendervisning (`features/calendar`)
 
 - Dage-fanen har en knap **Liste | Kalender** (`?visning=kalender` i URL'en). Kalenderen er en tidsplan: dagene som kolonner, klokkeslæt nedad, overnatninger som bjælker øverst (fra midt på indtjekningsdagen til midt på udtjekningsdagen, så skiftedagen viser begge).
-- **−/+** skifter mellem 7, 3 og 1 dag ad gangen (færre dage = større timer), **‹ ›** bladrer. Starter på dags dato, hvis rejsen er i gang.
+- **−/+** viser færre/flere dage ad gangen (1, 3 eller 7; færre dage = større timer), **‹ ›** bladrer. Starter på dags dato, hvis rejsen er i gang.
 - Ren logik i `logic/calendarLayout.ts` (testet): `buildCalendarDays` (transport + reservationer pr. dato, natfly delt over midnat, overlap side om side), `visibleHours` (07–22, udvidet til alt på rejsen), `stayBars`. Fly fylder deres rigtige flyvetid, når tidszonerne kendes; reservationer (kun starttid) fylder 1 time. Ting uden klokkeslæt står i rækken "Uden tid".
 - Tryk på et punkt åbner dets formular (samme som i Billetter & tider) under kalenderen; tryk på en dags overskrift skifter til listen med dagen foldet ud.
 
