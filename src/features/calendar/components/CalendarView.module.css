@@ -1,0 +1,322 @@
+/*
+ * Tidsplanen. Placeringer kommer som CSS-variabler fra komponenten (se cssVars.ts):
+ *   --hours        antal viste timer
+ *   --start/--length  minutter fra første viste time / varighed
+ *   --lane/--lanes    spor side om side ved overlap
+ *   --col-start/--col-end/--row  overnatningsbjælker
+ * Antal dage (data-days) bestemmer kolonner og timehøjde — færre dage = større.
+ */
+.calendar {
+  --days: 3;
+  --hour: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calendar[data-days='1'] {
+  --days: 1;
+  --hour: 64px;
+}
+
+.calendar[data-days='7'] {
+  --days: 7;
+  --hour: 36px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolButton {
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.toolButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.zoomLabel {
+  min-width: 56px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 28px repeat(var(--days), minmax(0, 1fr));
+  column-gap: 2px;
+  row-gap: 4px;
+}
+
+.corner {
+  display: block;
+}
+
+.dayHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 4px 2px;
+  border: none;
+  border-bottom: 3px solid var(--day-color);
+  border-radius: 6px 6px 0 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.dayHeader[data-today='true'] {
+  background: var(--color-surface-alt);
+}
+
+.dayNumber {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dayDate {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+.rowIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rowLabel {
+  align-self: center;
+  color: var(--color-text-muted);
+  font-size: 0.6rem;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* Overnatninger: egen række af dage, så bjælkerne kan gå hen over kolonnerne. */
+.stays {
+  display: grid;
+  grid-column: 2 / -1;
+  grid-template-columns: repeat(var(--days), minmax(0, 1fr));
+  column-gap: 2px;
+  row-gap: 2px;
+}
+
+.stayBar {
+  grid-column: var(--col-start) / var(--col-end);
+  grid-row: var(--row);
+  overflow: hidden;
+  min-width: 0;
+  min-height: 26px;
+  /* Start midt på indtjekningsdagen og slut midt på udtjekningsdagen,
+     så skiftedagen viser begge steder. */
+  margin: 0 calc(50% / (var(--col-end) - var(--col-start))) 0
+    calc(50% / (var(--col-end) - var(--col-start)));
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 0.75rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.stayBar[data-starts-before='true'] {
+  margin-left: 0;
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.stayBar[data-ends-after='true'] {
+  margin-right: 0;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.untimed {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* Timerne til venstre og dagenes kolonner har samme højde. */
+.hours,
+.column {
+  height: calc(var(--hours) * var(--hour));
+}
+
+.hours {
+  display: flex;
+  flex-direction: column;
+}
+
+.hour {
+  flex: 0 0 var(--hour);
+  color: var(--color-text-muted);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transform: translateY(-0.35em);
+}
+
+.column {
+  position: relative;
+  min-width: 0;
+  border-radius: 0 0 6px 6px;
+  background-color: var(--color-surface);
+  background-image: linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  background-size: 100% var(--hour);
+}
+
+.event,
+.timedEvent {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 2px 4px;
+  border: none;
+  border-left: 3px solid var(--day-color);
+  border-radius: 4px;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.timedEvent {
+  position: absolute;
+  top: calc(var(--start) * var(--hour) / 60);
+  left: calc(100% * var(--lane) / var(--lanes));
+  width: calc(100% / var(--lanes) - 2px);
+  height: calc(var(--length) * var(--hour) / 60 - 2px);
+  overflow: hidden;
+}
+
+/* Reservationer adskilles fra transport med en lys baggrund i dagens farve. */
+.timedEvent[data-kind='reservation'],
+.event[data-kind='reservation'] {
+  background: color-mix(in srgb, var(--day-color) 22%, var(--color-surface-alt));
+}
+
+.timedEvent[data-continued='true'] {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.event[data-open='true'],
+.timedEvent[data-open='true'],
+.stayBar[data-open='true'] {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
+  z-index: 1;
+}
+
+.eventLine {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--day-color);
+  font-size: 0.75rem;
+}
+
+.icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.eventTime {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventTitle,
+.eventDetail {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventTitle {
+  font-weight: 600;
+}
+
+.eventDetail {
+  color: var(--color-text-muted);
+}
+
+/* En uge ad gangen: kun ikon og tid — titlen ses, når man forstørrer. */
+.calendar[data-days='7'] .eventDetail,
+.calendar[data-days='7'] .timedEvent .eventTitle {
+  display: none;
+}
+
+.calendar[data-days='7'] .timedEvent .eventLine {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.now {
+  position: absolute;
+  top: calc(var(--start) * var(--hour) / 60);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-danger);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.form {
+  scroll-margin-top: 12px;
+}

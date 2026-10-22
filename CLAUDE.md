@@ -18,7 +18,7 @@ Gælder hele projektet, ikke kun ved aflevering.
 - **Streng TypeScript.** Ingen `any`. Delte typer ligger ét sted (`src/shared/types/`), feature-specifikke typer i feature'ens egen `types.ts`.
 - **ESLint + Prettier** er sat op fra første commit — kør `npm run lint` og `npm run format` før commit.
 - **Ingen duplikeret kode** — træk fælles logik ud i `src/shared/` når den opstår anden gang.
-- **Ingen inline `style="..."`** i JSX/HTML, undtagen hvor et element bevidst starter som `display:none` og JS viser det igen. Al styling er CSS Modules (`Komponent.module.css`) samme sted som komponenten.
+- **Ingen inline `style="..."`** i JSX/HTML, undtagen hvor et element bevidst starter som `display:none` og JS viser det igen. Al styling er CSS Modules (`Komponent.module.css`) samme sted som komponenten. **Undtagelse:** placeringer, der afhænger af data (kalenderens klokkeslæt), sættes som CSS-variabler via en ref-callback (`cssVars` i `features/calendar/components/cssVars.ts`) — al selve stylingen ligger stadig i CSS-modulet.
 - **Commit efter hvert færdigt trin** med beskrivende beskeder.
 
 ## Sprog (dansk/engelsk)
@@ -168,6 +168,13 @@ Billeder har deres eget adgangsfelt, `photoViewerUids`, i stedet for det alminde
 - `buildTimeline` lægger stoppene ud som bevægelse + pauser (billede 2,5 s, check-in 1,5 s, planlagt sted 1 s). Et stræks tid vokser med `log(1+km)`, og den samlede bevægelsestid skaleres ind i 15-90 s, så både en weekendtur og en jordomrejse kan ses på rimelig tid. `stateAt` giver position/km/pause til et tidspunkt (rent, testet).
 - Lange stræk (fly) tegnes og køres som storcirkel-buer (`greatCircle.ts`), og længdegrader "foldes ud" over datolinjen. Kameraet følger positionen og glider mod en zoom, der passer til strækkets længde (`zoomForLegKm`). Før start og efter slut vises hele rejsen.
 - Billeder vises som et kort over kortet under pausen; det næste billede hentes skjult i forvejen. `usePhotoUrl` (photos-featuren) deles med `PhotoThumbnail`.
+
+### Kalendervisning (`features/calendar`)
+
+- Dage-fanen har en knap **Liste | Kalender** (`?visning=kalender` i URL'en). Kalenderen er en tidsplan: dagene som kolonner, klokkeslæt nedad, overnatninger som bjælker øverst (fra midt på indtjekningsdagen til midt på udtjekningsdagen, så skiftedagen viser begge).
+- **−/+** skifter mellem 7, 3 og 1 dag ad gangen (færre dage = større timer), **‹ ›** bladrer. Starter på dags dato, hvis rejsen er i gang.
+- Ren logik i `logic/calendarLayout.ts` (testet): `buildCalendarDays` (transport + reservationer pr. dato, natfly delt over midnat, overlap side om side), `visibleHours` (07–22, udvidet til alt på rejsen), `stayBars`. Fly fylder deres rigtige flyvetid, når tidszonerne kendes; reservationer (kun starttid) fylder 1 time. Ting uden klokkeslæt står i rækken "Uden tid".
+- Tryk på et punkt åbner dets formular (samme som i Billetter & tider) under kalenderen; tryk på en dags overskrift skifter til listen med dagen foldet ud.
 
 ### Overnatninger (`features/stays`)
 

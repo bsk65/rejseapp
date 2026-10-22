@@ -127,3 +127,32 @@
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* Dage-fanen: Liste | Kalender. */
+.viewToggle {
+  display: flex;
+  align-self: flex-end;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.viewOption {
+  min-height: 36px;
+  padding: 0 14px;
+  border: none;
+  background: none;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.viewOption + .viewOption {
+  border-left: 1px solid var(--color-border);
+}
+
+.viewOption[aria-pressed='true'] {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}

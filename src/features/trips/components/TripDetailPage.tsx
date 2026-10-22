@@ -6,6 +6,7 @@ import { AppQrButton } from '../../../shared/ui/AppQrButton'
 import { LangToggle } from '../../../shared/ui/LangToggle'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
+import { CalendarView } from '../../calendar/components/CalendarView'
 import { TripCosts } from '../../costs/components/TripCosts'
 import { DaysList } from '../../days/components/DaysList'
 import { PeopleProvider } from '../../friends/components/PeopleProvider'
@@ -59,12 +60,18 @@ export function TripDetailPage() {
   const tabParam = searchParams.get('fane')
   const activeTab: TripTab = isTripTab(tabParam) ? tabParam : 'dage'
 
-  function selectTab(tab: TripTab) {
-    setSearchParams(tab === 'dage' ? {} : { fane: tab }, { replace: true })
+  // Dage-fanen kan vises som liste (standard) eller kalender (?visning=kalender).
+  const calendarView = searchParams.get('visning') === 'kalender'
+
+  function selectTab(tab: TripTab, calendar = calendarView) {
+    const params: Record<string, string> = {}
+    if (tab !== 'dage') params.fane = tab
+    if (calendar) params.visning = 'kalender'
+    setSearchParams(params, { replace: true })
   }
 
   function showDay(dayId: string) {
-    selectTab('dage')
+    selectTab('dage', false)
     setHighlightedDayId(dayId)
     // Vent til fanen er vist, før der scrolles.
     requestAnimationFrame(() =>
@@ -173,20 +180,49 @@ export function TripDetailPage() {
           )}
           {staysError && <p className={styles.error}>{t(staysError)}</p>}
           {reservationsError && <p className={styles.error}>{t(reservationsError)}</p>}
-          <DaysList
-            tripId={trip.id}
-            memberUids={trip.memberUids}
-            userUid={user.uid}
-            stays={stays}
-            reservations={reservations}
-            days={days}
-            photos={photos}
-            loading={daysLoading}
-            highlightedDayId={highlightedDayId}
-            onDeleteDay={isOwner ? removeDay : undefined}
-            deleteError={removeDayError}
-          />
-          {!daysLoading && <ExtendTripForm trip={trip} days={days} userUid={user.uid} />}
+          {days.length > 0 && (
+            <div className={styles.viewToggle} role="group" aria-label={t('calendar.viewLabel')}>
+              {[false, true].map((calendar) => (
+                <button
+                  key={String(calendar)}
+                  type="button"
+                  className={styles.viewOption}
+                  aria-pressed={calendarView === calendar}
+                  onClick={() => selectTab('dage', calendar)}
+                >
+                  {calendar ? `📅 ${t('calendar.viewCalendar')}` : t('calendar.viewList')}
+                </button>
+              ))}
+            </div>
+          )}
+          {calendarView && !daysLoading ? (
+            <CalendarView
+              tripId={trip.id}
+              days={days}
+              stays={stays}
+              reservations={reservations}
+              userUid={user.uid}
+              memberUids={trip.memberUids}
+              onShowDay={showDay}
+            />
+          ) : (
+            <DaysList
+              tripId={trip.id}
+              memberUids={trip.memberUids}
+              userUid={user.uid}
+              stays={stays}
+              reservations={reservations}
+              days={days}
+              photos={photos}
+              loading={daysLoading}
+              highlightedDayId={highlightedDayId}
+              onDeleteDay={isOwner ? removeDay : undefined}
+              deleteError={removeDayError}
+            />
+          )}
+          {!daysLoading && !calendarView && (
+            <ExtendTripForm trip={trip} days={days} userUid={user.uid} />
+          )}
         </div>
 
         <div className={styles.tabPanel} hidden={activeTab !== 'billetter'}>

@@ -1,4 +1,5 @@
 import { authTexts } from './auth'
+import { calendarTexts } from './calendar'
 import { commonTexts } from './common'
 import { costsTexts } from './costs'
 import { daysTexts } from './days'
@@ -19,6 +20,7 @@ export const texts = {
   auth: authTexts,
   trips: tripsTexts,
   days: daysTexts,
+  calendar: calendarTexts,
   segments: segmentsTexts,
   stays: staysTexts,
   reservations: reservationsTexts,
