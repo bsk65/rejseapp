@@ -78,7 +78,8 @@ export function TicketsView({
       return (
         <div className={styles.ticketWithPasses}>
           <TicketCard ticket={ticket} onSelect={() => setEditingKey(item.key)} />
-          <BoardingPassButtons passes={ticket.segment.boardingPasses} />
+          {/* Åben formular viser selv boardingkortene (med Fjern) — ellers stod de der to gange. */}
+          {!editing && <BoardingPassButtons passes={ticket.segment.boardingPasses} />}
           {editing && (
             <SegmentDetailForm
               key={ticket.segment.id}
