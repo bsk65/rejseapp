@@ -1,20 +1,46 @@
 import { useRef, type ChangeEvent } from 'react'
+import type { Message } from '../../../shared/i18n/message'
+import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
 import { Button } from '../../../shared/ui/Button'
 import styles from './TicketUpload.module.css'
 
-/** "Tilføj billet": PDF, foto eller skærmbillede af billetten (tog, bus, færge). */
+const variants: Record<
+  'billet' | 'boardingkort',
+  { accept: string; label: TextKey; pending: TextKey; hint: TextKey }
+> = {
+  billet: {
+    accept: 'image/*,application/pdf',
+    label: 'segments.addTicket',
+    pending: 'segments.uploadingTicket',
+    hint: 'segments.addTicketHint',
+  },
+  boardingkort: {
+    accept: 'image/*',
+    label: 'segments.scanPass',
+    pending: 'segments.readingPass',
+    hint: 'segments.scanPassFormHint',
+  },
+}
+
+/**
+ * "Tilføj billet": PDF, foto eller skærmbillede af billetten (tog, bus, færge).
+ * "Scan boardingkort" (fly): foto eller skærmbillede af boardingkortets stregkode.
+ */
 export function TicketUpload({
+  kind,
   uploading,
-  failed,
+  error,
   onFile,
 }: {
+  kind: 'billet' | 'boardingkort'
   uploading: boolean
-  failed: boolean
+  error: Message | null
   onFile: (file: File) => Promise<void>
 }) {
   const { t } = useT()
   const inputRef = useRef<HTMLInputElement>(null)
+  const variant = variants[kind]
 
   async function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -27,7 +53,7 @@ export function TicketUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,application/pdf"
+        accept={variant.accept}
         className={styles.hiddenInput}
         onChange={(e) => void handleChange(e)}
         disabled={uploading}
@@ -39,10 +65,10 @@ export function TicketUpload({
         disabled={uploading}
         onClick={() => inputRef.current?.click()}
       >
-        {uploading ? t('segments.uploadingTicket') : t('segments.addTicket')}
+        {uploading ? t(variant.pending) : t(variant.label)}
       </Button>
-      <p className={styles.hint}>{t('segments.addTicketHint')}</p>
-      {failed && <p className={styles.error}>{t('segments.ticketNotSaved')}</p>}
+      <p className={styles.hint}>{t(variant.hint)}</p>
+      {error && <p className={styles.error}>{t(error.key, error.params)}</p>}
     </div>
   )
 }

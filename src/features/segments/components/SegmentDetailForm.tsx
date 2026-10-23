@@ -77,8 +77,9 @@ export function SegmentDetailForm({
     passes,
     remove: removePass,
     addTicket,
+    scanBoardingPass,
     uploading,
-    uploadFailed,
+    error: uploadError,
   } = useBoardingPasses(tripId, dayId, segment)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [priceInvalid, setPriceInvalid] = useState(false)
@@ -91,14 +92,28 @@ export function SegmentDetailForm({
   const showsCarrier = segment.mode !== 'bil' && segment.mode !== 'gang'
   const showsTerminal = segment.mode === 'fly'
   const showsSeat = segment.mode === 'tog' || segment.mode === 'fly'
-  // Fly får boardingkort via "Scan boardingkort"; andre billetter uploades her.
+  // Fly får et scannet boardingkort; tog, bus og færge en billet (PDF eller billede).
   const showsTicketUpload =
-    segment.mode === 'tog' || segment.mode === 'bus' || segment.mode === 'færge'
+    segment.mode === 'fly' ||
+    segment.mode === 'tog' ||
+    segment.mode === 'bus' ||
+    segment.mode === 'færge'
   // Dato til flyopslag: afgangsdatoen, hvis den er udfyldt, ellers dagens dato.
   const lookupDate = details.departureTime?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? dayDate
 
   function set<K extends keyof SegmentDetails>(field: K, value: SegmentDetails[K]) {
     setDetails((prev) => ({ ...prev, [field]: value }))
+  }
+
+  async function handleTicketFile(file: File) {
+    if (segment.mode !== 'fly') return addTicket(file, nameOf(selfUid), selfUid)
+    const saved = await scanBoardingPass(file, {
+      flightNumber: withAirlineCode(details.number, details.carrier),
+      travelers: details.travelerUids ?? travelersOf(segment),
+      people: segment.memberUids.map((uid) => ({ uid, name: nameOf(uid) })),
+      selfUid,
+    })
+    if (saved) setDetails((prev) => ({ ...prev, ...saved }))
   }
 
   // Flyvetiden ud fra flyopslagets tidszoner — opdateres, hvis tiderne rettes.
@@ -132,9 +147,10 @@ export function SegmentDetailForm({
       <BoardingPassButtons passes={passes} onRemove={removePass} />
       {showsTicketUpload && (
         <TicketUpload
+          kind={segment.mode === 'fly' ? 'boardingkort' : 'billet'}
           uploading={uploading}
-          failed={uploadFailed}
-          onFile={(file) => addTicket(file, nameOf(selfUid), selfUid)}
+          error={uploadError}
+          onFile={handleTicketFile}
         />
       )}
 

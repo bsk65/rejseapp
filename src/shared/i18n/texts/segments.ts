@@ -105,6 +105,11 @@ export const segmentsTexts = defineTexts({
     noBarcode:
       'Kunne ikke finde en stregkode i billedet. Prøv et skarpere billede, hvor hele stregkoden er med.',
     notBoardingPass: 'Stregkoden ligner ikke et boardingkort.',
+    passWrongFlight: 'Boardingkortet er til {flights} — ikke dette fly.',
+    passPickFlight:
+      'Boardingkortet har flere fly ({flights}). Skriv flynummeret først, så appen ved, hvilket det er.',
+    scanPassFormHint:
+      'Tag et foto af stregkoden, eller vælg et skærmbillede af boardingkortet. Sæde og bookingnummer udfyldes også.',
   },
   en: {
     modeFly: 'Flight',
@@ -211,5 +216,10 @@ export const segmentsTexts = defineTexts({
     noBarcode:
       'Could not find a barcode in the image. Try a sharper image that includes the whole barcode.',
     notBoardingPass: "The barcode doesn't look like a boarding pass.",
+    passWrongFlight: 'The boarding pass is for {flights} — not this flight.',
+    passPickFlight:
+      'The boarding pass has several flights ({flights}). Enter the flight number first so the app knows which one.',
+    scanPassFormHint:
+      'Take a photo of the barcode, or choose a screenshot of the boarding pass. Seat and booking reference are filled in too.',
   },
 })
