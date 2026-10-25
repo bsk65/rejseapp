@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import type { TrackPoint, TrackSource } from '../../tracking/types'
-import { buildJourney, journeyOwners, onlyPerson, pickOneTrackerPerDay } from './buildJourney'
+import type { TicketEntry } from '../../segments/logic/tickets'
+import { buildJourney, onlyPerson, pickOneTrackerPerDay } from './buildJourney'
 
 const odense = { name: 'Odense', lat: 55.4, lng: 10.39, placeId: 'odense' }
 const rome = { name: 'Rom', lat: 41.9, lng: 12.5, placeId: 'rome' }
@@ -128,27 +129,33 @@ describe('buildJourney', () => {
   })
 })
 
-describe('journeyOwners / onlyPerson', () => {
+describe('onlyPerson', () => {
   const points = [
     point('p1', localNoon('2026-05-01'), 'a'),
     point('p2', localNoon('2026-05-01'), 'b'),
   ]
-  const photos = [
-    photo('f1', { ownerUid: 'c', location: { lat: 1, lng: 2 } }),
-    photo('f2', { ownerUid: 'd' }),
-  ]
+  const photos = [photo('f1', { ownerUid: 'a' }), photo('f2', { ownerUid: 'b' })]
+  const entry = (id: string, ownerUid: string, travelerUids?: string[]) =>
+    ({
+      segment: { id, ownerUid, travelerUids, mode: 'fly' },
+      dayId: 'd1',
+      dayNumber: 1,
+      dayDate: '2026-05-01',
+    }) as unknown as TicketEntry
+  const entries = [entry('s1', 'a'), entry('s2', 'a', ['b']), entry('s3', 'b', ['a', 'b'])]
 
-  it('finder dem med spor eller billeder med position', () => {
-    expect(journeyOwners(points, photos)).toEqual(['a', 'b', 'c'])
-  })
-
-  it('beholder kun den valgte persons punkter og billeder', () => {
-    const picked = onlyPerson('b', points, photos)
+  it('beholder kun den valgte persons spor, billeder og ture', () => {
+    const picked = onlyPerson('b', points, photos, entries)
     expect(picked.trackPoints.map((p) => p.id)).toEqual(['p2'])
-    expect(picked.photos).toEqual([])
+    expect(picked.photos.map((p) => p.id)).toEqual(['f2'])
+    expect(picked.entries.map((e) => e.segment.id)).toEqual(['s2', 's3'])
   })
 
   it("'alle' beholder det hele", () => {
-    expect(onlyPerson('alle', points, photos)).toEqual({ trackPoints: points, photos })
+    expect(onlyPerson('alle', points, photos, entries)).toEqual({
+      trackPoints: points,
+      photos,
+      entries,
+    })
   })
 })

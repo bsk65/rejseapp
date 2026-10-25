@@ -1,6 +1,8 @@
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import { dayRoute, type Leg } from '../../segments/logic/legs'
+import type { TicketEntry } from '../../segments/logic/tickets'
+import { isTravelling } from '../../segments/logic/travelers'
 import { isRouteSource, type TrackPoint } from '../../tracking/types'
 import { localIsoDate } from '../../../shared/utils/date'
 import type { JourneyStop } from '../types'
@@ -119,24 +121,20 @@ export function buildJourney(
 /** Hvis rejse der afspilles: én bestemt persons uid, eller 'alle'. */
 export type JourneyPerson = string | 'alle'
 
-/** De personer, der har spor, check-ins eller billeder med position på rejsen. */
-export function journeyOwners(trackPoints: TrackPoint[], photos: Photo[]): string[] {
-  const owners = new Set(trackPoints.map((point) => point.ownerUid))
-  photos.forEach((photo) => {
-    if (photo.location) owners.add(photo.ownerUid)
-  })
-  return [...owners]
-}
-
-/** Kun den valgte persons spor, check-ins og billeder ('alle' = det hele). */
+/**
+ * Kun det, den valgte person selv har været med til: egne spor, check-ins og
+ * billeder, og kun de ture, personen rejser med på ('alle' = det hele).
+ */
 export function onlyPerson(
   person: JourneyPerson,
   trackPoints: TrackPoint[],
   photos: Photo[],
-): { trackPoints: TrackPoint[]; photos: Photo[] } {
-  if (person === 'alle') return { trackPoints, photos }
+  entries: TicketEntry[],
+): { trackPoints: TrackPoint[]; photos: Photo[]; entries: TicketEntry[] } {
+  if (person === 'alle') return { trackPoints, photos, entries }
   return {
     trackPoints: trackPoints.filter((point) => point.ownerUid === person),
     photos: photos.filter((photo) => photo.ownerUid === person),
+    entries: entries.filter((entry) => isTravelling(entry.segment, person)),
   }
 }
