@@ -115,3 +115,28 @@ export function buildJourney(
 
   return stops.sort((a, b) => a.time - b.time)
 }
+
+/** Hvis rejse der afspilles: én bestemt persons uid, eller 'alle'. */
+export type JourneyPerson = string | 'alle'
+
+/** De personer, der har spor, check-ins eller billeder med position på rejsen. */
+export function journeyOwners(trackPoints: TrackPoint[], photos: Photo[]): string[] {
+  const owners = new Set(trackPoints.map((point) => point.ownerUid))
+  photos.forEach((photo) => {
+    if (photo.location) owners.add(photo.ownerUid)
+  })
+  return [...owners]
+}
+
+/** Kun den valgte persons spor, check-ins og billeder ('alle' = det hele). */
+export function onlyPerson(
+  person: JourneyPerson,
+  trackPoints: TrackPoint[],
+  photos: Photo[],
+): { trackPoints: TrackPoint[]; photos: Photo[] } {
+  if (person === 'alle') return { trackPoints, photos }
+  return {
+    trackPoints: trackPoints.filter((point) => point.ownerUid === person),
+    photos: photos.filter((photo) => photo.ownerUid === person),
+  }
+}

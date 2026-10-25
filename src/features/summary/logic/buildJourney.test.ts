@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Day } from '../../days/types'
 import type { Photo } from '../../photos/types'
 import type { TrackPoint, TrackSource } from '../../tracking/types'
-import { buildJourney, pickOneTrackerPerDay } from './buildJourney'
+import { buildJourney, journeyOwners, onlyPerson, pickOneTrackerPerDay } from './buildJourney'
 
 const odense = { name: 'Odense', lat: 55.4, lng: 10.39, placeId: 'odense' }
 const rome = { name: 'Rom', lat: 41.9, lng: 12.5, placeId: 'rome' }
@@ -125,5 +125,30 @@ describe('buildJourney', () => {
     )
     expect(stops.map((s) => s.photoId)).toEqual(['dayOnly'])
     expect(stops[0].dayNumber).toBe(1)
+  })
+})
+
+describe('journeyOwners / onlyPerson', () => {
+  const points = [
+    point('p1', localNoon('2026-05-01'), 'a'),
+    point('p2', localNoon('2026-05-01'), 'b'),
+  ]
+  const photos = [
+    photo('f1', { ownerUid: 'c', location: { lat: 1, lng: 2 } }),
+    photo('f2', { ownerUid: 'd' }),
+  ]
+
+  it('finder dem med spor eller billeder med position', () => {
+    expect(journeyOwners(points, photos)).toEqual(['a', 'b', 'c'])
+  })
+
+  it('beholder kun den valgte persons punkter og billeder', () => {
+    const picked = onlyPerson('b', points, photos)
+    expect(picked.trackPoints.map((p) => p.id)).toEqual(['p2'])
+    expect(picked.photos).toEqual([])
+  })
+
+  it("'alle' beholder det hele", () => {
+    expect(onlyPerson('alle', points, photos)).toEqual({ trackPoints: points, photos })
   })
 })

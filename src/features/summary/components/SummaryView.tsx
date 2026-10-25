@@ -1,12 +1,13 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useT } from '../../../shared/i18n/useT'
 import type { Day } from '../../days/types'
+import { usePeople } from '../../friends/hooks/usePeople'
 import type { Photo } from '../../photos/types'
 import type { Stay } from '../../stays/types'
 import { useTripSegments } from '../../segments/hooks/useTripSegments'
 import { buildLegs } from '../../segments/logic/legs'
 import { useTrack } from '../../tracking/hooks/useTrack'
-import { buildJourney } from '../logic/buildJourney'
+import { buildJourney, journeyOwners, onlyPerson, type JourneyPerson } from '../logic/buildJourney'
 import { buildTimeline } from '../logic/timeline'
 import { formatKm } from '../logic/formatKm'
 import { JourneyPlayer } from './JourneyPlayer'
@@ -29,13 +30,25 @@ export function SummaryView({
   stays: Stay[]
 }) {
   const { t, locale } = useT()
+  const { nameOf } = usePeople()
   const { points, error } = useTrack(tripId, userUid)
   const { entries } = useTripSegments(tripId, days, userUid)
   const legs = useMemo(() => buildLegs(entries), [entries])
-  const stops = useMemo(
-    () => buildJourney(days, points, photos, legs),
-    [days, points, photos, legs],
-  )
+
+  // Hvis spor der afspilles. Uden eget valg: ens eget, hvis man har noget, ellers alles.
+  const owners = useMemo(() => journeyOwners(points, photos), [points, photos])
+  const [chosenPerson, setChosenPerson] = useState<JourneyPerson | null>(null)
+  const person: JourneyPerson = chosenPerson ?? (owners.includes(userUid) ? userUid : 'alle')
+  const personChoices: JourneyPerson[] = [
+    ...owners.filter((uid) => uid === userUid),
+    ...owners.filter((uid) => uid !== userUid),
+    'alle',
+  ]
+
+  const stops = useMemo(() => {
+    const picked = onlyPerson(person, points, photos)
+    return buildJourney(days, picked.trackPoints, picked.photos, legs)
+  }, [days, points, photos, legs, person])
   const totalKm = useMemo(() => {
     const { cumulativeKm } = buildTimeline(stops)
     return cumulativeKm[cumulativeKm.length - 1]
@@ -45,6 +58,26 @@ export function SummaryView({
 
   return (
     <div className={styles.view}>
+      {owners.length > 1 && (
+        <div className={styles.people}>
+          {personChoices.map((choice) => (
+            <button
+              key={choice}
+              type="button"
+              className={styles.chip}
+              data-active={person === choice}
+              onClick={() => setChosenPerson(choice)}
+            >
+              {choice === 'alle'
+                ? t('people.everyone')
+                : choice === userUid
+                  ? t('people.you')
+                  : nameOf(choice)}
+            </button>
+          ))}
+        </div>
+      )}
+
       <dl className={styles.stats}>
         <Stat label={t('summary.statDays')} value={String(dayCount)} />
         <Stat label={t('summary.statDistance')} value={formatKm(totalKm, locale)} />
@@ -57,7 +90,8 @@ export function SummaryView({
       {stops.length < 2 ? (
         <p className={styles.empty}>{t('summary.notEnough')}</p>
       ) : (
-        <JourneyPlayer stops={stops} days={days} stays={stays} />
+        // key: afspilningen starter forfra, når man skifter person.
+        <JourneyPlayer key={person} stops={stops} days={days} stays={stays} />
       )}
     </div>
   )
