@@ -40,6 +40,18 @@ export function JourneyPlayer({
 
   return (
     <div className={styles.player}>
+      {/* Knapperne står over kortet, så ▶ kan ses uden at rulle på en telefon. */}
+      <PlaybackControls
+        elapsed={playback.elapsed}
+        duration={timeline.duration}
+        playing={playback.playing}
+        speed={playback.speed}
+        onTogglePlay={playback.togglePlay}
+        onRestart={playback.restart}
+        onCycleSpeed={playback.cycleSpeed}
+        onSeek={playback.seek}
+      />
+
       <div className={styles.stage}>
         <JourneyMap stops={stops} path={path} state={state} follow={follow} stays={stays} />
 
@@ -63,17 +75,6 @@ export function JourneyPlayer({
           <JourneyPhoto storagePath={nextPhoto.storagePath} hidden />
         )}
       </div>
-
-      <PlaybackControls
-        elapsed={playback.elapsed}
-        duration={timeline.duration}
-        playing={playback.playing}
-        speed={playback.speed}
-        onTogglePlay={playback.togglePlay}
-        onRestart={playback.restart}
-        onCycleSpeed={playback.cycleSpeed}
-        onSeek={playback.seek}
-      />
     </div>
   )
 }
