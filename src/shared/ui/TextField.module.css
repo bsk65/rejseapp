@@ -23,6 +23,21 @@
   font-size: 1rem;
 }
 
+/* Telefonens egen dato-/tidsboks har en fast mindstebredde og egen
+   ramme, der ignorerer min-width — uden appearance: none stak den ud over
+   kolonnen. Vælgeren åbner stadig, når man trykker på feltet. */
+.input[type='date'],
+.input[type='time'] {
+  width: 100%;
+  padding: 0 10px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 .input:focus {
   outline: 2px solid var(--color-accent);
   outline-offset: 1px;
