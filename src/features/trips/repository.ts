@@ -169,7 +169,7 @@ const DELETE_BATCH_SIZE = 400
 
 /**
  * Sletter rejsens dage, segmenter, overnatninger, reservationer (inkl. ejerens egne
- * boardingkort-filer) og til sidst selve rejsen. Billeder og spor slettes
+ * boardingkort- og billetfiler) og til sidst selve rejsen. Billeder og spor slettes
  * først af deres egne features (se useDeleteTrip). Rejse-dokumentet slettes
  * sidst, så en afbrudt sletning kan gentages — reglerne for billeder/spor
  * slår trippen op for at se, om man er dens ejer.
@@ -211,14 +211,19 @@ export async function deleteTripContent(tripId: string, ownerUid: string): Promi
     await batch.commit()
   }
 
-  await deleteBoardingPassFiles(segmentDocs)
+  await deleteBoardingPassFiles([...segmentDocs, ...reservationsSnapshot.docs])
   await deleteDoc(doc(db, 'trips', tripId))
 }
 
-/** Storage lader kun uploaderen slette — rejsefællers boardingkort efterlades. */
-async function deleteBoardingPassFiles(segmentDocs: QueryDocumentSnapshot<DocumentData>[]) {
-  const boardingPaths = segmentDocs.flatMap((segDoc) =>
-    ((segDoc.data().boardingPasses ?? []) as { storagePath: string }[]).map((p) => p.storagePath),
+/**
+ * Segmenters boardingkort/billetter og reservationers billetter. Storage lader
+ * kun uploaderen slette — rejsefællers filer efterlades.
+ */
+async function deleteBoardingPassFiles(docs: QueryDocumentSnapshot<DocumentData>[]) {
+  const boardingPaths = docs.flatMap((d) =>
+    ((d.data().boardingPasses ?? d.data().tickets ?? []) as { storagePath: string }[]).map(
+      (p) => p.storagePath,
+    ),
   )
   await Promise.all(
     boardingPaths.map((path) => deleteObject(ref(storage, path)).catch(() => undefined)),

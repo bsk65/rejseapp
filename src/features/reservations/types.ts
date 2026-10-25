@@ -1,6 +1,7 @@
 import type { TextKey } from '../../shared/i18n/translator'
 import type { Place } from '../../shared/types/place'
 import type { Price, PriceFor } from '../../shared/types/price'
+import type { BoardingPassImage } from '../segments/types'
 
 export type ReservationKind = 'restaurant' | 'aktivitet' | 'andet'
 
@@ -21,6 +22,8 @@ export type Reservation = {
   bookingRef?: string
   phone?: string
   note?: string
+  /** Uploadede billetter/bekræftelser (PDF eller billede) — samme form som på transport. */
+  tickets?: BoardingPassImage[]
   /** Hvad reservationen kostede (i alt). */
   price?: Price
   /** Samlet for alle med eller pr. person — kun relevant, når flere er med. */

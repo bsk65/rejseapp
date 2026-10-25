@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { usePeople } from '../../friends/hooks/usePeople'
 import { priceForSave } from '../../../shared/api/exchangeRates'
 import type { TextKey } from '../../../shared/i18n/translator'
 import { useT } from '../../../shared/i18n/useT'
@@ -6,8 +7,11 @@ import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { PriceField } from '../../../shared/ui/PriceField'
 import { PriceForChoice } from '../../../shared/ui/PriceForChoice'
+import { BoardingPassButtons } from '../../segments/components/BoardingPassButtons'
+import { TicketUpload } from '../../segments/components/TicketUpload'
 import { TravelersPicker } from '../../segments/components/TravelersPicker'
 import { TextField } from '../../../shared/ui/TextField'
+import { useReservationTickets } from '../hooks/useReservationTickets'
 import { useSaveReservation } from '../hooks/useSaveReservation'
 import {
   RESERVATION_KINDS,
@@ -70,6 +74,8 @@ export function ReservationForm({
   const [converting, setConverting] = useState(false)
   const [validationError, setValidationError] = useState<TextKey | null>(null)
   const { create, update, remove, pending, error } = useSaveReservation(tripId)
+  const files = useReservationTickets(tripId, reservation?.tickets)
+  const { nameOf } = usePeople()
 
   function set<K extends keyof ReservationDetails>(field: K, value: ReservationDetails[K]) {
     setDetails((prev) => ({ ...prev, [field]: value }))
@@ -99,15 +105,20 @@ export function ReservationForm({
     const price = await priceForSave(details.price, reservation?.price)
     setConverting(false)
     const priceFor = price && travelers.length > 1 ? details.priceFor : undefined
-    const toSave = { ...details, name, price, priceFor }
+    const tickets = files.tickets.length ? files.tickets : undefined
+    const toSave = { ...details, name, price, priceFor, tickets }
     const saved = reservation
       ? await update(reservation.id, toSave)
       : await create(userUid, memberUids, toSave)
-    if (saved) onClose()
+    if (!saved) return
+    await files.saved()
+    onClose()
   }
 
   async function handleDelete() {
-    if (reservation && (await remove(reservation.id))) onClose()
+    if (!reservation || !(await remove(reservation.id))) return
+    await files.deletedAll()
+    onClose()
   }
 
   const shownError = validationError ?? error
@@ -164,6 +175,14 @@ export function ReservationForm({
         />
       </div>
 
+      <BoardingPassButtons passes={files.tickets} onRemove={files.remove} />
+      <TicketUpload
+        kind="reservation"
+        uploading={files.uploading}
+        error={files.error}
+        onFile={(file) => files.add(file, nameOf(userUid), userUid)}
+      />
+
       {textField('bookingRef', t('reservations.bookingRef'))}
       {textField('phone', t('reservations.phone'), 'tel')}
       <TravelersPicker travelers={travelers} onChange={(next) => set('travelerUids', next)} />
@@ -218,7 +237,11 @@ export function ReservationForm({
           <Button type="button" variant="secondary" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button type="button" disabled={pending || converting} onClick={() => void handleSave()}>
+          <Button
+            type="button"
+            disabled={pending || converting || files.uploading}
+            onClick={() => void handleSave()}
+          >
             {t('common.save')}
           </Button>
         </div>

@@ -1,15 +1,14 @@
 import { useEffect } from 'react'
 import { saveFileOffline } from '../../../shared/api/offlineFiles'
-import type { TicketEntry } from '../logic/tickets'
+import type { BoardingPassImage } from '../types'
 
 /**
  * Gemmer en kopi af rejsens boardingkort og billetter på enheden, mens der er
  * forbindelse — så de kan vises ved gaten/i toget, selvom nettet er væk.
  * Allerede gemte filer hentes ikke igen.
  */
-export function useOfflinePasses(entries: TicketEntry[]): void {
-  const pathsKey = entries
-    .flatMap((entry) => entry.segment.boardingPasses ?? [])
+export function useOfflinePasses(passes: BoardingPassImage[]): void {
+  const pathsKey = passes
     .map((pass) => pass.storagePath)
     .sort()
     .join('|')

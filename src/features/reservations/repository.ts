@@ -34,6 +34,7 @@ function toReservation(docSnap: QueryDocumentSnapshot<DocumentData>): Reservatio
     bookingRef: data.bookingRef ?? undefined,
     phone: data.phone ?? undefined,
     note: data.note ?? undefined,
+    tickets: data.tickets ?? undefined,
     price: data.price ?? undefined,
     priceFor: data.priceFor ?? undefined,
     travelerUids: data.travelerUids ?? undefined,

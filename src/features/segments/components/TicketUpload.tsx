@@ -6,7 +6,7 @@ import { Button } from '../../../shared/ui/Button'
 import styles from './TicketUpload.module.css'
 
 const variants: Record<
-  'billet' | 'boardingkort',
+  'billet' | 'boardingkort' | 'reservation',
   { accept: string; label: TextKey; pending: TextKey; hint: TextKey }
 > = {
   billet: {
@@ -21,11 +21,18 @@ const variants: Record<
     pending: 'segments.readingPass',
     hint: 'segments.scanPassFormHint',
   },
+  reservation: {
+    accept: 'image/*,application/pdf',
+    label: 'reservations.addTicket',
+    pending: 'segments.uploadingTicket',
+    hint: 'reservations.addTicketHint',
+  },
 }
 
 /**
  * "Tilføj billet": PDF, foto eller skærmbillede af billetten (tog, bus, færge).
  * "Scan boardingkort" (fly): foto eller skærmbillede af boardingkortets stregkode.
+ * "Tilføj billet eller bekræftelse" (reservationer): som billetten.
  */
 export function TicketUpload({
   kind,
@@ -33,7 +40,7 @@ export function TicketUpload({
   error,
   onFile,
 }: {
-  kind: 'billet' | 'boardingkort'
+  kind: 'billet' | 'boardingkort' | 'reservation'
   uploading: boolean
   error: Message | null
   onFile: (file: File) => Promise<void>

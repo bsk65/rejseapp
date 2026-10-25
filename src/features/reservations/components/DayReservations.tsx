@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useT } from '../../../shared/i18n/useT'
+import { BoardingPassButtons } from '../../segments/components/BoardingPassButtons'
 import { reservationsForDate } from '../logic/reservationDates'
 import { reservationKindIcon, type Reservation } from '../types'
 import { ReservationForm } from './ReservationForm'
@@ -28,7 +29,7 @@ export function DayReservations({
       {today.length > 0 && (
         <ul className={styles.list}>
           {today.map((reservation) => (
-            <li key={reservation.id}>
+            <li key={reservation.id} className={styles.entry}>
               <button type="button" className={styles.item} onClick={() => setEditing(reservation)}>
                 <span className={styles.icon} aria-hidden="true">
                   {reservationKindIcon[reservation.kind]}
@@ -42,6 +43,9 @@ export function DayReservations({
                   </span>
                 </span>
               </button>
+              {(editing === 'ny' || editing?.id !== reservation.id) && (
+                <BoardingPassButtons passes={reservation.tickets} />
+              )}
             </li>
           ))}
         </ul>

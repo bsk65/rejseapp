@@ -100,7 +100,7 @@ export function TripDetailPage() {
 
   return (
     <PeopleProvider selfUid={user.uid} memberUids={trip.memberUids}>
-      <OfflinePasses tripId={trip.id} days={days} userUid={user.uid} />
+      <OfflinePasses tripId={trip.id} days={days} userUid={user.uid} reservations={reservations} />
       <div className={styles.page}>
         <div className={styles.topBar}>
           <Link to="/" className={styles.back}>

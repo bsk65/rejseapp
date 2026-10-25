@@ -96,12 +96,13 @@ export function TicketsView({
     if (item.kind === 'reservation') {
       const { reservation } = item
       return (
-        <>
+        <div className={styles.ticketWithPasses}>
           <ReservationCard
             reservation={reservation}
             dayNumber={dayNumberOf(reservation.date)}
             onSelect={() => setEditingKey(item.key)}
           />
+          {!editing && <BoardingPassButtons passes={reservation.tickets} />}
           {editing && (
             <ReservationForm
               key={reservation.id}
@@ -112,7 +113,7 @@ export function TicketsView({
               onClose={close}
             />
           )}
-        </>
+        </div>
       )
     }
     return (
