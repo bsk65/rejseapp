@@ -1,4 +1,5 @@
 import type { Lang } from './translate'
+import { translate } from './translator'
 
 /** Sprogvalget gemmes kun på denne enhed (ikke i Firestore). */
 const STORAGE_KEY = 'rejseappen_lang'
@@ -25,7 +26,7 @@ export function setLang(lang: Lang): void {
   } catch {
     // Privat vindue o.l. — sproget gælder så kun, indtil appen lukkes.
   }
-  document.documentElement.lang = lang
+  applyLangToDocument(lang)
   listeners.forEach((listener) => listener())
 }
 
@@ -34,7 +35,13 @@ export function subscribeToLang(listener: () => void): () => void {
   return () => listeners.delete(listener)
 }
 
-/** Sætter <html lang> ved opstart, så den passer til det gemte valg. */
+/** Sætter <html lang> og titel ved opstart, så de passer til det gemte valg. */
 export function applyStoredLang(): void {
-  document.documentElement.lang = currentLang
+  applyLangToDocument(currentLang)
+}
+
+/** <html lang> og fanens titel (app-navnet hedder Travelapp på engelsk). */
+function applyLangToDocument(lang: Lang): void {
+  document.documentElement.lang = lang
+  document.title = translate(lang, 'common.appName')
 }

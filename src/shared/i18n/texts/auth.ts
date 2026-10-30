@@ -55,7 +55,7 @@ export const authTexts = defineTexts({
     errorTooMany: 'Too many attempts right now. Wait a moment and try again.',
     errorGeneric: 'Something went wrong. Please try again.',
     gateText:
-      'Rejseappen stores your trips, photos, boarding passes and — if you turn it on — your GPS track. Read how the information is used and shared, and confirm that you accept the privacy policy to continue.',
+      'Travelapp stores your trips, photos, boarding passes and — if you turn it on — your GPS track. Read how the information is used and shared, and confirm that you accept the privacy policy to continue.',
     gateRead: 'Read the privacy policy',
     gateAccept: 'I accept the privacy policy',
     gateContinue: 'Continue',

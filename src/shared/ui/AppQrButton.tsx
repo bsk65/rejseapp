@@ -77,7 +77,7 @@ export function AppQrButton() {
         }}
       >
         <div className={styles.content}>
-          <h2 className={styles.heading}>Rejseappen</h2>
+          <h2 className={styles.heading}>{t('common.appName')}</h2>
           <p className={styles.hint}>{t('common.qrHint')}</p>
           {qrSrc ? (
             <img src={qrSrc} alt={t('common.qrAlt', { url })} className={styles.qr} />

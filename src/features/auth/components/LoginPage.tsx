@@ -41,7 +41,7 @@ export function LoginPage() {
     <div className={styles.page}>
       <form className={styles.form} onSubmit={(e) => void handleSubmit(e)}>
         <div className={styles.titleRow}>
-          <h1 className={styles.title}>Rejseappen</h1>
+          <h1 className={styles.title}>{t('common.appName')}</h1>
           <LangToggle />
         </div>
         {mode === 'reset' && <p className={styles.info}>{t('auth.resetInfo')}</p>}

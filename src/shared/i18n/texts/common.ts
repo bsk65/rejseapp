@@ -3,6 +3,7 @@ import { defineTexts } from '../translate'
 /** Tekster brugt på tværs af features og i shared/ui. */
 export const commonTexts = defineTexts({
   da: {
+    appName: 'Rejseappen',
     cancel: 'Annuller',
     undo: 'Fortryd',
     save: 'Gem',
@@ -27,6 +28,7 @@ export const commonTexts = defineTexts({
     reload: 'Genindlæs',
   },
   en: {
+    appName: 'Travelapp',
     cancel: 'Cancel',
     undo: 'Cancel',
     save: 'Save',
