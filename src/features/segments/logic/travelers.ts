@@ -17,6 +17,19 @@ export function isTravelling(
   return travelersOf(segment).includes(uid)
 }
 
+/**
+ * "Hvem er med?" uden dem, der kun kigger med — en booking kan have dem stående
+ * fra før, de blev markeret som gæst. Står der ingen tilbage, bruges fallback.
+ */
+export function withoutGuests(
+  travelers: string[],
+  guestUids: string[],
+  fallback: string[],
+): string[] {
+  const left = travelers.filter((uid) => !guestUids.includes(uid))
+  return left.length > 0 ? left : fallback
+}
+
 /** Slår/fjerner én person; den sidste kan ikke fjernes (nogen skal være med). */
 export function toggleTraveler(travelers: string[], uid: string): string[] {
   if (!travelers.includes(uid)) return [...travelers, uid]

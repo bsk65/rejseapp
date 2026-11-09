@@ -17,7 +17,7 @@ import { PriceCoversPicker } from './PriceCoversPicker'
 import { TicketUpload } from './TicketUpload'
 import { TravelersPicker } from './TravelersPicker'
 import { dayIdForDeparture } from '../logic/segmentDay'
-import { travelersOf } from '../logic/travelers'
+import { travelersOf, withoutGuests } from '../logic/travelers'
 import { useUpdateSegment } from '../hooks/useUpdateSegment'
 import { withAirlineCode } from '../logic/airlineCodes'
 import { describeFlightDuration } from '../logic/flightDuration'
@@ -50,6 +50,7 @@ export function SegmentDetailForm({
 }) {
   const { t } = useT()
   const modeName = t(transportModeLabel[segment.mode])
+  const { selfUid, guestUids, nameOf } = usePeople()
   const [details, setDetails] = useState<SegmentDetails>({
     status: segment.status,
     carrier: segment.carrier,
@@ -67,11 +68,11 @@ export function SegmentDetailForm({
     price: segment.price,
     priceCovers: segment.priceCovers,
     priceFor: segment.priceFor,
-    travelerUids: travelersOf(segment),
+    // Dem, der kun kigger med, er aldrig med — heller ikke på en ældre billet.
+    travelerUids: withoutGuests(travelersOf(segment), guestUids, [segment.ownerUid]),
   })
   const { saveSegment, saveAndMoveSegment, pending } = useUpdateSegment()
   const { removeSegment, pending: deleting } = useDeleteSegment()
-  const { selfUid, nameOf } = usePeople()
   const { days } = useDays(tripId, selfUid)
   const {
     passes,

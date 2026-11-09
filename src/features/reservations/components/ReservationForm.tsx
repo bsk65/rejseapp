@@ -10,6 +10,7 @@ import { PriceForChoice } from '../../../shared/ui/PriceForChoice'
 import { BoardingPassButtons } from '../../segments/components/BoardingPassButtons'
 import { TicketUpload } from '../../segments/components/TicketUpload'
 import { TravelersPicker } from '../../segments/components/TravelersPicker'
+import { withoutGuests } from '../../segments/logic/travelers'
 import { TextField } from '../../../shared/ui/TextField'
 import { useReservationTickets } from '../hooks/useReservationTickets'
 import { useSaveReservation } from '../hooks/useSaveReservation'
@@ -60,11 +61,18 @@ export function ReservationForm({
   onClose: () => void
 }) {
   const { t } = useT()
-  // Ny reservation: som udgangspunkt alle, der rejser med (ikke dem, der kun kigger med).
-  const { memberUids: travellingUids, nameOf } = usePeople()
+  // Som udgangspunkt alle, der rejser med — dem, der kun kigger med, er aldrig med.
+  const { memberUids: travellingUids, guestUids, nameOf } = usePeople()
   const [details, setDetails] = useState<ReservationDetails>(() =>
     reservation
-      ? detailsOf(reservation)
+      ? {
+          ...detailsOf(reservation),
+          travelerUids: withoutGuests(
+            reservation.travelerUids ?? reservation.memberUids,
+            guestUids,
+            travellingUids,
+          ),
+        }
       : {
           ...{ kind: 'restaurant', name: '', date: initialDate ?? '' },
           travelerUids: travellingUids,

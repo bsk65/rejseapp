@@ -8,6 +8,7 @@ import { PriceField } from '../../../shared/ui/PriceField'
 import { PriceForChoice } from '../../../shared/ui/PriceForChoice'
 import { usePeople } from '../../friends/hooks/usePeople'
 import { TravelersPicker } from '../../segments/components/TravelersPicker'
+import { withoutGuests } from '../../segments/logic/travelers'
 import { TextField } from '../../../shared/ui/TextField'
 import type { Place } from '../../../shared/types/place'
 import { useSaveStay } from '../hooks/useSaveStay'
@@ -64,11 +65,18 @@ export function StayForm({
   onClose: () => void
 }) {
   const { t } = useT()
-  // Ny overnatning: som udgangspunkt alle, der rejser med (ikke dem, der kun kigger med).
-  const { memberUids: travellingUids } = usePeople()
+  // Som udgangspunkt alle, der rejser med — dem, der kun kigger med, er aldrig med.
+  const { memberUids: travellingUids, guestUids } = usePeople()
   const [details, setDetails] = useState<StayDetails>(() =>
     stay
-      ? detailsOf(stay)
+      ? {
+          ...detailsOf(stay),
+          travelerUids: withoutGuests(
+            stay.travelerUids ?? stay.memberUids,
+            guestUids,
+            travellingUids,
+          ),
+        }
       : {
           ...{ name: '', checkInDate: initialCheckIn ?? '', checkOutDate: initialCheckOut ?? '' },
           travelerUids: travellingUids,

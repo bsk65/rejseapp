@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { isTravelling, toggleTraveler, travelersLabel, travelersOf } from './travelers'
+import {
+  isTravelling,
+  toggleTraveler,
+  travelersLabel,
+  travelersOf,
+  withoutGuests,
+} from './travelers'
 
 const names: Record<string, string> = { me: 'Bjarne', lars: 'Lars', eva: 'Eva' }
 const nameOf = (uid: string) => names[uid]
@@ -42,5 +48,14 @@ describe('travelersLabel', () => {
 
   it('does not say everyone on a trip with one person', () => {
     expect(travelersLabel(['me'], ['me'], 'me', nameOf, labels)).toBe('Dig')
+  })
+})
+
+describe('withoutGuests', () => {
+  it('drops guests who only follow along', () => {
+    expect(withoutGuests(['u1', 'u2', 'g'], ['g'], ['x'])).toEqual(['u1', 'u2'])
+  })
+  it('falls back when only guests were listed', () => {
+    expect(withoutGuests(['g'], ['g'], ['u1', 'u2'])).toEqual(['u1', 'u2'])
   })
 })

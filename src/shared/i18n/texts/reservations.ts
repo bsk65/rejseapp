@@ -26,7 +26,8 @@ export const reservationsTexts = defineTexts({
     errorLoad: 'Kunne ikke hente reservationer.',
     filter: 'Reservationer',
     addTicket: 'Tilføj billet eller bekræftelse (PDF eller billede)',
-    addTicketHint: 'Vælg filen som PDF, eller tag et foto/skærmbillede af den. Den gemmes, når du trykker Gem.',
+    addTicketHint:
+      'Vælg filen som PDF, eller tag et foto/skærmbillede af den. Den gemmes, når du trykker Gem.',
   },
   en: {
     reservation: 'Reservation',
@@ -52,6 +53,7 @@ export const reservationsTexts = defineTexts({
     errorLoad: 'Could not load reservations.',
     filter: 'Reservations',
     addTicket: 'Add ticket or confirmation (PDF or image)',
-    addTicketHint: 'Choose the file as a PDF, or take a photo/screenshot of it. It is saved when you tap Save.',
+    addTicketHint:
+      'Choose the file as a PDF, or take a photo/screenshot of it. It is saved when you tap Save.',
   },
 })
