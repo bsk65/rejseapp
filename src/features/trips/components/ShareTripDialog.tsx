@@ -16,12 +16,14 @@ export function ShareTripDialog({
   tripId,
   ownerUid,
   memberUids,
+  guestUids,
   sharedCategories,
   onClose,
 }: {
   tripId: string
   ownerUid: string
   memberUids: string[]
+  guestUids: string[]
   sharedCategories: SharedCategories
   onClose: () => void
 }) {
@@ -44,10 +46,23 @@ export function ShareTripDialog({
   const { saveMembers, pending: savingMembers } = useUpdateTripMembers()
   const { saveSharedCategories, pending: savingCategories } = useUpdateSharedCategories()
   const [selected, setSelected] = useState<Set<string>>(new Set(memberUids))
+  const [guests, setGuests] = useState<Set<string>>(new Set(guestUids))
   const [sharePhotos, setSharePhotos] = useState(sharedCategories.photos)
   const [shareTrack, setShareTrack] = useState(sharedCategories.track)
   const [email, setEmail] = useState('')
   const saving = savingMembers || savingCategories
+
+  function toggleGuest(uid: string) {
+    setGuests((prev) => {
+      const next = new Set(prev)
+      if (next.has(uid)) {
+        next.delete(uid)
+      } else {
+        next.add(uid)
+      }
+      return next
+    })
+  }
 
   function toggle(uid: string) {
     setSelected((prev) => {
@@ -70,7 +85,7 @@ export function ShareTripDialog({
 
   async function handleSave() {
     const nextMemberUids = Array.from(selected)
-    await saveMembers(tripId, ownerUid, nextMemberUids)
+    await saveMembers(tripId, ownerUid, nextMemberUids, Array.from(guests))
     // Køres altid (ikke kun ved ændret toggle): billeder og sporingspunkter
     // har deres eget adgangsfelt, som også skal genberegnes når medlemslisten
     // ændres — ellers ser nye medlemmer ikke det allerede delte indhold.
@@ -95,6 +110,8 @@ export function ShareTripDialog({
               label={labelOf(friend.uid, friend.email)}
               checked={selected.has(friend.uid)}
               onToggle={() => toggle(friend.uid)}
+              guest={guests.has(friend.uid)}
+              onToggleGuest={() => toggleGuest(friend.uid)}
               onRemove={() => removeFriend(ownerUid, friend.uid)}
             />
           ))}
@@ -104,6 +121,8 @@ export function ShareTripDialog({
               label={labelOf(uid)}
               checked={selected.has(uid)}
               onToggle={() => toggle(uid)}
+              guest={guests.has(uid)}
+              onToggleGuest={() => toggleGuest(uid)}
             />
           ))}
         </ul>

@@ -16,7 +16,9 @@ export function TravelersPicker({
   if (!shared) return null
 
   // Én selv først, så de andre i den rækkefølge, de blev tilføjet til rejsen.
-  const ordered = [selfUid, ...memberUids.filter((uid) => uid !== selfUid)]
+  // Kigger man selv kun med, er man ikke på listen.
+  const self = memberUids.includes(selfUid) ? [selfUid] : []
+  const ordered = [...self, ...memberUids.filter((uid) => uid !== selfUid)]
   return (
     <fieldset className={styles.picker}>
       <legend className={styles.legend}>{t('people.travelers')}</legend>

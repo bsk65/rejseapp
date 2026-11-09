@@ -19,7 +19,11 @@ const reservationCategory: Record<ReservationKind, CostCategory> = {
  * uden egen pris, som en anden rejses pris dækker (priceCovers), vises under
  * den pris ("inkl. …") i stedet for som "uden pris".
  */
-function transportSources(entries: TicketEntry[], t: Translate): CostSource[] {
+function transportSources(
+  entries: TicketEntry[],
+  t: Translate,
+  travelling: (uids: string[]) => string[],
+): CostSource[] {
   const titleOf = new Map(
     entries.map(({ segment }) => [segment.id, describeSegment(segment, t).title]),
   )
@@ -37,6 +41,7 @@ function transportSources(entries: TicketEntry[], t: Translate): CostSource[] {
     .filter(({ segment }) => segment.price || (segment.mode !== 'bil' && segment.mode !== 'gang'))
     .map((entry): CostSource => {
       const { segment } = entry
+      const travelers = travelling(travelersOf(segment))
       const from = segment.departurePlace?.name
       const to = segment.arrivalPlace?.name
       const route = from || to ? ` · ${from ?? '?'} → ${to ?? '?'}` : ''
@@ -52,35 +57,44 @@ function transportSources(entries: TicketEntry[], t: Translate): CostSource[] {
         date: departureDate(entry),
         price: segment.price,
         includes: includes.length > 0 ? includes : undefined,
-        quantity: segment.priceFor === 'person' ? travelersOf(segment).length : undefined,
-        travelers: travelersOf(segment),
+        quantity: segment.priceFor === 'person' ? travelers.length : undefined,
+        travelers,
       }
     })
 }
 
 /** Hvem en overnatning/reservation gælder — uden "hvem er med" er det alle på rejsen. */
-function peopleOf(booking: Pick<Stay, 'travelerUids' | 'memberUids' | 'priceFor'>) {
-  const travelers = booking.travelerUids ?? booking.memberUids
+function peopleOf(
+  booking: Pick<Stay, 'travelerUids' | 'memberUids' | 'priceFor'>,
+  travelling: (uids: string[]) => string[],
+) {
+  const travelers = travelling(booking.travelerUids ?? booking.memberUids)
   return {
     travelers,
     quantity: booking.priceFor === 'person' ? travelers.length : undefined,
   }
 }
 
-/** Rejsens bookinger som poster i prisoversigten. */
+/**
+ * Rejsens bookinger som poster i prisoversigten. Dem, der kun kigger med
+ * (guestUids), tælles ikke med — heller ikke på bookinger, hvor de stod som
+ * "med", før de blev markeret som gæst.
+ */
 export function costSources(
   entries: TicketEntry[],
   stays: Stay[],
   reservations: Reservation[],
   t: Translate,
+  guestUids: string[] = [],
 ): CostSource[] {
+  const travelling = (uids: string[]) => uids.filter((uid) => !guestUids.includes(uid))
   const stayItems = stays.map((stay): CostSource => ({
     key: `stay-${stay.id}`,
     category: 'stays',
     label: stay.name,
     date: stay.checkInDate,
     price: stay.price,
-    ...peopleOf(stay),
+    ...peopleOf(stay, travelling),
   }))
 
   const reservationItems = reservations.map((reservation): CostSource => ({
@@ -89,8 +103,8 @@ export function costSources(
     label: reservation.name,
     date: reservation.date,
     price: reservation.price,
-    ...peopleOf(reservation),
+    ...peopleOf(reservation, travelling),
   }))
 
-  return [...transportSources(entries, t), ...stayItems, ...reservationItems]
+  return [...transportSources(entries, t, travelling), ...stayItems, ...reservationItems]
 }

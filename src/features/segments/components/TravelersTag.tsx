@@ -7,10 +7,11 @@ import styles from './TravelersTag.module.css'
 /** "👤 Dig" / "👥 Dig, Lars" / "👥 Alle" på et transportkort — kun på delte rejser. */
 export function TravelersTag({ segment }: { segment: Segment }) {
   const { t } = useT()
-  const { shared, memberUids, selfUid, nameOf } = usePeople()
+  const { shared, memberUids, guestUids, selfUid, nameOf } = usePeople()
   if (!shared) return null
 
-  const travelers = travelersOf(segment)
+  // Dem, der kun kigger med, vises ikke, selv om de står på en ældre billet.
+  const travelers = travelersOf(segment).filter((uid) => !guestUids.includes(uid))
   const label = travelersLabel(travelers, memberUids, selfUid, nameOf, {
     everyone: t('people.everyone'),
     you: t('people.you'),

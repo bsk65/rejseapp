@@ -16,6 +16,12 @@ export type Trip = {
   destinations: Place[]
   ownerUid: string
   memberUids: string[]
+  /**
+   * Medlemmer, der kun kigger med (følger rejsen, men rejser ikke selv med) —
+   * altid en delmængde af memberUids. De er ikke med i "Hvem er med?" og
+   * tælles ikke med i rejsens pris.
+   */
+  guestUids: string[]
   sharedCategories: SharedCategories
   status: TripStatus
   createdAt: Timestamp | null

@@ -7,17 +7,21 @@ import { PeopleContext } from '../people'
 export function PeopleProvider({
   selfUid,
   memberUids,
+  guestUids,
   children,
 }: {
   selfUid: string
   memberUids: string[]
+  guestUids: string[]
   children: ReactNode
 }) {
   const profiles = useProfiles(memberUids)
+  const travellers = memberUids.filter((uid) => !guestUids.includes(uid))
   const value = {
     selfUid,
-    memberUids,
-    shared: memberUids.length > 1,
+    memberUids: travellers,
+    guestUids,
+    shared: travellers.length > 1,
     nameOf: (uid: string) => displayNameOf(profiles[uid]) ?? '…',
   }
   return <PeopleContext.Provider value={value}>{children}</PeopleContext.Provider>

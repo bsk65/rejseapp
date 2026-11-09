@@ -3,18 +3,23 @@ import { useT } from '../../../shared/i18n/useT'
 import styles from './ShareTripDialog.module.css'
 
 /**
- * Én person i "Del rejse": hak for deling og — for venner på vennelisten —
- * "Fjern" (fra vennelisten) med bekræftelse.
+ * Én person i "Del rejse": hak for deling, "Kigger kun med" (når rejsen er
+ * delt med personen) og — for venner på vennelisten — "Fjern" (fra
+ * vennelisten) med bekræftelse.
  */
 export function ShareFriendRow({
   label,
   checked,
   onToggle,
+  guest,
+  onToggleGuest,
   onRemove,
 }: {
   label: string
   checked: boolean
   onToggle: () => void
+  guest: boolean
+  onToggleGuest: () => void
   /** Mangler for rejsefæller, der ikke (længere) står på vennelisten. */
   onRemove?: () => Promise<void>
 }) {
@@ -53,6 +58,15 @@ export function ShareFriendRow({
           </button>
         )}
       </div>
+      {checked && (
+        <label className={styles.guestRow}>
+          <input type="checkbox" checked={guest} onChange={onToggleGuest} />
+          <span>
+            {t('trips.guestOnly')}
+            <span className={styles.guestHint}>{t('trips.guestHint')}</span>
+          </span>
+        </label>
+      )}
       {confirming && (
         <div className={styles.confirmRemove}>
           <p className={styles.confirmText}>{t('trips.removeFriendConfirm', { name: label })}</p>

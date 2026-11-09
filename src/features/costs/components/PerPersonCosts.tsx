@@ -15,7 +15,9 @@ export function PerPersonCosts({ perPerson }: { perPerson: Record<string, number
 
   const others = memberUids.filter((uid) => uid !== selfUid)
   const former = Object.keys(perPerson).filter((uid) => uid !== selfUid && !others.includes(uid))
-  const ordered = [selfUid, ...others, ...former]
+  // Kigger man selv kun med, står man ikke på listen.
+  const self = memberUids.includes(selfUid) ? [selfUid] : []
+  const ordered = [...self, ...others, ...former]
 
   return (
     <section className={styles.group}>

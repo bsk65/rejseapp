@@ -105,6 +105,29 @@ describe('costSources', () => {
     expect(shared?.quantity).toBeUndefined()
   })
 
+  it('leaves out guests who only follow along, also on older bookings that list them', () => {
+    const price = { amount: 6000, currency: 'DKK', dkk: 6000 }
+    const stay: Stay = {
+      id: 'h1',
+      name: 'Hotel',
+      checkInDate: '2026-12-21',
+      checkOutDate: '2026-12-23',
+      ownerUid: 'u1',
+      memberUids: ['u1', 'u2', 'gæst'],
+      price,
+      priceFor: 'person',
+    }
+    const [flight, hotel] = costSources(
+      [entry(segment('a', { price, priceFor: 'person', travelerUids: ['u1', 'gæst'] }))],
+      [stay],
+      [],
+      t,
+      ['gæst'],
+    )
+    expect(flight).toMatchObject({ travelers: ['u1'], quantity: 1 })
+    expect(hotel).toMatchObject({ travelers: ['u1', 'u2'], quantity: 2 })
+  })
+
   it('maps stays and reservation kinds to their categories', () => {
     const stay: Stay = {
       id: 'h1',

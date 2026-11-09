@@ -51,11 +51,12 @@ service cloud.firestore {
       allow create: if isOwner(request.resource.data.ownerUid)
         && request.resource.data.memberUids == [request.auth.uid];
       // Alle medlemmer må redigere rejsens indhold, men kun ejeren må ændre
-      // hvem der er medlem, delings-kategorier, eller slette rejsen.
+      // hvem der er medlem (og hvem der kun kigger med), delings-kategorier,
+      // eller slette rejsen.
       allow update: if isMember(resource.data.memberUids)
         && (isOwner(resource.data.ownerUid)
           || !request.resource.data.diff(resource.data).affectedKeys()
-              .hasAny(['ownerUid', 'memberUids', 'sharedCategories']));
+              .hasAny(['ownerUid', 'memberUids', 'guestUids', 'sharedCategories']));
       allow delete: if isOwner(resource.data.ownerUid);
 
       // Subcollection-dokumenter har selv et denormaliseret memberUids-felt,

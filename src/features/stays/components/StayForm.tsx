@@ -6,6 +6,7 @@ import { Button } from '../../../shared/ui/Button'
 import { PlaceField } from '../../../shared/ui/PlaceField'
 import { PriceField } from '../../../shared/ui/PriceField'
 import { PriceForChoice } from '../../../shared/ui/PriceForChoice'
+import { usePeople } from '../../friends/hooks/usePeople'
 import { TravelersPicker } from '../../segments/components/TravelersPicker'
 import { TextField } from '../../../shared/ui/TextField'
 import type { Place } from '../../../shared/types/place'
@@ -63,12 +64,14 @@ export function StayForm({
   onClose: () => void
 }) {
   const { t } = useT()
+  // Ny overnatning: som udgangspunkt alle, der rejser med (ikke dem, der kun kigger med).
+  const { memberUids: travellingUids } = usePeople()
   const [details, setDetails] = useState<StayDetails>(() =>
     stay
       ? detailsOf(stay)
       : {
           ...{ name: '', checkInDate: initialCheckIn ?? '', checkOutDate: initialCheckOut ?? '' },
-          travelerUids: memberUids,
+          travelerUids: travellingUids,
         },
   )
   const [useAsDayTo, setUseAsDayTo] = useState(true)

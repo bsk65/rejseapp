@@ -33,15 +33,15 @@ export function TripCosts({
   onClose: () => void
 }) {
   const { t, locale } = useT()
+  const { shared, memberUids, guestUids, selfUid, nameOf } = usePeople()
   const { entries } = useTripSegments(tripId, days, userUid)
   const sources = useMemo(
-    () => costSources(entries, stays, reservations, t),
-    [entries, stays, reservations, t],
+    () => costSources(entries, stays, reservations, t, guestUids),
+    [entries, stays, reservations, t, guestUids],
   )
   const rates = useTodayRates(needsRates(sources))
   const summary = buildCostSummary(sources, rates)
   const kr = (amount: number) => formatMoney(amount, 'DKK', locale)
-  const { shared, memberUids, selfUid, nameOf } = usePeople()
   // "Dig" / "Dig, Jens" / "Alle" under hver post — kun på delte rejser.
   const whoLabel = (travelers: string[]) =>
     travelersLabel(travelers, memberUids, selfUid, nameOf, {

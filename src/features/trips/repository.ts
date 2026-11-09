@@ -33,6 +33,7 @@ function toTrip(docSnap: QueryDocumentSnapshot<DocumentData>): Trip {
     destinations: data.destinations ?? [],
     ownerUid: data.ownerUid,
     memberUids: data.memberUids ?? [data.ownerUid],
+    guestUids: data.guestUids ?? [],
     sharedCategories: data.sharedCategories ?? { photos: false, track: false },
     status: data.status,
     createdAt: data.createdAt ?? null,
@@ -90,6 +91,11 @@ export async function updateTripSharedCategories(
   sharedCategories: SharedCategories,
 ): Promise<void> {
   await updateDoc(doc(db, 'trips', tripId), { sharedCategories })
+}
+
+/** Hvem der kun kigger med (se Trip.guestUids). Kun ejeren må ændre det. */
+export async function updateTripGuests(tripId: string, guestUids: string[]): Promise<void> {
+  await updateDoc(doc(db, 'trips', tripId), { guestUids })
 }
 
 /**

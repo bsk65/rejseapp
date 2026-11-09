@@ -4,8 +4,11 @@ import { createContext } from 'react'
 export type People = {
   /** Den loggede ind bruger. */
   selfUid: string
+  /** De medlemmer, der rejser med — uden dem, der kun kigger med. */
   memberUids: string[]
-  /** Rejsen er delt (mere end én person) — kun da vises, hvem der er med. */
+  /** Medlemmer, der kun kigger med (se Trip.guestUids). */
+  guestUids: string[]
+  /** Rejsen har mere end én rejsende — kun da vises, hvem der er med. */
   shared: boolean
   /** Personens navn (valgt navn, ellers første del af e-mailen). */
   nameOf: (uid: string) => string

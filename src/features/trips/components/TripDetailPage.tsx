@@ -99,7 +99,7 @@ export function TripDetailPage() {
   const tabs: TabOption<TripTab>[] = TABS.map((tab) => ({ id: tab.id, label: t(tab.labelKey) }))
 
   return (
-    <PeopleProvider selfUid={user.uid} memberUids={trip.memberUids}>
+    <PeopleProvider selfUid={user.uid} memberUids={trip.memberUids} guestUids={trip.guestUids}>
       <OfflinePasses tripId={trip.id} days={days} userUid={user.uid} reservations={reservations} />
       <div className={styles.page}>
         <div className={styles.topBar}>
@@ -154,6 +154,7 @@ export function TripDetailPage() {
             tripId={trip.id}
             ownerUid={trip.ownerUid}
             memberUids={trip.memberUids}
+            guestUids={trip.guestUids}
             sharedCategories={trip.sharedCategories}
             onClose={() => setShowShareDialog(false)}
           />

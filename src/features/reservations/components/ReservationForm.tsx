@@ -60,10 +60,15 @@ export function ReservationForm({
   onClose: () => void
 }) {
   const { t } = useT()
+  // Ny reservation: som udgangspunkt alle, der rejser med (ikke dem, der kun kigger med).
+  const { memberUids: travellingUids, nameOf } = usePeople()
   const [details, setDetails] = useState<ReservationDetails>(() =>
     reservation
       ? detailsOf(reservation)
-      : { ...{ kind: 'restaurant', name: '', date: initialDate ?? '' }, travelerUids: memberUids },
+      : {
+          ...{ kind: 'restaurant', name: '', date: initialDate ?? '' },
+          travelerUids: travellingUids,
+        },
   )
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [priceInvalid, setPriceInvalid] = useState(false)
@@ -75,7 +80,6 @@ export function ReservationForm({
   const [validationError, setValidationError] = useState<TextKey | null>(null)
   const { create, update, remove, pending, error } = useSaveReservation(tripId)
   const files = useReservationTickets(tripId, reservation?.tickets)
-  const { nameOf } = usePeople()
 
   function set<K extends keyof ReservationDetails>(field: K, value: ReservationDetails[K]) {
     setDetails((prev) => ({ ...prev, [field]: value }))
