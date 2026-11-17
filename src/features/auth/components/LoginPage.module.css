@@ -80,7 +80,7 @@
 
 .consentRow a,
 .policyLink {
-  color: var(--color-accent);
+  color: var(--color-text);
 }
 
 .policyLink {
