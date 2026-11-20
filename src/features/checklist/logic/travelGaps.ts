@@ -83,9 +83,11 @@ export function travelGaps(input: GapInput, uid: string): PersonGap[] {
       arriveAt(day, end, true)
       return
     }
+    // Undervejs om natten (natfly, kort skift) er man i transporten — også hvis der
+    // står en "overnatning" for natten (f.eks. "Fly fra Indonesien til DK").
+    if (nightInTransit(entries, day.date, uid)) return
     const stay = stayForNight(stays, day.date, uid)
-    if (stay) arriveAt(day, stayAsSpot(stay))
-    else if (!nightInTransit(entries, day.date, uid)) arriveAt(day, spotOf(day.toPlace))
+    arriveAt(day, stay ? stayAsSpot(stay) : spotOf(day.toPlace))
   })
 
   return gaps

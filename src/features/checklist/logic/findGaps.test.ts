@@ -193,6 +193,19 @@ describe('findGaps', () => {
     ])
   })
 
+  it('ignores a placeholder stay on a night spent on board', () => {
+    const input = completeTrip()
+    input.stays = [
+      stay(rom, '2026-05-10', '2026-05-12'),
+      { ...stay(rom, '2026-05-12', '2026-05-13'), place: undefined, name: 'Natfly' },
+    ]
+    input.entries[2] = leg(3, romStation, billund, {
+      departureTime: '2026-05-12T23:30',
+      arrivalTime: '2026-05-13T02:30',
+    })
+    expect(kinds(input).filter((k) => k.startsWith('rejse'))).toEqual([])
+  })
+
   it('needs transport between two stays more than 2 km apart, not between ones closer', () => {
     const input = completeTrip()
     input.stays = [
