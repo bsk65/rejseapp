@@ -166,16 +166,31 @@ describe('findGaps', () => {
     input.entries[2] = leg(4, firenze, billund)
     const gaps = findGaps(input, ['a']).filter((gap) => gap.kind === 'rejse')
     expect(gaps).toHaveLength(1)
-    expect(gaps[0]).toMatchObject({ dayId: 'd3', reason: 'mellem', from: rom, to: firenze })
+    expect(gaps[0]).toMatchObject({
+      dayId: 'd3',
+      reason: 'mellem',
+      from: { name: 'Rom' },
+      to: { name: 'Firenze' },
+    })
   })
 
   it('needs transport from the airport to a stay more than 2 km away (taxi, boat …)', () => {
     const input = completeTrip()
     input.entries[1] = leg(1, billund, fiumicino)
     const gaps = findGaps(input, ['a']).filter((gap) => gap.kind === 'rejse')
-    expect(gaps[0]).toMatchObject({ dayId: 'd1', from: fiumicino, to: rom })
+    expect(gaps[0]).toMatchObject({ dayId: 'd1', from: { name: 'Fiumicino' }, to: { name: 'Rom' } })
     input.entries.splice(2, 0, leg(1, fiumicino, rom, {}, 'bil'))
     expect(kinds(input).filter((k) => k.startsWith('rejse'))).not.toContain('rejse:d1')
+  })
+
+  it('treats a stay without an address as far from everything but itself', () => {
+    const input = completeTrip()
+    input.stays = [{ ...stay(rom, '2026-05-10', '2026-05-13'), place: undefined, name: 'Lodge' }]
+    const gaps = findGaps(input, ['a']).filter((gap) => gap.kind === 'rejse')
+    expect(gaps.map((gap) => [gap.dayId, gap.from?.name, gap.to?.name])).toEqual([
+      ['d1', 'Roma Termini', 'Lodge'],
+      ['d4', 'Lodge', 'Roma Termini'],
+    ])
   })
 
   it('needs transport between two stays more than 2 km apart, not between ones closer', () => {
@@ -205,8 +220,8 @@ describe('findGaps', () => {
     input.days[1].toPlace = cph
     expect(findGaps(input, ['a']).filter((g) => g.kind === 'rejse')[0]).toMatchObject({
       dayId: 'd2',
-      from: romStation,
-      to: cph,
+      from: { name: 'Roma Termini' },
+      to: { name: 'København' },
     })
   })
 

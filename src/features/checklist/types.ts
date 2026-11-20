@@ -19,6 +19,12 @@ export function isOkKind(kind: GapKind): kind is OkKind {
 /** Et rejse-hul: udrejsen eller hjemrejsen mangler, eller man kommer ikke fra et sted til det næste. */
 export type TravelGapReason = 'udrejse' | 'hjemrejse' | 'mellem'
 
+/**
+ * Et sted på ruten. En overnatning uden adresse har intet `place` — så kendes
+ * kun navnet, og den regnes for langt fra alle andre steder.
+ */
+export type GapPlace = { key: string; name: string; place?: Place }
+
 /** Ét hul for én person, før hullerne for alle rejsende lægges sammen. */
 export type PersonGap = {
   kind: GapKind
@@ -29,8 +35,8 @@ export type PersonGap = {
   date: string
   /** Kun rejse-huller. */
   reason?: TravelGapReason
-  from?: Place
-  to?: Place
+  from?: GapPlace
+  to?: GapPlace
   /** Kun ubekræftet transport. */
   segment?: Segment
 }

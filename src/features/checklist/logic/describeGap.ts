@@ -1,7 +1,7 @@
 import type { Translate } from '../../../shared/i18n/translator'
 import { formatDayDate } from '../../../shared/utils/date'
 import { describeSegment } from '../../segments/logic/describeSegment'
-import type { Gap } from '../types'
+import type { Gap, GapPlace } from '../types'
 
 /** Teksten på en linje i "Mangler": "Dag 3 · tirs. 12. maj" + hvad der mangler. */
 export function describeGap(
@@ -28,10 +28,16 @@ function gapDetail(gap: Gap, t: Translate): string {
       return `${title} · ${detail}`
     }
     case 'rejse': {
-      const params = { from: gap.from?.name ?? '?', to: gap.to?.name ?? '?' }
+      const params = { from: placeName(gap.from, t), to: placeName(gap.to, t) }
       if (gap.reason === 'udrejse') return t('checklist.travelOut', params)
       if (gap.reason === 'hjemrejse') return t('checklist.travelHome', params)
       return t('checklist.travelBetween', params)
     }
   }
+}
+
+/** "Raja Ampat Dive Lodge (adresse mangler)" — så man ved, at en adresse kan fjerne hullet. */
+function placeName(spot: GapPlace | undefined, t: Translate): string {
+  if (!spot) return '?'
+  return spot.place ? spot.name : t('checklist.noAddress', { name: spot.name })
 }
