@@ -117,6 +117,41 @@ describe('findGaps', () => {
     expect(kinds(input)).not.toContain('overnatning:d3')
   })
 
+  it('counts a short layover over midnight as in transit (land 23:00, fly on 02:20)', () => {
+    const input = completeTrip()
+    input.stays = [stay(rom, '2026-05-11', '2026-05-13')]
+    input.entries[1] = leg(1, billund, fiumicino, {
+      departureTime: '2026-05-10T18:00',
+      arrivalTime: '2026-05-10T23:00',
+    })
+    input.entries.push(
+      leg(2, fiumicino, fiumicino, {
+        departureTime: '2026-05-11T02:20',
+        arrivalTime: '2026-05-11T04:00',
+      }),
+    )
+    expect(kinds(input)).not.toContain('overnatning:d1')
+  })
+
+  it('still needs a bed when the next flight is the following afternoon', () => {
+    const input = completeTrip()
+    input.stays = [stay(rom, '2026-05-11', '2026-05-13')]
+    input.entries[1] = leg(1, billund, fiumicino, {
+      departureTime: '2026-05-10T18:00',
+      arrivalTime: '2026-05-10T23:00',
+    })
+    input.entries.push(leg(2, fiumicino, fiumicino, { departureTime: '2026-05-11T14:00' }))
+    expect(kinds(input)).toContain('overnatning:d1')
+  })
+
+  it('understands a layover where only clock times are known', () => {
+    const input = completeTrip()
+    input.stays = [stay(rom, '2026-05-11', '2026-05-13')]
+    input.entries[1] = leg(1, billund, fiumicino, { departureTime: '18:00', arrivalTime: '23:00' })
+    input.entries.push(leg(2, fiumicino, fiumicino, { departureTime: '02:20' }))
+    expect(kinds(input)).not.toContain('overnatning:d1')
+  })
+
   it('finds days without an activity — restaurants do not count, flight days are skipped', () => {
     const input = completeTrip()
     input.reservations = [activity('2026-05-11'), activity('2026-05-12', 'restaurant')]

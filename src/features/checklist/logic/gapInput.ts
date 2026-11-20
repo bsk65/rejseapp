@@ -1,4 +1,4 @@
-import { clockTime } from '../../../shared/utils/date'
+import { addDaysToIsoDate, clockTime } from '../../../shared/utils/date'
 import type { Day } from '../../days/types'
 import type { Reservation } from '../../reservations/types'
 import {
@@ -52,12 +52,44 @@ export function stayForNight(stays: Stay[], date: string, uid: string): Stay | u
   )
 }
 
-/** Sover personen i et fly/tog, der kører natten efter `date`? */
-export function sleepsOnBoard(entries: TicketEntry[], date: string, uid: string): boolean {
-  return entries.some(
-    (entry) =>
-      isTravelling(entry.segment, uid) &&
-      resolveDeparture(entry).date === date &&
-      isOvernight(entry),
+/**
+ * Ankomsttidspunktet (YYYY-MM-DDTHH:mm, lokal tid på ankomststedet). Er kun
+ * klokkeslættet kendt, er det afgangsdagen — eller dagen efter, hvis det er før afgang.
+ */
+export function arrivalAt(entry: TicketEntry): string | undefined {
+  const raw = entry.segment.arrivalTime
+  const full = raw?.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/)
+  if (full) return `${full[1]}T${full[2]}`
+  const clock = clockTime(raw)
+  const departure = resolveDeparture(entry)
+  if (!clock || !departure.time) return undefined
+  const date = clock < departure.time ? addDaysToIsoDate(departure.date, 1) : departure.date
+  return `${date}T${clock}`
+}
+
+/** Højst så lang tid mellem ankomst og næste afgang hen over natten, før man skal have et sted at sove. */
+export const MAX_NIGHT_LAYOVER_HOURS = 8
+
+function minutesBetween(from: string, to: string): number {
+  return (Date.parse(`${to}:00Z`) - Date.parse(`${from}:00Z`)) / 60_000
+}
+
+/**
+ * Er personen undervejs natten efter `date`? Enten om bord på et natfly/nattog,
+ * eller med et kort skift hen over midnat (lander kl. 23, flyver videre kl. 02.20).
+ */
+export function nightInTransit(entries: TicketEntry[], date: string, uid: string): boolean {
+  const own = entries.filter((entry) => isTravelling(entry.segment, uid))
+  if (own.some((entry) => resolveDeparture(entry).date === date && isOvernight(entry))) return true
+
+  const arrivals = own.map(arrivalAt).filter((at): at is string => !!at && at.slice(0, 10) <= date)
+  const departures = own
+    .map((entry) => resolveDeparture(entry).departsAt)
+    .filter((at): at is string => !!at && at.slice(0, 10) > date)
+  return arrivals.some((arrived) =>
+    departures.some((departs) => {
+      const wait = minutesBetween(arrived, departs)
+      return wait >= 0 && wait <= MAX_NIGHT_LAYOVER_HOURS * 60
+    }),
   )
 }

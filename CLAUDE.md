@@ -212,7 +212,7 @@ Restaurant, aktivitet (udflugt, dykning …) eller andet: `trips/{tripId}/reserv
 Knappen **✅ Mangler** i rejsens header (tal = antal åbne huller) åbner en oversigt i fire grupper. Tryk på en linje → `showDay` (Dage-fanen, dagen foldet ud). Ren logik i `checklist/logic/` (testet i `findGaps.test.ts`):
 
 - **Rejser** (`travelGaps`): følger hver rejsende fra dag 1's Fra → transportens Fra/Til (sorteret som i Billetter) → nattens overnatning (ellers dagens Til; intet ved natfly/-tog) → sidste dags Til (ellers dag 1's Fra). Ligger næste sted mere end `SAME_PLACE_KM` (50 km) fra, hvor man er, mangler der transport (udrejse/hjemrejse/mellem). Ukendt sted (transport uden Til) = næste skridt tjekkes ikke.
-- **Overnatning** (`nightGaps`): alle nætter undtagen den sidste dag uden overnatning for personen og uden natfly/nattog (`isOvernight`: ankomstdato senere, eller ankomst-klokkeslæt før afgang).
+- **Overnatning** (`nightGaps`): alle nætter undtagen den sidste dag uden overnatning for personen og ikke undervejs (`nightInTransit`): om bord på natfly/nattog (`isOvernight`), eller et kort skift hen over midnat — ankomst og næste afgang højst `MAX_NIGHT_LAYOVER_HOURS` (8 t) fra hinanden (lander 23:00, flyver videre 02:20).
 - **Aktiviteter** (`activityGaps`): dage uden reservation af typen `aktivitet` (restauranter tæller ikke); dage hvor personen flyver springes over.
 - **Ikke bekræftet** (`unconfirmedGaps`): transport med `status: 'planlagt'`, undtagen bil og gang.
 - **Pr. person:** beregnes for hver rejsende (`usePeople().memberUids`, uden gæster) og lægges sammen pr. nøgle (`findGaps`). Gælder et hul ikke alle, står "Kun Jens" på linjen — ellers intet, så solo-rejser og ens huller ikke fylder.

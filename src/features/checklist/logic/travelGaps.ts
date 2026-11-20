@@ -2,7 +2,7 @@ import type { Place } from '../../../shared/types/place'
 import { distanceMeters } from '../../../shared/utils/geo'
 import type { Day } from '../../days/types'
 import type { PersonGap, TravelGapReason } from '../types'
-import { personLegsOnDay, sleepsOnBoard, stayForNight, type GapInput } from './gapInput'
+import { personLegsOnDay, nightInTransit, stayForNight, type GapInput } from './gapInput'
 
 /**
  * Steder tættere på hinanden end dette regnes for samme sted — så "lufthavnen"
@@ -67,7 +67,7 @@ export function travelGaps(input: GapInput, uid: string): PersonGap[] {
     }
     const stay = stayForNight(stays, day.date, uid)
     if (stay) arriveAt(day, stay.place)
-    else if (!sleepsOnBoard(entries, day.date, uid)) arriveAt(day, day.toPlace)
+    else if (!nightInTransit(entries, day.date, uid)) arriveAt(day, day.toPlace)
   })
 
   return gaps

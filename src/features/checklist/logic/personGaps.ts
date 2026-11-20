@@ -2,7 +2,7 @@ import type { TransportMode } from '../../segments/types'
 import { resolveDeparture } from '../../segments/logic/tickets'
 import { isTravelling } from '../../segments/logic/travelers'
 import type { PersonGap } from '../types'
-import { includesPerson, sleepsOnBoard, stayForNight, type GapInput } from './gapInput'
+import { includesPerson, nightInTransit, stayForNight, type GapInput } from './gapInput'
 import { travelGaps } from './travelGaps'
 
 /** Egen bil og gåture skal ikke bookes — de tæller ikke som "ikke bekræftet". */
@@ -13,7 +13,7 @@ export function nightGaps(input: GapInput, uid: string): PersonGap[] {
   const { days, stays, entries } = input
   return days
     .slice(0, -1)
-    .filter((day) => !stayForNight(stays, day.date, uid) && !sleepsOnBoard(entries, day.date, uid))
+    .filter((day) => !stayForNight(stays, day.date, uid) && !nightInTransit(entries, day.date, uid))
     .map((day) => ({
       kind: 'overnatning',
       key: `overnatning:${day.id}`,
