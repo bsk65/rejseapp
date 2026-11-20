@@ -207,16 +207,16 @@ Restaurant, aktivitet (udflugt, dykning …) eller andet: `trips/{tripId}/reserv
 - **Pr. person:** overnatninger og reservationer har også `travelerUids` ("Hvem er med?", `TravelersPicker` fra segments) og `priceFor` (`shared/ui/PriceForChoice`, `PriceFor`-typen ligger i shared/types/price.ts). Mangler `travelerUids` på en overnatning/reservation, er det alle rejsens medlemmer (modsat transport, hvor det er opretteren). Oversigten viser under totalen "Pr. person" (`PerPersonCosts`, kun på delte rejser): hver pris i kroner deles ligeligt mellem dem, der er med — en pris pr. person er allerede ganget op, så hver får præcis én (`summary.perPerson` i `buildCostSummary`).
 - Ingen regelændring: reglerne begrænser ikke felterne på segments/stays/reservations.
 
-### "Mangler at booke" ()
+### "Mangler at booke" (`features/checklist`)
 
-Knappen **✅ Mangler** i rejsens header (tal = antal åbne huller) åbner en oversigt i fire grupper. Tryk på en linje →  (Dage-fanen, dagen foldet ud). Ren logik i  (testet i ):
+Knappen **✅ Mangler** i rejsens header (tal = antal åbne huller) åbner en oversigt i fire grupper. Tryk på en linje → `showDay` (Dage-fanen, dagen foldet ud). Ren logik i `checklist/logic/` (testet i `findGaps.test.ts`):
 
-- **Rejser** (): følger hver rejsende fra dag 1's Fra → transportens Fra/Til (sorteret som i Billetter) → nattens overnatning (ellers dagens Til; intet ved natfly/-tog) → sidste dags Til (ellers dag 1's Fra). Ligger næste sted mere end  (50 km) fra, hvor man er, mangler der transport (udrejse/hjemrejse/mellem). Ukendt sted (transport uden Til) = næste skridt tjekkes ikke.
-- **Overnatning** (): alle nætter undtagen den sidste dag uden overnatning for personen og uden natfly/nattog (: ankomstdato senere, eller ankomst-klokkeslæt før afgang).
-- **Aktiviteter** (): dage uden reservation af typen  (restauranter tæller ikke); dage hvor personen flyver springes over.
-- **Ikke bekræftet** (): transport med , undtagen bil og gang.
-- **Pr. person:** beregnes for hver rejsende (, uden gæster) og lægges sammen pr. nøgle (). Gælder et hul ikke alle, står "Kun Jens" på linjen — ellers intet, så solo-rejser og ens huller ikke fylder.
-- **"Det er OK"**: gemmes på dagen som  (, tom = ); gælder alle huller af den slags på dagen og alle rejsende. Vises nedtonet under "Markeret som OK" med "Fortryd". Ingen regelændring (medlemmer må i forvejen rette dage).
+- **Rejser** (`travelGaps`): følger hver rejsende fra dag 1's Fra → transportens Fra/Til (sorteret som i Billetter) → nattens overnatning (ellers dagens Til; intet ved natfly/-tog) → sidste dags Til (ellers dag 1's Fra). Ligger næste sted mere end `SAME_PLACE_KM` (50 km) fra, hvor man er, mangler der transport (udrejse/hjemrejse/mellem). Ukendt sted (transport uden Til) = næste skridt tjekkes ikke.
+- **Overnatning** (`nightGaps`): alle nætter undtagen den sidste dag uden overnatning for personen og uden natfly/nattog (`isOvernight`: ankomstdato senere, eller ankomst-klokkeslæt før afgang).
+- **Aktiviteter** (`activityGaps`): dage uden reservation af typen `aktivitet` (restauranter tæller ikke); dage hvor personen flyver springes over.
+- **Ikke bekræftet** (`unconfirmedGaps`): transport med `status: 'planlagt'`, undtagen bil og gang.
+- **Pr. person:** beregnes for hver rejsende (`usePeople().memberUids`, uden gæster) og lægges sammen pr. nøgle (`findGaps`). Gælder et hul ikke alle, står "Kun Jens" på linjen — ellers intet, så solo-rejser og ens huller ikke fylder.
+- **"Det er OK"**: gemmes på dagen som `checksOk: ('rejse'|'overnatning'|'aktivitet')[]` (`updateDayChecksOk`, tom = `deleteField()`); gælder alle huller af den slags på dagen og alle rejsende. Vises nedtonet under "Markeret som OK" med "Fortryd". Ingen regelændring (medlemmer må i forvejen rette dage).
 
 ## Byggetrin (status)
 
