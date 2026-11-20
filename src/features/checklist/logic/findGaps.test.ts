@@ -18,7 +18,9 @@ const odense = place('Odense', 55.4, 10.39)
 const billund = place('Billund', 55.74, 9.15) // ~90 km fra Odense
 const cph = place('København', 55.62, 12.65)
 const rom = place('Rom', 41.9, 12.5)
+const romStation = place('Roma Termini', 41.901, 12.501) // ~0,1 km fra Rom
 const fiumicino = place('Fiumicino', 41.8, 12.24) // ~25 km fra Rom
+const hotelNearby = place('Hotel', 41.912, 12.5) // ~1,3 km fra Rom
 const firenze = place('Firenze', 43.77, 11.25)
 
 function makeDays(count: number, from?: Place, to?: Place): Day[] {
@@ -83,8 +85,8 @@ function completeTrip(): GapInput {
     days: makeDays(4, odense, odense),
     entries: [
       leg(1, odense, billund, {}, 'bil'),
-      leg(1, billund, fiumicino),
-      leg(4, fiumicino, billund),
+      leg(1, billund, romStation),
+      leg(4, romStation, billund),
       leg(4, billund, odense, {}, 'bil'),
     ],
     stays: [stay(rom, '2026-05-10', '2026-05-13')],
@@ -109,7 +111,7 @@ describe('findGaps', () => {
   it('counts a night flight as a place to sleep', () => {
     const input = completeTrip()
     input.stays = [stay(rom, '2026-05-10', '2026-05-12')]
-    input.entries[2] = leg(3, fiumicino, billund, {
+    input.entries[2] = leg(3, romStation, billund, {
       departureTime: '2026-05-12T23:30',
       arrivalTime: '2026-05-13T02:30',
     })
@@ -120,12 +122,12 @@ describe('findGaps', () => {
   it('counts a short layover over midnight as in transit (land 23:00, fly on 02:20)', () => {
     const input = completeTrip()
     input.stays = [stay(rom, '2026-05-11', '2026-05-13')]
-    input.entries[1] = leg(1, billund, fiumicino, {
+    input.entries[1] = leg(1, billund, romStation, {
       departureTime: '2026-05-10T18:00',
       arrivalTime: '2026-05-10T23:00',
     })
     input.entries.push(
-      leg(2, fiumicino, fiumicino, {
+      leg(2, romStation, romStation, {
         departureTime: '2026-05-11T02:20',
         arrivalTime: '2026-05-11T04:00',
       }),
@@ -136,19 +138,19 @@ describe('findGaps', () => {
   it('still needs a bed when the next flight is the following afternoon', () => {
     const input = completeTrip()
     input.stays = [stay(rom, '2026-05-11', '2026-05-13')]
-    input.entries[1] = leg(1, billund, fiumicino, {
+    input.entries[1] = leg(1, billund, romStation, {
       departureTime: '2026-05-10T18:00',
       arrivalTime: '2026-05-10T23:00',
     })
-    input.entries.push(leg(2, fiumicino, fiumicino, { departureTime: '2026-05-11T14:00' }))
+    input.entries.push(leg(2, romStation, romStation, { departureTime: '2026-05-11T14:00' }))
     expect(kinds(input)).toContain('overnatning:d1')
   })
 
   it('understands a layover where only clock times are known', () => {
     const input = completeTrip()
     input.stays = [stay(rom, '2026-05-11', '2026-05-13')]
-    input.entries[1] = leg(1, billund, fiumicino, { departureTime: '18:00', arrivalTime: '23:00' })
-    input.entries.push(leg(2, fiumicino, fiumicino, { departureTime: '02:20' }))
+    input.entries[1] = leg(1, billund, romStation, { departureTime: '18:00', arrivalTime: '23:00' })
+    input.entries.push(leg(2, romStation, romStation, { departureTime: '02:20' }))
     expect(kinds(input)).not.toContain('overnatning:d1')
   })
 
@@ -167,8 +169,24 @@ describe('findGaps', () => {
     expect(gaps[0]).toMatchObject({ dayId: 'd3', reason: 'mellem', from: rom, to: firenze })
   })
 
-  it('does not see airport and city centre as a gap', () => {
-    expect(kinds(completeTrip()).filter((k) => k.startsWith('rejse'))).toEqual([])
+  it('needs transport from the airport to a stay more than 2 km away (taxi, boat …)', () => {
+    const input = completeTrip()
+    input.entries[1] = leg(1, billund, fiumicino)
+    const gaps = findGaps(input, ['a']).filter((gap) => gap.kind === 'rejse')
+    expect(gaps[0]).toMatchObject({ dayId: 'd1', from: fiumicino, to: rom })
+    input.entries.splice(2, 0, leg(1, fiumicino, rom, {}, 'bil'))
+    expect(kinds(input).filter((k) => k.startsWith('rejse'))).not.toContain('rejse:d1')
+  })
+
+  it('needs transport between two stays more than 2 km apart, not between ones closer', () => {
+    const input = completeTrip()
+    input.stays = [
+      stay(rom, '2026-05-10', '2026-05-11'),
+      stay(hotelNearby, '2026-05-11', '2026-05-13'),
+    ]
+    expect(kinds(input).filter((k) => k.startsWith('rejse'))).toEqual([])
+    input.stays[1] = stay(fiumicino, '2026-05-11', '2026-05-13')
+    expect(kinds(input).filter((k) => k.startsWith('rejse'))).toContain('rejse:d2')
   })
 
   it('finds a missing outbound and homebound journey', () => {
@@ -187,14 +205,14 @@ describe('findGaps', () => {
     input.days[1].toPlace = cph
     expect(findGaps(input, ['a']).filter((g) => g.kind === 'rejse')[0]).toMatchObject({
       dayId: 'd2',
-      from: fiumicino,
+      from: romStation,
       to: cph,
     })
   })
 
   it('lists planned (unconfirmed) transport, but not own car or walking', () => {
     const input = completeTrip()
-    input.entries[1] = leg(1, billund, fiumicino, { status: 'planlagt' })
+    input.entries[1] = leg(1, billund, romStation, { status: 'planlagt' })
     input.entries[3] = leg(4, billund, odense, { status: 'planlagt' }, 'bil')
     expect(kinds(input)).toEqual(['ubekraeftet:d1'])
   })

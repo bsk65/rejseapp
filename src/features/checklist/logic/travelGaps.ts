@@ -5,10 +5,10 @@ import type { PersonGap, TravelGapReason } from '../types'
 import { personLegsOnDay, nightInTransit, stayForNight, type GapInput } from './gapInput'
 
 /**
- * Steder tættere på hinanden end dette regnes for samme sted — så "lufthavnen"
- * og "hotellet i byen" ikke giver et hul.
+ * Steder tættere på hinanden end dette regnes for samme sted. Længere væk (f.eks.
+ * lufthavn → hotel, eller mellem to overnatninger) mangler der transport: taxa, båd …
  */
-export const SAME_PLACE_KM = 50
+export const SAME_PLACE_KM = 2
 
 function farApart(a: Place, b: Place): boolean {
   return distanceMeters(a, b) > SAME_PLACE_KM * 1000
