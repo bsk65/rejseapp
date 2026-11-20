@@ -29,7 +29,7 @@ const DATE_TIME = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/
  * departureTime kan være fuld dato+tid (fra datetime-local eller parseren),
  * kun en dato, kun et klokkeslæt, eller mangle — normaliser til ét format.
  */
-function resolveDeparture(entry: TicketEntry): Pick<Ticket, 'departsAt' | 'time' | 'date'> {
+export function resolveDeparture(entry: TicketEntry): Pick<Ticket, 'departsAt' | 'time' | 'date'> {
   const raw = entry.segment.departureTime
   const full = raw?.match(DATE_TIME)
   if (full) return { departsAt: `${full[1]}T${full[2]}`, time: full[2], date: full[1] }

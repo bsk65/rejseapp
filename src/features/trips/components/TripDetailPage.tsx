@@ -7,6 +7,8 @@ import { LangToggle } from '../../../shared/ui/LangToggle'
 import { Tabs, type TabOption } from '../../../shared/ui/Tabs'
 import { useAuthUser } from '../../auth/hooks/useAuthUser'
 import { CalendarView } from '../../calendar/components/CalendarView'
+import { ChecklistButton } from '../../checklist/components/ChecklistButton'
+import { TripChecklist } from '../../checklist/components/TripChecklist'
 import { TripCosts } from '../../costs/components/TripCosts'
 import { DaysList } from '../../days/components/DaysList'
 import { PeopleProvider } from '../../friends/components/PeopleProvider'
@@ -54,6 +56,7 @@ export function TripDetailPage() {
   const [highlightedDayId, setHighlightedDayId] = useState<string | null>(null)
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [showCosts, setShowCosts] = useState(false)
+  const [showChecklist, setShowChecklist] = useState(false)
   const { removeDay, error: removeDayError } = useRemoveTripDay(trip, days, user?.uid)
 
   // Valgt fane ligger i URL'en (?fane=...), så den overlever en genindlæsning.
@@ -117,6 +120,16 @@ export function TripDetailPage() {
             <p className={styles.meta}>{formatDateRange(trip.startDate, trip.days)}</p>
           </div>
           <div className={styles.headerActions}>
+            <ChecklistButton
+              tripId={trip.id}
+              days={days}
+              stays={stays}
+              reservations={reservations}
+              userUid={user.uid}
+              className={styles.shareButton}
+              expanded={showChecklist}
+              onClick={() => setShowChecklist((prev) => !prev)}
+            />
             <button
               type="button"
               className={styles.shareButton}
@@ -137,6 +150,18 @@ export function TripDetailPage() {
             )}
           </div>
         </div>
+
+        {showChecklist && (
+          <TripChecklist
+            tripId={trip.id}
+            days={days}
+            stays={stays}
+            reservations={reservations}
+            userUid={user.uid}
+            onShowDay={showDay}
+            onClose={() => setShowChecklist(false)}
+          />
+        )}
 
         {showCosts && (
           <TripCosts

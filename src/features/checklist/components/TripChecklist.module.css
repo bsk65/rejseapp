@@ -1,0 +1,133 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-surface);
+  border-radius: 12px;
+}
+
+.title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger);
+  font-size: 0.9rem;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+}
+
+/* Antal huller i gruppen — rødt, når der mangler noget. */
+.count {
+  min-width: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.count[data-zero='true'] {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.row[data-muted='true'] {
+  opacity: 0.6;
+}
+
+/* Hele linjen er en knap, der går til dagen. */
+.rowMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rowTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.rowDetail,
+.who {
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.who {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.okButton {
+  flex: none;
+  max-width: 30%;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.okHeading {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

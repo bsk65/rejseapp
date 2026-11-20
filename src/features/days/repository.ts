@@ -15,7 +15,7 @@ import {
 import { db } from '../../firebase/config'
 import { addDaysToIsoDate } from '../../shared/utils/date'
 import type { Place } from '../../shared/types/place'
-import type { Day } from './types'
+import type { Day, DayCheckKind } from './types'
 
 function daysCollection(tripId: string) {
   return collection(db, 'trips', tripId, 'days')
@@ -30,6 +30,7 @@ function toDay(docSnap: QueryDocumentSnapshot<DocumentData>): Day {
     fromPlace: data.fromPlace ?? undefined,
     toPlace: data.toPlace ?? undefined,
     note: data.note ?? undefined,
+    checksOk: data.checksOk ?? undefined,
     ownerUid: data.ownerUid,
     memberUids: data.memberUids ?? [data.ownerUid],
   }
@@ -98,4 +99,15 @@ export async function updateToPlaceAndNextFrom(
   batch.update(doc(daysCollection(tripId), dayId), { toPlace: place })
   batch.update(doc(daysCollection(tripId), nextDayId), { fromPlace: place })
   await batch.commit()
+}
+
+/** Gemmer dagens "Det er OK"-markeringer; ingen tilbage = feltet slettes. */
+export async function updateDayChecksOk(
+  tripId: string,
+  dayId: string,
+  checksOk: DayCheckKind[],
+): Promise<void> {
+  await updateDoc(doc(daysCollection(tripId), dayId), {
+    checksOk: checksOk.length > 0 ? checksOk : deleteField(),
+  })
 }
