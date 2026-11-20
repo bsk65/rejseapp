@@ -1,16 +1,14 @@
 import type { TextKey } from '../../shared/i18n/translator'
 import type { Place } from '../../shared/types/place'
-import type { DayCheckKind } from '../days/types'
 import type { Segment } from '../segments/types'
 
 /** De slags huller, "Mangler"-oversigten finder. */
 export type GapKind = 'rejse' | 'overnatning' | 'aktivitet' | 'ubekraeftet'
 
 /** Huller, man selv kan markere som "Det er OK" på en dag (ubekræftet transport rettes i stedet). */
-export type OkKind = DayCheckKind
+export type OkKind = Exclude<GapKind, 'ubekraeftet'>
 
 export const GAP_KINDS: GapKind[] = ['rejse', 'overnatning', 'aktivitet', 'ubekraeftet']
-export const OK_KINDS: OkKind[] = ['rejse', 'overnatning', 'aktivitet']
 
 export function isOkKind(kind: GapKind): kind is OkKind {
   return kind !== 'ubekraeftet'

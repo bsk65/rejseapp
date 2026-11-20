@@ -38,7 +38,7 @@ export function TripChecklist({
 
   function toggleOk(gap: Gap, ok: boolean) {
     const day = days.find((d) => d.id === gap.dayId)
-    if (day && isOkKind(gap.kind)) void setOk(day, gap.kind, ok)
+    if (day && isOkKind(gap.kind)) void setOk(day, gap, ok)
   }
 
   return (

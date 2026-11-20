@@ -216,7 +216,7 @@ Knappen **✅ Mangler** i rejsens header (tal = antal åbne huller) åbner en ov
 - **Aktiviteter** (`activityGaps`): dage uden reservation af typen `aktivitet` (restauranter tæller ikke); dage hvor personen flyver springes over.
 - **Ikke bekræftet** (`unconfirmedGaps`): transport med `status: 'planlagt'`, undtagen bil og gang.
 - **Pr. person:** beregnes for hver rejsende (`usePeople().memberUids`, uden gæster) og lægges sammen pr. nøgle (`findGaps`). Gælder et hul ikke alle, står "Kun Jens" på linjen — ellers intet, så solo-rejser og ens huller ikke fylder.
-- **"Det er OK"**: gemmes på dagen som `checksOk: ('rejse'|'overnatning'|'aktivitet')[]` (`updateDayChecksOk`, tom = `deleteField()`); gælder alle huller af den slags på dagen og alle rejsende. Vises nedtonet under "Markeret som OK" med "Fortryd". Ingen regelændring (medlemmer må i forvejen rette dage).
+- **"Det er OK"**: gemmes på dagen i `checksOk: string[]` (`updateDayChecksOk`, tom = `deleteField()`) med nøglen fra `okKeyOf`: `overnatning`/`aktivitet` (ét hul pr. dag) eller `rejse:<fra>><til>` for præcis den tur — en dag kan have flere manglende ture, og OK til én må ikke skjule de andre (fejl set 2026-11-20). Et gammelt rent `rejse` ignoreres og fjernes ved næste ændring. Gælder alle rejsende. Vises nedtonet under "Markeret som OK" med "Fortryd". Ingen regelændring (medlemmer må i forvejen rette dage).
 
 ## Byggetrin (status)
 

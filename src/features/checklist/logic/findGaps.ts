@@ -1,5 +1,6 @@
 import type { Day } from '../../days/types'
-import { GAP_KINDS, isOkKind, type Gap, type GapKind } from '../types'
+import { GAP_KINDS, type Gap, type GapKind } from '../types'
+import { okKeyOf } from './okKey'
 import type { GapInput } from './gapInput'
 import { personGaps } from './personGaps'
 
@@ -22,9 +23,9 @@ export function findGaps(input: GapInput, travelerUids: string[]): Gap[] {
 
 /** Er hullet markeret "Det er OK" på sin dag? */
 export function isMarkedOk(gap: Gap, days: Day[]): boolean {
-  if (!isOkKind(gap.kind)) return false
-  const kind = gap.kind
-  return days.some((day) => day.id === gap.dayId && (day.checksOk ?? []).includes(kind))
+  const key = okKeyOf(gap)
+  if (!key) return false
+  return days.some((day) => day.id === gap.dayId && (day.checksOk ?? []).includes(key))
 }
 
 export type GapGroup = { kind: GapKind; open: Gap[]; ok: Gap[] }

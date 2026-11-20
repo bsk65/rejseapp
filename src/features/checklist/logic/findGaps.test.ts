@@ -7,6 +7,7 @@ import type { Segment, TransportMode } from '../../segments/types'
 import type { Stay } from '../../stays/types'
 import { concernsEveryone, findGaps, groupGaps, openGapCount } from './findGaps'
 import type { GapInput } from './gapInput'
+import { okKeyOf, toggleOkKey } from './okKey'
 
 const place = (name: string, lat: number, lng: number): Place => ({
   name,
@@ -263,5 +264,28 @@ describe('findGaps', () => {
     expect(activities?.open.map((gap) => gap.dayId)).toEqual(['d3'])
     expect(activities?.ok.map((gap) => gap.dayId)).toEqual(['d2'])
     expect(openGapCount(groups)).toBe(1)
+  })
+
+  it('marks only the one journey OK, not other missing journeys the same day', () => {
+    const input = completeTrip()
+    input.entries[1] = leg(1, billund, fiumicino)
+    input.stays = [{ ...stay(rom, '2026-05-10', '2026-05-13'), place: undefined, name: 'Lodge' }]
+    input.entries.splice(1, 0, leg(1, cph, billund))
+    const before = findGaps(input, ['a']).filter((g) => g.kind === 'rejse' && g.dayId === 'd1')
+    expect(before).toHaveLength(2)
+    const first = before[0]
+    input.days[0].checksOk = toggleOkKey(['rejse'], okKeyOf(first) as string, true)
+    expect(input.days[0].checksOk).not.toContain('rejse')
+    const travel = groupGaps(findGaps(input, ['a']), input.days).find((g) => g.kind === 'rejse')
+    expect(travel?.ok.map((gap) => gap.key)).toEqual([first.key])
+    expect(travel?.open.map((gap) => gap.key)).toContain(before[1].key)
+  })
+
+  it('ignores an old plain "rejse" mark', () => {
+    const input = completeTrip()
+    input.entries = []
+    input.days[0].checksOk = ['rejse']
+    const travel = groupGaps(findGaps(input, ['a']), input.days).find((g) => g.kind === 'rejse')
+    expect(travel?.ok).toEqual([])
   })
 })

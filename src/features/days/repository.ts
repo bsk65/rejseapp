@@ -15,7 +15,7 @@ import {
 import { db } from '../../firebase/config'
 import { addDaysToIsoDate } from '../../shared/utils/date'
 import type { Place } from '../../shared/types/place'
-import type { Day, DayCheckKind } from './types'
+import type { Day } from './types'
 
 function daysCollection(tripId: string) {
   return collection(db, 'trips', tripId, 'days')
@@ -105,7 +105,7 @@ export async function updateToPlaceAndNextFrom(
 export async function updateDayChecksOk(
   tripId: string,
   dayId: string,
-  checksOk: DayCheckKind[],
+  checksOk: string[],
 ): Promise<void> {
   await updateDoc(doc(daysCollection(tripId), dayId), {
     checksOk: checksOk.length > 0 ? checksOk : deleteField(),
